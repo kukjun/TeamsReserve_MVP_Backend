@@ -10,4 +10,6 @@
 
 [DB 설계](https://kukjun.notion.site/DB-bcc159387e5d4cdbad901e89082fd3d8?pvs=4)
 
+[API Docs](https://www.notion.so/kukjun/API-Docs-48cc57899fa749a7abeb4a84ef649bdc?pvs=4)
+
 프로젝트 이해를 위한 간단한 문제를 먼저 작성해두었고, 작업이 완료되면, 직접 접속해볼 수 있도록 만들어 둘 예정입니다.
