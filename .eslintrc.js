@@ -1,130 +1,117 @@
 module.exports = {
-  parser: '@typescript-eslint/parser',
+  parser: "@typescript-eslint/parser",
   parserOptions: {
-    project: 'tsconfig.json', tsconfigRootDir: __dirname, sourceType: 'module',
+    project: "tsconfig.json",
+    tsconfigRootDir: __dirname,
+    sourceType: "module",
   },
-  plugins: ['@typescript-eslint/eslint-plugin'],
-  extends: ['plugin:@typescript-eslint/recommended'],
+  plugins: ["@typescript-eslint/eslint-plugin"],
+  extends: ["plugin:@typescript-eslint/recommended"],
   root: true,
   env: {
-    node: true, jest: true,
+    node: true,
+    jest: true,
   },
-  ignorePatterns: ['.eslintrc.js'],
+  ignorePatterns: [".eslintrc.js"],
   rules: {
-    'array-element-newline': ['error', {
-      'ArrayExpression': {
-        'multiline': true, 'minItems': 1,
-      },
-    },
-    ],
-    'brace-style': [
-      'error',
-      '1tbs',
+    "array-element-newline": [
+      "error",
       {
-        'allowSingleLine': false,
+        ArrayExpression: {
+          multiline: true,
+          minItems: 1,
+        },
       },
     ],
-    'camelcase': [
-      'error',
+    "brace-style": [
+      "error",
+      "1tbs",
       {
-        'properties': 'never',
+        allowSingleLine: false,
       },
     ],
-    'comma-dangle': [
-      'error',
-      'always',
-    ],
-    'eqeqeq': [
-      'error',
-      'allow-null',
-    ],
-    'function-call-argument-newline': [
-      'error',
-      'consistent',
-    ],
-    'indent': [
-      'error',
-      4, {
-        'SwitchCase': 1,
-        'ignoredNodes': ['PropertyDefinition'],
+    camelcase: [
+      "error",
+      {
+        properties: "never",
       },
     ],
-    'max-len': [
-      'error',
+    "comma-dangle": ["error", "always"],
+    eqeqeq: ["error", "allow-null"],
+    "function-call-argument-newline": ["error", "consistent"],
+    indent: [
+      "error",
+      4,
+      {
+        SwitchCase: 1,
+        ignoredNodes: ["PropertyDefinition"],
+      },
+    ],
+    "max-len": [
+      "error",
       120,
       4,
       {
-        'ignoreUrls': true,
-      }
-    ],
-    'no-console': 'error',
-    'no-empty': [
-      'error', {
-        'allowEmptyCatch': false,
+        ignoreUrls: true,
       },
     ],
-    'no-multiple-empty-lines': [
-      'error', {
-        'max': 1,
-        'maxEOF': 0,
-      },
-    ],
-    'padding-line-between-statements': [
-      'error', {
-        'blankLine': 'always',
-        'prev': '*',
-        'next': 'return',
-      },
-    ],
-    'object-curly-newline': [
-      'error', {
-        'ObjectExpression': {
-          'multiline': true,
-          'minProperties': 1,
-        },
-        'ObjectPattern': {
-          'multiline': true,
-          'minProperties': 1,
-        },
-        'ImportDeclaration': {
-          'multiline': true,
-          'minProperties': 1,
-        },
-        'ExportDeclaration': {
-          'multiline': true,
-          'minProperties': 1,
-        },
-      },
-    ],
-    'object-curly-spacing': [
-      'error',
-      'always',
-    ],
-    'object-property-newline': [
-      'error',
+    "no-console": "error",
+    "no-empty": [
+      "error",
       {
-        'allowAllPropertiesOnSameLine': false,
+        allowEmptyCatch: false,
       },
     ],
-    'semi': [
-      'error',
-      'always',
+    "no-multiple-empty-lines": [
+      "error",
+      {
+        max: 1,
+        maxEOF: 0,
+      },
     ],
-    'space-before-blocks': [
-      'error',
-      'always',
+    "padding-line-between-statements": [
+      "error",
+      {
+        blankLine: "always",
+        prev: "*",
+        next: "return",
+      },
     ],
-    'space-in-parens': [
-      'error',
-      'never',
+    "object-curly-newline": [
+      "error",
+      {
+        ObjectExpression: {
+          multiline: true,
+          minProperties: 1,
+        },
+        ObjectPattern: {
+          multiline: true,
+          minProperties: 1,
+        },
+        ImportDeclaration: {
+          multiline: true,
+          minProperties: 1,
+        },
+        ExportDeclaration: {
+          multiline: true,
+          minProperties: 1,
+        },
+      },
     ],
-    'quotes': [
-      'error',
-      'double',
+    "object-curly-spacing": ["error", "always"],
+    "object-property-newline": [
+      "error",
+      {
+        allowAllPropertiesOnSameLine: false,
+      },
     ],
-    '@typescript-eslint/interface-name-prefix': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
+    semi: ["error", "always"],
+    "space-before-blocks": ["error", "always"],
+    "space-in-parens": ["error", "never"],
+    quotes: ["error", "double"],
+    "@typescript-eslint/interface-name-prefix": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-explicit-any": "off",
   },
 };

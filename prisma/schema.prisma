@@ -12,3 +12,64 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Member {
+  id               String   @id @default(uuid())
+  email            String   @unique
+  password         String
+  nickname         String   @unique
+  introduce        String?  @db.Text
+  teamCode         String
+  joinStatus       Boolean
+  authority        String
+  createdAt        DateTime @default(now())
+  lastModifiedTime DateTime @updatedAt
+
+  @@map("member")
+}
+
+model Space {
+  id               String   @id @default(uuid())
+  name             String
+  location         String
+  description      String?  @db.Text
+  createdAt        DateTime @default(now())
+  lastModifiedTime DateTime @updatedAt
+  Photo            Photo[]
+
+  @@map("space")
+}
+
+model Photo {
+  id        String   @id @default(uuid())
+  path      String
+  name      String
+  createdAt DateTime @default(now())
+  spaceId   String
+  space     Space    @relation(fields: [spaceId], references: [id])
+
+  @@map("photo")
+}
+
+model Reserve {
+  id               String   @id @default(uuid())
+  times            String
+  description      String?  @db.Text
+  createdAt        DateTime @default(now())
+  lastModifiedTime DateTime @updatedAt
+
+  @@map("reserve")
+}
+
+model ReserveLog {
+  id                String   @id @default(uuid())
+  reservedUser      String
+  reservedSpaceName String
+  reservedLocation  String
+  reservedTimes     String
+  state             String
+  createdAt         DateTime @default(now())
+  lastModifiedTime  DateTime @updatedAt
+
+  @@map("reserve_log")
+}
