@@ -1,6 +1,13 @@
+import {
+    ApiProperty, 
+} from "@nestjs/swagger";
+
 export class SigninResponse {
-    constructor(
-        readonly accessToken: string
-    ) {
-    }
+        @ApiProperty({
+            type: String,
+            description: "access token",
+            required: true,
+            example: "accessToken",
+        })
+        accessToken: string;
 }

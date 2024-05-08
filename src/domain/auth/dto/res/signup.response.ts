@@ -1,6 +1,13 @@
+import {
+    ApiProperty, 
+} from "@nestjs/swagger";
+
 export class SignupResponse {
-    constructor(
-        readonly id: string
-    ) {
-    }
+        @ApiProperty({
+            type: String,
+            description: "Member id",
+            required: true,
+            example: "uuid",
+        })
+        id: string;
 }

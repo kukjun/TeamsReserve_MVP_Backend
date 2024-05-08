@@ -1,6 +1,6 @@
 import {
     Body,
-    Controller, Post,
+    Controller, HttpCode, Post,
 } from "@nestjs/common";
 import {
     AuthService,
@@ -23,7 +23,25 @@ import {
 import {
     SigninRequest, 
 } from "./dto/req/signin.request";
+import {
+    ApiCreatedResponse,
+    ApiOperation,
+    ApiTags,
+} from "@nestjs/swagger";
+import {
+    SignupResponse, 
+} from "./dto/res/signup.response";
+import {
+    ValidateEmailResponse, 
+} from "./dto/res/validate-email.response";
+import {
+    ConfirmEmailResponse,
+} from "./dto/res/confirm-email.response";
+import {
+    SigninResponse,
+} from "./dto/res/signin.response";
 
+@ApiTags("auth")
 @Controller("/auth")
 export class AuthController {
 
@@ -37,6 +55,11 @@ export class AuthController {
      * email 인증 요청 api
      * @param request
      */
+    @ApiOperation({
+        summary: "이메일 인증 요청 API",
+        description: "자신의 이메일로 인증번호를 받는다.",
+    })
+    @HttpCode(201)
     @Post("/validate-email")
     async validateEmail(@Body() request: ValidateEmailRequest) {
         const data = await this.emailTransferService.validateEmail(request);
@@ -48,6 +71,11 @@ export class AuthController {
      * email 인증 확인 api
      * @param request
      */
+    @ApiOperation({
+        summary: "이메일 인증 확인 API",
+        description: "받은 인증번호를 5분 이내로 입력해서, 본인 이메일임을 인증한다.",
+    })
+    @HttpCode(201)
     @Post("confirm-email")
     async confirmEmail(@Body() request: ConfirmEmailRequest) {
         const data = await this.emailTransferService.confirmEmail(request);
@@ -59,6 +87,11 @@ export class AuthController {
      * 회원가입 api
      * @param request
      */
+    @ApiOperation({
+        summary: "회원 가입 API",
+        description: "인증된 이메일로 1시간 이내로, 회원가입을 한다.",
+    })
+    @HttpCode(201)
     @Post("/signup")
     async signup(@Body() request: SignupRequest) {
         const data = await this.authService.signup(request);
@@ -70,6 +103,11 @@ export class AuthController {
      * 로그인 api
      * @param request
      */
+    @ApiOperation({
+        summary: "로그인 API",
+        description: "관리자로부터 로그인 승인을 받으면, 해당 id, password로 로그인을 한다.",
+    })
+    @HttpCode(200)
     @Post("/signin")
     async signin(@Body() request: SigninRequest) {
         const data = await this.authService.signin(request);

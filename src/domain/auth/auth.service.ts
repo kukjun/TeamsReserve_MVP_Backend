@@ -86,10 +86,12 @@ export class AuthService {
         memberEntity.authority = MemberAuthority.USER;
         const result = await this.memberRepository.saveMember(memberEntity);
 
-        return new SignupResponse(result);
+        return {
+            id: result,
+        };
     }
 
-    async signin(request: SigninRequest) {
+    async signin(request: SigninRequest): Promise<SigninResponse> {
         const member = await this.memberRepository.findMemberByEmail(request.email);
 
         if(!member || member.joinStatus === false) throw new SigninFailException();
@@ -109,7 +111,9 @@ export class AuthService {
             secret: this.secret,
         });
 
-        return new SigninResponse(token);
+        return {
+            accessToken: token,
+        };
 
     }
 

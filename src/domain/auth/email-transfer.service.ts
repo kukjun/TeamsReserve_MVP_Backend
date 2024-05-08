@@ -69,7 +69,9 @@ export class EmailTransferService {
         const key = this.validateEmailPrefix + request.email;
         await this.client.set(key, code, "EX", this.validateLimitTime);
 
-        return new ValidateEmailResponse(request.email);
+        return {
+            email: request.email,
+        };
     }
 
     async confirmEmail(request: ConfirmEmailRequest): Promise<ConfirmEmailResponse> {
@@ -80,6 +82,8 @@ export class EmailTransferService {
         await this.client.del(key);
         await this.client.set(request.email, "validate", "EX", this.signupLimitTime);
 
-        return new ConfirmEmailResponse(request.email);
+        return {
+            email: request.email,
+        };
     }
 }

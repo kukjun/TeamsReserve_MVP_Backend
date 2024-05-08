@@ -10,6 +10,10 @@ import {
 import {
     ValidationPipe, 
 } from "@nestjs/common";
+import {
+    DocumentBuilder,
+    SwaggerModule,
+} from "@nestjs/swagger";
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -17,6 +21,14 @@ async function bootstrap() {
         whitelist: true, 
     }));
     app.useGlobalFilters(new HttpExceptionFilter());
+    const options = new DocumentBuilder()
+        .setTitle("Teams Reserve MVP Service")
+        .setDescription("공간 예약 프로그램의 MVP Version")
+        .setVersion("0.0.1")
+        .build();
+    const document = SwaggerModule.createDocument(app, options);
+    SwaggerModule.setup("apiDocs", app, document);
+
     await app.listen(3000);
 }
 bootstrap();
