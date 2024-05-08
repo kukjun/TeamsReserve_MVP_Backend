@@ -74,13 +74,13 @@ export class AuthService {
 
         // 생성
         const hashedPassword = await bcrypt.hash(request.password, await bcrypt.genSalt());
-        const updatedRequest = new SignupRequest(
-            request.email,
-            hashedPassword,
-            request.nickname,
-            request.teamCode,
-            request?.introduce
-        );
+        const updatedRequest: SignupRequest = {
+            email: request.email,
+            password: hashedPassword,
+            nickname: request.nickname,
+            teamCode: request.teamCode,
+            introduce: request?.introduce,
+        };
 
         const memberEntity = new MemberEntity(updatedRequest);
         memberEntity.authority = MemberAuthority.USER;

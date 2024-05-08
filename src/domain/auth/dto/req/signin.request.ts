@@ -1,7 +1,11 @@
+import {
+    IsEmail, IsNotEmpty,
+} from "class-validator";
+
 export class SigninRequest {
-    constructor(
-        readonly email: string,
-        readonly password: string,
-    ) {
-    }
+    @IsEmail()
+    @IsNotEmpty()
+    email!: string;
+    @IsNotEmpty()
+    password!: string;
 }

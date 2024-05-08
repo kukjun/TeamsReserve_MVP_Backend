@@ -1,7 +1,11 @@
+import {
+    IsEmail, IsNotEmpty,
+} from "class-validator";
+
 export class ConfirmEmailRequest {
-    constructor(
-        readonly email: string,
-        readonly code: string,
-    ) {
-    }
+    @IsEmail()
+    @IsNotEmpty()
+    email!: string;
+    @IsNotEmpty()
+    code!: string;
 }
