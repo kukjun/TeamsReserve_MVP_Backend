@@ -66,7 +66,10 @@ export class AuthController {
         return new DefaultResponse(data);
     }
 
-    // 로그인 api
+    /**
+     * 로그인 api
+     * @param request
+     */
     @Post("/signin")
     async signin(@Body() request: SigninRequest) {
         const data = await this.authService.signin(request);

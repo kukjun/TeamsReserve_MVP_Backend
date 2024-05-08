@@ -42,10 +42,14 @@ import {
 import {
     SigninResponse, 
 } from "./dto/res/signin.response";
+import {
+    TeamUnauthorizedException, 
+} from "../../exception/team-unauthorized.exception";
 
 @Injectable()
 export class AuthService {
-    private secret: string;
+    private readonly secret: string;
+    private readonly teamCode: string;
     constructor(
         @InjectRedis() private readonly client: Redis,
         private readonly memberRepository: MemberRepository,
@@ -53,11 +57,14 @@ export class AuthService {
         configService: ConfigService,
     ) {
         this.secret = configService.get<string>("JWT_SECRET_KEY");
+        this.teamCode = configService.get<string>("TEAM_CODE");
     }
 
     async signup(request: SignupRequest): Promise<SignupResponse> {
         const validate = await this.client.get(request.email);
-        if(validate === null || validate !== "validate") throw new EmailUnauthorizedException("Email Unauthorized");
+        if(validate === null || validate !== "validate") throw new EmailUnauthorizedException();
+
+        if(request.teamCode !== this.teamCode) throw new TeamUnauthorizedException();
 
         const memberByEmail = await this.memberRepository.findMemberByEmail(request.email);
         if (memberByEmail !== null) throw new DuplicateException("email: " + request.email + " duplicate");
