@@ -14,13 +14,13 @@ datasource db {
 }
 
 model Member {
-  id               String   @id @default(uuid())
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email            String   @unique
   password         String
   nickname         String   @unique
   introduce        String?  @db.Text
   teamCode         String
-  joinStatus       Boolean
+  joinStatus       Boolean  @default(false)
   authority        String
   createdAt        DateTime @default(now())
   lastModifiedTime DateTime @updatedAt
@@ -29,7 +29,7 @@ model Member {
 }
 
 model Space {
-  id               String   @id @default(uuid())
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name             String
   location         String
   description      String?  @db.Text
@@ -41,18 +41,18 @@ model Space {
 }
 
 model Photo {
-  id        String   @id @default(uuid())
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   path      String
   name      String
   createdAt DateTime @default(now())
-  spaceId   String
+  spaceId   String   @db.Uuid
   space     Space    @relation(fields: [spaceId], references: [id])
 
   @@map("photo")
 }
 
 model Reserve {
-  id               String   @id @default(uuid())
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   times            String
   description      String?  @db.Text
   createdAt        DateTime @default(now())
@@ -62,7 +62,7 @@ model Reserve {
 }
 
 model ReserveLog {
-  id                String   @id @default(uuid())
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   reservedUser      String
   reservedSpaceName String
   reservedLocation  String

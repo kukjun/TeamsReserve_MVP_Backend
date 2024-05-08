@@ -17,6 +17,12 @@ import {
 import {
     ConfirmEmailRequest, 
 } from "./dto/req/confirm-email.request";
+import {
+    SignupRequest, 
+} from "./dto/req/signup.request";
+import {
+    SigninRequest, 
+} from "./dto/req/signin.request";
 
 @Controller("/auth")
 export class AuthController {
@@ -49,6 +55,22 @@ export class AuthController {
         return new DefaultResponse(data);
     }
 
-    // 회원가입 api
+    /**
+     * 회원가입 api
+     * @param request
+     */
+    @Post("/signup")
+    async signup(@Body() request: SignupRequest) {
+        const data = await this.authService.signup(request);
+
+        return new DefaultResponse(data);
+    }
+
     // 로그인 api
+    @Post("/signin")
+    async signin(@Body() request: SigninRequest) {
+        const data = await this.authService.signin(request);
+
+        return new DefaultResponse(data);
+    }
 }

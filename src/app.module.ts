@@ -10,9 +10,18 @@ import {
 import {
     RedisModule,
 } from "@liaoliaots/nestjs-redis";
+import {
+    PrismaModule, 
+} from "./config/prisma/prisma.module";
+import {
+    MemberModule, 
+} from "./domain/member/member.module";
 
 @Module({
-    imports: [AuthModule,
+    imports: [
+        AuthModule,
+        PrismaModule,
+        MemberModule,
         ConfigModule.forRoot({
             isGlobal: true,
             envFilePath: ".env",
