@@ -15,24 +15,24 @@ import {
     DefaultResponse,
 } from "../../response/default.response";
 import {
-    ConfirmEmailRequest, 
+    ConfirmEmailRequest,
 } from "./dto/req/confirm-email.request";
 import {
-    SignupRequest, 
+    SignupRequest,
 } from "./dto/req/signup.request";
 import {
-    SigninRequest, 
+    SigninRequest,
 } from "./dto/req/signin.request";
 import {
-    ApiCreatedResponse,
+    ApiExtraModels,
     ApiOperation,
     ApiTags,
 } from "@nestjs/swagger";
 import {
-    SignupResponse, 
+    SignupResponse,
 } from "./dto/res/signup.response";
 import {
-    ValidateEmailResponse, 
+    ValidateEmailResponse,
 } from "./dto/res/validate-email.response";
 import {
     ConfirmEmailResponse,
@@ -40,8 +40,12 @@ import {
 import {
     SigninResponse,
 } from "./dto/res/signin.response";
+import {
+    ApiDefaultResponse, 
+} from "../../util/decorators/api-default.response";
 
 @ApiTags("auth")
+@ApiExtraModels(DefaultResponse, ValidateEmailResponse)
 @Controller("/auth")
 export class AuthController {
 
@@ -59,6 +63,7 @@ export class AuthController {
         summary: "이메일 인증 요청 API",
         description: "자신의 이메일로 인증번호를 받는다.",
     })
+    @ApiDefaultResponse(ValidateEmailResponse)
     @HttpCode(201)
     @Post("/validate-email")
     async validateEmail(@Body() request: ValidateEmailRequest) {
@@ -75,6 +80,7 @@ export class AuthController {
         summary: "이메일 인증 확인 API",
         description: "받은 인증번호를 5분 이내로 입력해서, 본인 이메일임을 인증한다.",
     })
+    @ApiDefaultResponse(ConfirmEmailResponse)
     @HttpCode(201)
     @Post("confirm-email")
     async confirmEmail(@Body() request: ConfirmEmailRequest) {
@@ -91,6 +97,7 @@ export class AuthController {
         summary: "회원 가입 API",
         description: "인증된 이메일로 1시간 이내로, 회원가입을 한다.",
     })
+    @ApiDefaultResponse(SignupResponse)
     @HttpCode(201)
     @Post("/signup")
     async signup(@Body() request: SignupRequest) {
@@ -107,6 +114,7 @@ export class AuthController {
         summary: "로그인 API",
         description: "관리자로부터 로그인 승인을 받으면, 해당 id, password로 로그인을 한다.",
     })
+    @ApiDefaultResponse(SigninResponse)
     @HttpCode(200)
     @Post("/signin")
     async signin(@Body() request: SigninRequest) {

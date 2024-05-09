@@ -2,7 +2,7 @@ import {
     MemberEntity,
 } from "../../../member/entity/member.entity";
 import {
-    IsEmail, IsNotEmpty, IsString, MaxLength, MinLength,
+    IsEmail, IsNotEmpty, MaxLength, MinLength,
 } from "class-validator";
 import {
     ApiProperty, 
