@@ -16,6 +16,20 @@ export class MemberRepository {
     }
 
     /**
+     * id 검색
+     */
+    async findMemberById(id: string): Promise<MemberEntity | null> {
+        const member = await this.prismaService.member.findUnique({
+            where: {
+                id,
+            },
+        });
+        if(!member) return null;
+
+        return member;
+    }
+
+    /**
      * email 검색
      * @param email
      */

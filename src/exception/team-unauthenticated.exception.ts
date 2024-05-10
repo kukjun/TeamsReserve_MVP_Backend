@@ -2,8 +2,8 @@ import {
     UnauthorizedException, 
 } from "./http/unauthorized.exception";
 
-export class EmailUnauthorizedException extends UnauthorizedException {
+export class TeamUnauthenticatedException extends UnauthorizedException {
     constructor() {
-        super("Email");
+        super("Team Code");
     }
 }

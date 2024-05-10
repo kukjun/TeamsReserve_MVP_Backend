@@ -25,6 +25,12 @@ import {
 import {
     JwtModule, 
 } from "@nestjs/jwt";
+import {
+    LocalStrategy, 
+} from "./strategies/local.strategy";
+import {
+    JwtStrategy, 
+} from "./strategies/jwt.strategy";
 
 @Module({
     imports: [
@@ -47,6 +53,8 @@ import {
         EmailTransferService,
         MemberRepository,
         PrismaService,
+        LocalStrategy,
+        JwtStrategy,
     ],
     exports: [],
 })

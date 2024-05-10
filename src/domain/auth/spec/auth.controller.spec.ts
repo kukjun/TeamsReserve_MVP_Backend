@@ -27,11 +27,11 @@ import {
     signupRequestFixture,
 } from "./fixture/signup-request.fixture";
 import {
-    TeamUnauthorizedException, 
-} from "../../../exception/team-unauthorized.exception";
+    TeamUnauthenticatedException,
+} from "../../../exception/team-unauthenticated.exception";
 import {
-    EmailUnauthorizedException, 
-} from "../../../exception/email-unauthorized.exception";
+    EmailUnauthenticatedException,
+} from "../../../exception/email-unauthenticated.exception";
 import {
     DuplicateException, 
 } from "../../../exception/duplicate.exception";
@@ -141,7 +141,7 @@ describe("AuthController Unit Test", () => {
             // given
             const request = signupRequestFixture();
             authServiceMock.signup.mockImplementation(() => {
-                throw new TeamUnauthorizedException();
+                throw new TeamUnauthenticatedException();
             });
             // when
             try {
@@ -149,7 +149,7 @@ describe("AuthController Unit Test", () => {
                 new Error();
             } catch(error) {
                 // then
-                expect(error instanceof TeamUnauthorizedException).toBe(true);
+                expect(error instanceof TeamUnauthenticatedException).toBe(true);
             }
         });
 
@@ -157,7 +157,7 @@ describe("AuthController Unit Test", () => {
             // given
             const request = signupRequestFixture();
             authServiceMock.signup.mockImplementation(() => {
-                throw new EmailUnauthorizedException();
+                throw new EmailUnauthenticatedException();
             });
             // when
             try {
@@ -165,7 +165,7 @@ describe("AuthController Unit Test", () => {
                 new Error();
             } catch(error) {
                 // then
-                expect(error instanceof EmailUnauthorizedException).toBe(true);
+                expect(error instanceof EmailUnauthenticatedException).toBe(true);
             }
         });
 

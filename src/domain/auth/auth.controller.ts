@@ -1,6 +1,6 @@
 import {
     Body,
-    Controller, HttpCode, Post,
+    Controller, HttpCode, Post, UseGuards, Request,
 } from "@nestjs/common";
 import {
     AuthService,
@@ -41,8 +41,11 @@ import {
     SigninResponse,
 } from "./dto/res/signin.response";
 import {
-    ApiDefaultResponse, 
+    ApiDefaultResponse,
 } from "../../util/decorators/api-default.response";
+import {
+    LocalGuard, 
+} from "./guards/local.guard";
 
 @ApiTags("auth")
 @ApiExtraModels(DefaultResponse, ValidateEmailResponse)
@@ -116,10 +119,14 @@ export class AuthController {
     })
     @ApiDefaultResponse(SigninResponse)
     @HttpCode(200)
+    @UseGuards(LocalGuard)
     @Post("/signin")
-    async signin(@Body() request: SigninRequest) {
-        const data = await this.authService.signin(request);
+    async signin(@Body() request: SigninRequest, @Request() req) {
+
+        const data = await this.authService.signin(req.user.id);
 
         return new DefaultResponse(data);
+
     }
+
 }

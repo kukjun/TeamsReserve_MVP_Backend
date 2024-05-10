@@ -25,11 +25,8 @@ import {
     MemberAuthority, 
 } from "../../types/enums/member.authority.enum";
 import {
-    EmailUnauthorizedException, 
-} from "../../exception/email-unauthorized.exception";
-import {
-    SigninRequest, 
-} from "./dto/req/signin.request";
+    EmailUnauthenticatedException,
+} from "../../exception/email-unauthenticated.exception";
 import {
     SigninFailException, 
 } from "../../exception/signin-fail.exception";
@@ -43,8 +40,14 @@ import {
     SigninResponse, 
 } from "./dto/res/signin.response";
 import {
-    TeamUnauthorizedException, 
-} from "../../exception/team-unauthorized.exception";
+    TeamUnauthenticatedException,
+} from "../../exception/team-unauthenticated.exception";
+import {
+    SigninRequest, 
+} from "./dto/req/signin.request";
+import {
+    MemberToken,
+} from "../../interface/member-token";
 
 @Injectable()
 export class AuthService {
@@ -62,9 +65,9 @@ export class AuthService {
 
     async signup(request: SignupRequest): Promise<SignupResponse> {
         const validate = await this.client.get(request.email);
-        if(validate === null || validate !== "validate") throw new EmailUnauthorizedException();
+        if(validate === null || validate !== "validate") throw new EmailUnauthenticatedException();
 
-        if(request.teamCode !== this.teamCode) throw new TeamUnauthorizedException();
+        if(request.teamCode !== this.teamCode) throw new TeamUnauthenticatedException();
 
         const memberByEmail = await this.memberRepository.findMemberByEmail(request.email);
         if (memberByEmail !== null) throw new DuplicateException("email: " + request.email + " duplicate");
@@ -91,18 +94,17 @@ export class AuthService {
         };
     }
 
-    async signin(request: SigninRequest): Promise<SigninResponse> {
+    async validateSignin(request: SigninRequest): Promise<string> {
         const member = await this.memberRepository.findMemberByEmail(request.email);
 
         if(!member || member.joinStatus === false) throw new SigninFailException();
         if(!await bcrypt.compare(request.password, member.password)) throw new SigninFailException();
 
-        // 문제가 없으면 jwt Token 발급
-        const payload: {
-            id: string,
-            nickname: string,
-            authority: string
-        } = {
+        return member.id;
+    }
+    async signin(id: string): Promise<SigninResponse> {
+        const member = await this.memberRepository.findMemberById(id);
+        const payload: MemberToken = {
             id: member.id,
             nickname: member.nickname,
             authority: member.authority,
