@@ -1,12 +1,12 @@
 -- CreateTable
 CREATE TABLE "member" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "nickname" TEXT NOT NULL,
     "introduce" TEXT,
     "teamCode" TEXT NOT NULL,
-    "joinStatus" BOOLEAN NOT NULL,
+    "joinStatus" BOOLEAN NOT NULL DEFAULT false,
     "authority" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "lastModifiedTime" TIMESTAMP(3) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE "member" (
 
 -- CreateTable
 CREATE TABLE "space" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" TEXT NOT NULL,
     "location" TEXT NOT NULL,
     "description" TEXT,
@@ -28,18 +28,18 @@ CREATE TABLE "space" (
 
 -- CreateTable
 CREATE TABLE "photo" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "path" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "spaceId" TEXT NOT NULL,
+    "spaceId" UUID NOT NULL,
 
     CONSTRAINT "photo_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "reserve" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "times" TEXT NOT NULL,
     "description" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -50,7 +50,7 @@ CREATE TABLE "reserve" (
 
 -- CreateTable
 CREATE TABLE "reserve_log" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "reservedUser" TEXT NOT NULL,
     "reservedSpaceName" TEXT NOT NULL,
     "reservedLocation" TEXT NOT NULL,

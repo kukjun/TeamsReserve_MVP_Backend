@@ -1,37 +1,37 @@
 import {
+    ApiProperty,
+} from "@nestjs/swagger";
+import {
     Member, 
 } from "@prisma/client";
-import {
-    MemberDomain, 
-} from "../domain/member.domain";
 
 export class MemberEntity implements Member {
-    constructor(
-        readonly id: string,
-        readonly email: string,
-        readonly password: string,
-        readonly nickname: string,
-        readonly introduce: string | null,
-        readonly teamCode: string,
-        readonly joinStatus: boolean,
-        readonly authority: string,
-        readonly createdAt: Date,
-        readonly lastModifiedTime: Date,
-    ) {
+    constructor(dto: Partial<MemberEntity>) {
+        Object.assign(this, dto);
     }
 
-    toDomain() {
-        return new MemberDomain(
-            this.id,
-            this.email,
-            this.password,
-            this.nickname,
-            this.introduce,
-            this.teamCode,
-            this.joinStatus,
-            this.authority,
-            this.createdAt,
-            this.lastModifiedTime,
-        );
-    }
+    @ApiProperty()
+    id: string;
+    @ApiProperty()
+    email: string;
+    @ApiProperty()
+    password: string;
+    @ApiProperty()
+    nickname: string;
+    @ApiProperty({
+        required: false,
+        nullable: true, 
+    })
+    introduce: string | null;
+    @ApiProperty()
+    teamCode: string;
+    @ApiProperty()
+    joinStatus: boolean;
+    @ApiProperty()
+    authority: string;
+    @ApiProperty()
+    createdAt: Date;
+    @ApiProperty()
+    lastModifiedTime: Date;
+
 }
