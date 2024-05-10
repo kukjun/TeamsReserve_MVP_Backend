@@ -3,7 +3,7 @@ import {
 } from "./http/bad-request.exception";
 
 export class EmailConfirmFailException extends BadRequestException {
-    constructor(message: string) {
-        super(message);
+    constructor() {
+        super("Email Confirm Fail");
     }
 }

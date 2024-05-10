@@ -3,7 +3,6 @@ import {
 } from "@nestjs/swagger";
 
 export class DefaultResponse<T> {
-    // TODO: Custom Decorator 작업이 필용함. 제네릭으로 선언하는 값을 읽을 수 있도록
     readonly data: T;
 
     @ApiProperty({

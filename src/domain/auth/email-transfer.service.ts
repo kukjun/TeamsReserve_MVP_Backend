@@ -78,7 +78,7 @@ export class EmailTransferService {
         const key = this.validateEmailPrefix + request.email;
         const resCode: string | null = await this.client.get(key);
 
-        if(resCode === null || resCode !== request.code) throw new EmailConfirmFailException("Email Confirm Fail");
+        if(resCode === null || resCode !== request.code) throw new EmailConfirmFailException();
         await this.client.del(key);
         await this.client.set(request.email, "validate", "EX", this.signupLimitTime);
 
