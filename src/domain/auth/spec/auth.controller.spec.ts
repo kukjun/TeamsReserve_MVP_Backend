@@ -1,27 +1,28 @@
+import * as UUID from "uuid";
 import {
-    AuthController, 
+    AuthController,
 } from "../auth.controller";
 import {
     Test,
     TestingModule,
 } from "@nestjs/testing";
 import {
-    AuthService, 
+    AuthService,
 } from "../auth.service";
 import {
-    EmailTransferService, 
+    EmailTransferService,
 } from "../email-transfer.service";
 import {
-    validateEmailRequestFixture, 
+    validateEmailRequestFixture,
 } from "./fixture/validate-email-request.fixture";
 import {
-    confirmEmailRequestFixture, 
+    confirmEmailRequestFixture,
 } from "./fixture/confirm-email-request.fixture";
 import {
-    EmailConfirmFailException, 
+    EmailConfirmFailException,
 } from "../../../exception/email-confirm-fail.exception";
 import {
-    faker, 
+    faker,
 } from "@faker-js/faker";
 import {
     signupRequestFixture,
@@ -33,23 +34,39 @@ import {
     EmailUnauthenticatedException,
 } from "../../../exception/email-unauthenticated.exception";
 import {
-    DuplicateException, 
+    DuplicateException,
 } from "../../../exception/duplicate.exception";
 import {
-    signinRequestFixture, 
+    signinRequestFixture,
 } from "./fixture/signin-request.fixture";
 import {
-    SigninFailException, 
+    SigninFailException,
 } from "../../../exception/signin-fail.exception";
+import {
+    RandomUuid, 
+} from "testcontainers";
+import {
+    MemberToken, 
+} from "../../../interface/member-token";
+import {
+    MemberAuthority, 
+} from "../../../types/enums/member.authority.enum";
 
 const authServiceMock = {
     signup: jest.fn(),
     signin: jest.fn(),
+    validateSignin: jest.fn(),
 };
 const emailTransferServiceMock = {
     validateEmail: jest.fn(),
     confirmEmail: jest.fn(),
-
+};
+const mockReq = {
+    user: {
+        id: UUID.v4(),
+        nickname: "TestNickname",
+        authority: MemberAuthority.USER,
+    },
 };
 
 describe("AuthController Unit Test", () => {
@@ -79,7 +96,7 @@ describe("AuthController Unit Test", () => {
             // given
             const request = validateEmailRequestFixture();
             emailTransferServiceMock.validateEmail.mockResolvedValue({
-                email: request.email, 
+                email: request.email,
             });
             // when
             const result = await authController.validateEmail(request);
@@ -147,7 +164,7 @@ describe("AuthController Unit Test", () => {
             try {
                 await authController.signup(request);
                 new Error();
-            } catch(error) {
+            } catch (error) {
                 // then
                 expect(error instanceof TeamUnauthenticatedException).toBe(true);
             }
@@ -163,7 +180,7 @@ describe("AuthController Unit Test", () => {
             try {
                 await authController.signup(request);
                 new Error();
-            } catch(error) {
+            } catch (error) {
                 // then
                 expect(error instanceof EmailUnauthenticatedException).toBe(true);
             }
@@ -180,7 +197,7 @@ describe("AuthController Unit Test", () => {
             try {
                 await authController.signup(request);
                 new Error();
-            } catch(error) {
+            } catch (error) {
                 // then
                 expect(error instanceof DuplicateException).toBe(true);
                 expect(error.message).toEqual(expectedMessage);
@@ -198,7 +215,7 @@ describe("AuthController Unit Test", () => {
             try {
                 await authController.signup(request);
                 new Error();
-            } catch(error) {
+            } catch (error) {
                 // then
                 expect(error instanceof DuplicateException).toBe(true);
                 expect(error.message).toEqual(expectedMessage);
@@ -210,12 +227,17 @@ describe("AuthController Unit Test", () => {
         it("사용자의 id, password가 일치하면 accessToken을 돌려준다.", async () => {
             // given
             const request = signinRequestFixture();
+            const expectedUUID = UUID.v4();
+
             const expectedJWTToken = "JWT_Example_Token";
             authServiceMock.signin.mockResolvedValue({
                 accessToken: expectedJWTToken,
             });
+            authServiceMock.validateSignin.mockResolvedValue(
+                expectedUUID
+            );
             // when
-            const result = await authController.signin(request);
+            const result = await authController.signin(request, mockReq);
             // then
             expect(result).not.toBeNull();
             expect(result.data.accessToken).toEqual(expectedJWTToken);
@@ -224,14 +246,14 @@ describe("AuthController Unit Test", () => {
         it("Member의 id, password가 일치하지 않거나 승인되지 않은 경우 로그인 실패 예외를 발생시킨다.", async () => {
             // given
             const request = signinRequestFixture();
-            authServiceMock.signin.mockImplementation(() => {
+            authServiceMock.validateSignin.mockImplementation(() => {
                 throw new SigninFailException();
             });
             // when
             try {
-                await authController.signin(request);
+                await authController.signin(request, mockReq);
                 new Error();
-            } catch(error) {
+            } catch (error) {
                 // then
                 expect(error instanceof SigninFailException).toBe(true);
             }
