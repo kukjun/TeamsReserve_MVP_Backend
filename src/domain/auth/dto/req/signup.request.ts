@@ -2,7 +2,7 @@ import {
     MemberEntity,
 } from "../../../member/entity/member.entity";
 import {
-    IsEmail, IsNotEmpty, MaxLength, MinLength,
+    IsEmail, IsNotEmpty, IsOptional, MaxLength, MinLength,
 } from "class-validator";
 import {
     ApiProperty, 
@@ -26,7 +26,9 @@ export class SignupRequest implements Pick<MemberEntity, "email" | "password" | 
         required: true,
         example: "test123!@",
     })
+    @IsNotEmpty()
     password!: string;
+
     @ApiProperty({
         type: String,
         description: "닉네임",
@@ -37,6 +39,7 @@ export class SignupRequest implements Pick<MemberEntity, "email" | "password" | 
     @MaxLength(10)
     @IsNotEmpty()
     nickname!: string;
+
     @ApiProperty({
         type: String,
         description: "팀 코드",
@@ -52,5 +55,6 @@ export class SignupRequest implements Pick<MemberEntity, "email" | "password" | 
         required: false,
         example: "안녕하세요. 지인 소개로 가입하게 되었습니다. 잘부탁드립니다.",
     })
+    @IsOptional()
     introduce?: string;
 }
