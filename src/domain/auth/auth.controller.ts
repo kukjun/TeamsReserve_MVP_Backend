@@ -1,6 +1,6 @@
 import {
     Body,
-    Controller, HttpCode, Post, UseGuards, Request,
+    Controller, HttpCode, Post, UseGuards, Request, HttpStatus,
 } from "@nestjs/common";
 import {
     AuthService,
@@ -67,7 +67,7 @@ export class AuthController {
         description: "자신의 이메일로 인증번호를 받는다.",
     })
     @ApiDefaultResponse(ValidateEmailResponse)
-    @HttpCode(201)
+    @HttpCode(HttpStatus.CREATED)
     @Post("/validate-email")
     async validateEmail(@Body() request: ValidateEmailRequest) {
         const data = await this.emailTransferService.validateEmail(request);
@@ -84,7 +84,7 @@ export class AuthController {
         description: "받은 인증번호를 5분 이내로 입력해서, 본인 이메일임을 인증한다.",
     })
     @ApiDefaultResponse(ConfirmEmailResponse)
-    @HttpCode(201)
+    @HttpCode(HttpStatus.CREATED)
     @Post("confirm-email")
     async confirmEmail(@Body() request: ConfirmEmailRequest) {
         const data = await this.emailTransferService.confirmEmail(request);
@@ -101,9 +101,10 @@ export class AuthController {
         description: "인증된 이메일로 1시간 이내로, 회원가입을 한다.",
     })
     @ApiDefaultResponse(SignupResponse)
-    @HttpCode(201)
+    @HttpCode(HttpStatus.CREATED)
     @Post("/signup")
     async signup(@Body() request: SignupRequest) {
+
         const data = await this.authService.signup(request);
 
         return new DefaultResponse(data);
@@ -118,7 +119,7 @@ export class AuthController {
         description: "관리자로부터 로그인 승인을 받으면, 해당 id, password로 로그인을 한다.",
     })
     @ApiDefaultResponse(SigninResponse)
-    @HttpCode(200)
+    @HttpCode(HttpStatus.OK)
     @UseGuards(LocalGuard)
     @Post("/signin")
     async signin(@Body() request: SigninRequest, @Request() req) {
