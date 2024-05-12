@@ -71,4 +71,15 @@ export class MemberRepository {
 
         return savedMember.id;
     }
+
+    async updateMember(member: MemberEntity): Promise<string | null> {
+        const updatedMember = await this.prismaService.member.update({
+            where: {
+                id: member.id,
+            },
+            data: member,
+        });
+
+        return updatedMember.id;
+    }
 }

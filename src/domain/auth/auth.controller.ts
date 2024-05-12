@@ -130,4 +130,22 @@ export class AuthController {
 
     }
 
+    /**
+     * 임시 비밀번호 발급 API
+     * @param request
+     */
+    @ApiOperation({
+        summary: "임시 비밀번호 발급",
+        description: "본인 이메일임을 인증하고, 임시 비밀번호를 생성 해, 이메일로 전송한다.",
+    })
+    @ApiDefaultResponse(ConfirmEmailResponse)
+    @HttpCode(HttpStatus.OK)
+    @Post("/tempPassword")
+    async updateTempPassword(@Body() request: ConfirmEmailRequest): Promise<DefaultResponse<ConfirmEmailResponse>> {
+
+        const data = await this.emailTransferService.updateTempPassword(request);
+
+        return new DefaultResponse(data);
+
+    }
 }
