@@ -418,4 +418,10 @@ describe("Auth e2e Test", () => {
             });
         });
     });
+
+    /**
+     * Email 전송은 테스트하지 않는다.
+     */
+    it("updateTempPassword Test는 하지 않는다.", () => {
+    });
 });

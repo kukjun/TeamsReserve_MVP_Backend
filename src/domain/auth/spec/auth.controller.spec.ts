@@ -43,14 +43,11 @@ import {
     SigninFailException,
 } from "../../../exception/signin-fail.exception";
 import {
-    RandomUuid, 
-} from "testcontainers";
-import {
-    MemberToken, 
-} from "../../../interface/member-token";
-import {
     MemberAuthority, 
 } from "../../../types/enums/member.authority.enum";
+import {
+    MemberNotFoundException, 
+} from "../../../exception/member-not-found.exception";
 
 const authServiceMock = {
     signup: jest.fn(),
@@ -60,6 +57,7 @@ const authServiceMock = {
 const emailTransferServiceMock = {
     validateEmail: jest.fn(),
     confirmEmail: jest.fn(),
+    updateTempPassword: jest.fn(),
 };
 const mockReq = {
     user: {
@@ -256,6 +254,55 @@ describe("AuthController Unit Test", () => {
             } catch (error) {
                 // then
                 expect(error instanceof SigninFailException).toBe(true);
+            }
+        });
+    });
+
+    describe("updateTempPassword", () => {
+        it("인증코드가 일치하면, 회원에게 임시 비밀번호 발급한다.", async () => {
+            // given
+            const request = confirmEmailRequestFixture();
+            emailTransferServiceMock.updateTempPassword.mockResolvedValue({
+                email: request.email,
+            });
+            // when
+            const result = await authController.updateTempPassword(request);
+            // then
+            expect(result).not.toBeNull();
+            expect(result.data.email).toEqual(request.email);
+        });
+
+        it("인증코드가 일치하지만 가입한 회원이 아니면, 멤버를 찾을 수 없다는 예외가 발생한다.", async () => {
+            // given
+            const request = confirmEmailRequestFixture();
+            emailTransferServiceMock.updateTempPassword.mockImplementation(() => {
+                throw new MemberNotFoundException(`email: ${request.email}`);
+            });
+
+            // when
+            try {
+                await authController.confirmEmail(request);
+                new Error();
+            } catch (error) {
+                // then
+                expect(error instanceof EmailConfirmFailException).toBe(true);
+            }
+        });
+
+        it("인증코드가 일치하지 않으면, 인증코드 불일치 예외가 발생한다.", async () => {
+            // given
+            const request = confirmEmailRequestFixture();
+            emailTransferServiceMock.updateTempPassword.mockImplementation(() => {
+                throw new EmailConfirmFailException();
+            });
+
+            // when
+            try {
+                await authController.confirmEmail(request);
+                new Error();
+            } catch (error) {
+                // then
+                expect(error instanceof EmailConfirmFailException).toBe(true);
             }
         });
     });

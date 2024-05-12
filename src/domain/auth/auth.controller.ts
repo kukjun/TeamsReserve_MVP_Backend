@@ -131,9 +131,9 @@ export class AuthController {
     }
 
     /**
-     * 임시 비밀번호 발급
+     * 임시 비밀번호 발급 API
+     * @param request
      */
-
     @ApiOperation({
         summary: "임시 비밀번호 발급",
         description: "본인 이메일임을 인증하고, 임시 비밀번호를 생성 해, 이메일로 전송한다.",

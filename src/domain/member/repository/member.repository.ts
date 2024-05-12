@@ -79,7 +79,6 @@ export class MemberRepository {
             },
             data: member,
         });
-        console.log(333, updatedMember);
 
         return updatedMember.id;
     }
