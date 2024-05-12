@@ -16,8 +16,8 @@ import {
     InjectRedis,
 } from "@liaoliaots/nestjs-redis";
 import {
-    generateRandomNumber,
-} from "../../util/random.function";
+    generateRandomCode,
+} from "../../util/function/random-code";
 import {
     EmailOptions,
 } from "../../interface/email-options";
@@ -28,8 +28,21 @@ import {
     ConfirmEmailResponse,
 } from "./dto/res/confirm-email.response";
 import {
-    EmailConfirmFailException, 
+    EmailConfirmFailException,
 } from "../../exception/email-confirm-fail.exception";
+import {
+    MemberRepository,
+} from "../member/repository/member.repository";
+import {
+    generateRandomPassword,
+} from "../../util/function/random-password";
+import {
+    MemberEntity,
+} from "../member/entity/member.entity";
+import * as bcrypt from "bcrypt";
+import {
+    MemberNotFoundException, 
+} from "../../exception/member-not-found.exception";
 
 @Injectable()
 export class EmailTransferService {
@@ -41,6 +54,7 @@ export class EmailTransferService {
 
     constructor(
         @InjectRedis() private readonly client: Redis,
+        private readonly memberRepository: MemberRepository,
         configService: ConfigService
     ) {
         this.hostAccount = configService.get<string>("EMAIL_ACCOUNT");
@@ -56,7 +70,7 @@ export class EmailTransferService {
     }
 
     async validateEmail(request: ValidateEmailRequest): Promise<ValidateEmailResponse> {
-        const code = generateRandomNumber().toString();
+        const code = generateRandomCode().toString();
         const emailOptions: EmailOptions = {
             from: this.hostAccount,
             to: request.email,
@@ -78,12 +92,43 @@ export class EmailTransferService {
         const key = this.validateEmailPrefix + request.email;
         const resCode: string | null = await this.client.get(key);
 
-        if(resCode === null || resCode !== request.code) throw new EmailConfirmFailException();
+        if (resCode === null || resCode !== request.code) throw new EmailConfirmFailException();
         await this.client.del(key);
         await this.client.set(request.email, "validate", "EX", this.signupLimitTime);
 
         return {
             email: request.email,
         };
+    }
+
+    async updateTempPassword(request: ConfirmEmailRequest): Promise<ConfirmEmailResponse> {
+        const key = this.validateEmailPrefix + request.email;
+        const resCode: string | null = await this.client.get(key);
+
+        if (resCode === null || resCode !== request.code) throw new EmailConfirmFailException();
+        await this.client.del(key);
+
+        const member = await this.memberRepository.findMemberByEmail(request.email);
+        if(!member) throw new MemberNotFoundException(`email: ${request.email}`);
+        const tempPassword = generateRandomPassword();
+        const hashedPassword = await bcrypt.hash(tempPassword, await bcrypt.genSalt());
+        const updatedMember: MemberEntity = {
+            ...member,
+            password: hashedPassword,
+        };
+        await this.memberRepository.updateMember(updatedMember);
+
+        const emailOptions: EmailOptions = {
+            from: this.hostAccount,
+            to: request.email,
+            subject: "Temp Password - TeamsReserve",
+            html: `<h1> TeamsReserve ${updatedMember.nickname}님 비밀번호 발급 </h1> <p>Temp Password: ${tempPassword}</p>`,
+        };
+        this.transporter.sendMail(emailOptions);
+
+        return {
+            email: request.email,
+        };
+
     }
 }
