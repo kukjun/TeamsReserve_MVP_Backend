@@ -32,7 +32,7 @@ import {
 } from "../../exception/email-confirm-fail.exception";
 import {
     MemberRepository,
-} from "../member/repository/member.repository";
+} from "../member/member.repository";
 import {
     generateRandomPassword,
 } from "../../util/function/random-password";

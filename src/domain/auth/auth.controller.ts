@@ -48,7 +48,7 @@ import {
 } from "./guards/local.guard";
 
 @ApiTags("auth")
-@ApiExtraModels(DefaultResponse, ValidateEmailResponse)
+@ApiExtraModels(DefaultResponse)
 @Controller("/auth")
 export class AuthController {
 

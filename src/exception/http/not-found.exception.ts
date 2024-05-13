@@ -4,6 +4,6 @@ import {
 
 export class NotFoundException extends HttpException {
     constructor(message: string) {
-        super(message, HttpStatus.NOT_FOUND);
+        super(message + " Not Found", HttpStatus.NOT_FOUND);
     }
 }

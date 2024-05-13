@@ -8,6 +8,7 @@ export class DefaultResponse<T> {
     @ApiProperty({
         type: String,
         description: "응답 생성 시간",
+        example: "2024-05-13T07:55:11.441Z",
     })
     readonly timestamp: string;
 

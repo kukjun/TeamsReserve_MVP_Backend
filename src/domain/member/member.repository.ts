@@ -3,10 +3,10 @@ import {
 } from "@nestjs/common";
 import {
     PrismaService,
-} from "../../../config/prisma/prisma.service";
+} from "../../config/prisma/prisma.service";
 import {
     MemberEntity,
-} from "../entity/member.entity";
+} from "./entity/member.entity";
 
 @Injectable()
 export class MemberRepository {
@@ -72,6 +72,10 @@ export class MemberRepository {
         return savedMember.id;
     }
 
+    /**
+     * member 수정
+     * @param member
+     */
     async updateMember(member: MemberEntity): Promise<string | null> {
         const updatedMember = await this.prismaService.member.update({
             where: {

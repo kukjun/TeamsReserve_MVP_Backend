@@ -14,7 +14,7 @@ import {
 } from "./dto/res/signup.response";
 import {
     MemberRepository,
-} from "../member/repository/member.repository";
+} from "../member/member.repository";
 import {
     DuplicateException,
 } from "../../exception/duplicate.exception";
