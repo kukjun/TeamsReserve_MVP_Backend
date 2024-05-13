@@ -1,4 +1,4 @@
-export const generateRandomCode = (): number => {
+export const generateRandomCodeFunction = (): number => {
     const min = 100000;
     const max = 999999;
 

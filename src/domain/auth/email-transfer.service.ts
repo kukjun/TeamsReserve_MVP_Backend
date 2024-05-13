@@ -16,8 +16,8 @@ import {
     InjectRedis,
 } from "@liaoliaots/nestjs-redis";
 import {
-    generateRandomCode,
-} from "../../util/function/random-code";
+    generateRandomCodeFunction,
+} from "../../util/function/random-code.function";
 import {
     EmailOptions,
 } from "../../interface/email-options";
@@ -34,8 +34,8 @@ import {
     MemberRepository,
 } from "../member/member.repository";
 import {
-    generateRandomPassword,
-} from "../../util/function/random-password";
+    generateRandomPasswordFunction,
+} from "../../util/function/random-password.function";
 import {
     MemberEntity,
 } from "../member/entity/member.entity";
@@ -70,7 +70,7 @@ export class EmailTransferService {
     }
 
     async validateEmail(request: ValidateEmailRequest): Promise<ValidateEmailResponse> {
-        const code = generateRandomCode().toString();
+        const code = generateRandomCodeFunction().toString();
         const emailOptions: EmailOptions = {
             from: this.hostAccount,
             to: request.email,
@@ -110,7 +110,7 @@ export class EmailTransferService {
 
         const member = await this.memberRepository.findMemberByEmail(request.email);
         if(!member) throw new MemberNotFoundException(`email: ${request.email}`);
-        const tempPassword = generateRandomPassword();
+        const tempPassword = generateRandomPasswordFunction();
         const hashedPassword = await bcrypt.hash(tempPassword, await bcrypt.genSalt());
         const updatedMember: MemberEntity = {
             ...member,

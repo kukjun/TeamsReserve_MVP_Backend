@@ -1,4 +1,4 @@
-export const generateRandomPassword = (length: number = 10): string => {
+export const generateRandomPasswordFunction = (length: number = 10): string => {
     const specialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
     const numbers = "0123456789";
     const upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
