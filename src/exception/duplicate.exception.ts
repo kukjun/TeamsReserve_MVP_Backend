@@ -4,6 +4,6 @@ import {
 
 export class DuplicateException extends BadRequestException {
     constructor(message: string) {
-        super(message);
+        super(message + " Duplicate");
     }
 }

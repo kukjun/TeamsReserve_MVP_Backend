@@ -1,42 +1,68 @@
 import {
-    Controller, Get, HttpCode, HttpStatus, Param, Query, UseGuards, 
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    Patch,
+    Put,
+    Query,
+    Request,
+    UseGuards,
 } from "@nestjs/common";
 import {
-    MemberService, 
+    MemberService,
 } from "./member.service";
 import {
-    ApiExtraModels, ApiOperation, ApiTags, 
+    ApiExtraModels, ApiOperation, ApiTags,
 } from "@nestjs/swagger";
 import {
-    ApiDefaultResponse, 
+    ApiDefaultResponse,
 } from "../../util/decorators/api-default.response";
 import {
-    GetMemberResponseDto, 
+    GetMemberResponseDto,
 } from "./dto/res/get-member.response.dto";
 import {
-    DefaultResponse, 
+    DefaultResponse,
 } from "../../interface/response/default.response";
 import {
-    Roles, 
+    Roles,
 } from "../../util/decorators/permission";
 import {
-    MemberAuthority, 
+    MemberAuthority,
 } from "../../types/enums/member.authority.enum";
 import {
-    PaginateRequestDto, 
+    PaginateRequestDto,
 } from "../../interface/request/paginate.request.dto";
 import {
-    PaginateData, 
+    PaginateData,
 } from "../../interface/response/paginate.data";
 import {
-    JwtGuard, 
+    JwtGuard,
 } from "../auth/guards/jwt.guard";
 import {
-    GetMemberDetailResponseDto, 
+    GetMemberDetailResponseDto,
 } from "./dto/res/get-member-detail.response.dto";
 import {
-    MemberOptionDto, 
+    MemberOptionDto,
 } from "../../interface/request/member-option.dto";
+import {
+    UpdateMemberRequestDto,
+} from "./dto/req/update-member.request.dto";
+import {
+    UpdateMemberResponseDto,
+} from "./dto/res/update-member.response.dto";
+import {
+    UpdateMemberPasswordRequestDto,
+} from "./dto/req/update-member-password.request.dto";
+import {
+    UpdateMemberJoinStatusRequestDto,
+} from "./dto/req/update-member-join-status-request.dto";
+import {
+    UpdateMemberAuthorityRequestDto,
+} from "./dto/req/update-member-authority.request.dto";
 
 @ApiTags("members")
 @ApiExtraModels(DefaultResponse)
@@ -71,9 +97,9 @@ export class MemberController {
     @Get("/detail")
     async getMemberDetailList(
         @Query() paginateDto: PaginateRequestDto,
-        @Query() optionDto: MemberOptionDto,
+        @Query() optionDto: MemberOptionDto
     )
-    :Promise<DefaultResponse<PaginateData<GetMemberDetailResponseDto>>> {
+        : Promise<DefaultResponse<PaginateData<GetMemberDetailResponseDto>>> {
         const data = await this.memberService.getMemberDetailList(paginateDto, optionDto);
 
         return new DefaultResponse(data);
@@ -91,6 +117,92 @@ export class MemberController {
         const data = await this.memberService.getMember(id);
 
         return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.USER, MemberAuthority.MANAGER, MemberAuthority.ADMIN)
+    @ApiOperation({
+        summary: "정보 수정",
+        description: "자신의 정보를 수정할 수 있다.",
+    })
+    @ApiDefaultResponse(GetMemberResponseDto)
+    @HttpCode(HttpStatus.CREATED)
+    @Put("/:id")
+    async updateMember(@Param("id") id: string,
+                       @Body() requestBody: UpdateMemberRequestDto,
+                       @Request() req
+    )
+        : Promise<DefaultResponse<UpdateMemberResponseDto>> {
+        const data = await this.memberService.updateMember(id, requestBody, req.user);
+
+        return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.USER, MemberAuthority.MANAGER, MemberAuthority.ADMIN)
+    @ApiOperation({
+        summary: "비밀번호 변경",
+        description: "자신의 비밀번호를 변경할 수 있다.",
+    })
+    @ApiDefaultResponse(GetMemberResponseDto)
+    @HttpCode(HttpStatus.CREATED)
+    @Patch("/:id/password")
+    async updateMemberPassword(@Param("id") id: string,
+                               @Body() requestBody: UpdateMemberPasswordRequestDto,
+                               @Request() req
+    )
+        : Promise<DefaultResponse<UpdateMemberResponseDto>> {
+        const data = await this.memberService.updateMemberPassword(id, requestBody, req.user);
+
+        return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.ADMIN, MemberAuthority.MANAGER)
+    @ApiOperation({
+        summary: "회원가입 승인, 취소",
+        description: "회원가입 요청이 있는 회원의 가입 승인, 취소할 수 있다.",
+    })
+    @ApiDefaultResponse(GetMemberResponseDto)
+    @HttpCode(HttpStatus.CREATED)
+    @Patch("/:id/join")
+    async updateMemberJoinStatus(@Param("id") id: string,
+                                 @Body() requestBody: UpdateMemberJoinStatusRequestDto,
+                                 @Request() req)
+        : Promise<DefaultResponse<UpdateMemberResponseDto>> {
+        const data = await this.memberService.updateMemberJoinStatus(id, requestBody, req.user);
+
+        return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.ADMIN)
+    @ApiOperation({
+        summary: "회원 권한 부여",
+        description: "회원가입 한 회원에게 권한을 부여할 수 있다.",
+    })
+    @ApiDefaultResponse(GetMemberResponseDto)
+    @HttpCode(HttpStatus.CREATED)
+    @Patch("/:id/authority")
+    async updateMemberAuthority(@Param("id") id: string,
+                                @Body() requestBody: UpdateMemberAuthorityRequestDto,
+                                @Request() req)
+        : Promise<DefaultResponse<UpdateMemberResponseDto>> {
+        const data = await this.memberService.updateMemberAuthority(id, requestBody, req.user);
+
+        return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.ADMIN, MemberAuthority.MANAGER, MemberAuthority.USER)
+    @ApiOperation({
+        summary: "회원 탈퇴",
+        description: "본인이 자신 스스로 탈퇴할 수 있다.",
+    })
+    @ApiDefaultResponse(GetMemberResponseDto)
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @Delete("/:id")
+    async deleteMember(@Param("id") id: string,
+                       @Request() req)
+        : Promise<null> {
+        await this.memberService.deleteMember(id, req.user);
+
+        return null;
     }
 
 }

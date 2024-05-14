@@ -1,21 +1,21 @@
 import {
-    MemberController, 
+    MemberController,
 } from "../member.controller";
 import {
     Test,
     TestingModule,
 } from "@nestjs/testing";
 import {
-    MemberService, 
+    MemberService,
 } from "../member.service";
 import {
-    GetMemberResponseDto, 
+    GetMemberResponseDto,
 } from "../dto/res/get-member.response.dto";
 import {
-    MemberNotFoundException, 
+    MemberNotFoundException,
 } from "../../../exception/member-not-found.exception";
 import {
-    PaginateData, 
+    PaginateData,
 } from "../../../interface/response/paginate.data";
 import {
     getMemberListDetailFixture,
@@ -24,10 +24,39 @@ import {
 import {
     PaginateRequestDto,
 } from "../../../interface/request/paginate.request.dto";
+import {
+    UpdateMemberRequestDto,
+} from "../dto/req/update-member.request.dto";
+import {
+    UpdateMemberResponseDto,
+} from "../dto/res/update-member.response.dto";
+import {
+    uuidFunction,
+} from "../../../util/function/uuid.function";
+import {
+    MemberToken,
+} from "../../../interface/member-token";
+import {
+    MemberAuthority,
+} from "../../../types/enums/member.authority.enum";
+import {
+    UpdateMemberPasswordRequestDto, 
+} from "../dto/req/update-member-password.request.dto";
+import {
+    UpdateMemberJoinStatusRequestDto,
+} from "../dto/req/update-member-join-status-request.dto";
+import {
+    UpdateMemberAuthorityRequestDto, 
+} from "../dto/req/update-member-authority.request.dto";
 
 const mockMemberService = {
     getMember: jest.fn(),
     getMemberList: jest.fn(),
+    updateMember: jest.fn(),
+    updateMemberPassword: jest.fn(),
+    updateMemberJoinStatus: jest.fn(),
+    updateMemberAuthority: jest.fn(),
+    deleteMember: jest.fn(),
 };
 describe("MemberController Unit Test", () => {
     let memberController: MemberController;
@@ -38,7 +67,7 @@ describe("MemberController Unit Test", () => {
             providers: [
                 {
                     provide: MemberService,
-                    useValue:mockMemberService,
+                    useValue: mockMemberService,
                 },
             ],
         }).compile();
@@ -90,7 +119,7 @@ describe("MemberController Unit Test", () => {
             try {
                 await memberController.getMember("ebbadaa0-8361-448b-93bc-c6f3b6d0c142");
                 new Error();
-            } catch(error) {
+            } catch (error) {
                 // then
                 expect(error instanceof MemberNotFoundException).toBe(true);
             }
@@ -132,6 +161,136 @@ describe("MemberController Unit Test", () => {
             // then
             expect(response.data.meta).toBe(expectedResponse.meta);
             expect(response.data.data[0].id).toBe(expectedResponse.data[0].id);
+        });
+    });
+
+    describe("updateMember", () => {
+        it("변환된 결과의 id를 반환한다.", async () => {
+            // given
+            const expectedNickname = "unitTestNickname";
+            const requestBody: UpdateMemberRequestDto = {
+                nickname: expectedNickname,
+                introduce: "unit test 진행중입니다.",
+            };
+            const expectedId = uuidFunction.v4();
+            const expectedResult: UpdateMemberResponseDto = {
+                id: expectedId,
+            };
+            const token: MemberToken = {
+                id: expectedId,
+                nickname: expectedNickname,
+                authority: MemberAuthority.USER,
+            };
+            mockMemberService.updateMember.mockResolvedValue(expectedResult);
+
+            // when
+            const response = await memberController.updateMember(expectedId, requestBody, token);
+
+            // then
+            expect(response.data.id).toBe(expectedId);
+
+        });
+    });
+
+    describe("updateMemberPassword", () => {
+        it("변환된 결과의 id를 반환한다.", async () => {
+            // given
+            const expectedNickname = "unitTestNickname";
+            const requestBody: UpdateMemberPasswordRequestDto = {
+                currentPassword: "currentPassword",
+                newPassword: "newPassword",
+            };
+            const expectedId = uuidFunction.v4();
+            const expectedResult: UpdateMemberResponseDto = {
+                id: expectedId,
+            };
+            const token: MemberToken = {
+                id: expectedId,
+                nickname: expectedNickname,
+                authority: MemberAuthority.USER,
+            };
+            mockMemberService.updateMemberPassword.mockResolvedValue(expectedResult);
+
+            // when
+            const response = await memberController.updateMemberPassword(expectedId, requestBody, token);
+
+            // then
+            expect(response.data.id).toBe(expectedId);
+        });
+    });
+
+    describe("updateMemberJoinStatus", () => {
+        it("변환된 결과의 id를 반환한다.", async () => {
+            // given
+            const expectedNickname = "unitTestNickname";
+            const requestBody: UpdateMemberJoinStatusRequestDto = {
+                joinStatus: true,
+            };
+            const expectedId = uuidFunction.v4();
+            const expectedResult: UpdateMemberResponseDto = {
+                id: expectedId,
+            };
+            const token: MemberToken = {
+                id: expectedId,
+                nickname: expectedNickname,
+                authority: MemberAuthority.ADMIN,
+            };
+            mockMemberService.updateMemberJoinStatus.mockResolvedValue(expectedResult);
+
+            // when
+            const response = await memberController.updateMemberJoinStatus(expectedId, requestBody, token);
+
+            // then
+            expect(response.data.id).toBe(expectedId);
+        });
+    });
+
+    describe("updateMemberJoinStatus", () => {
+        it("변환된 결과의 id를 반환한다.", async () => {
+            // given
+            const expectedNickname = "unitTestNickname";
+            const requestBody: UpdateMemberAuthorityRequestDto = {
+                authority: MemberAuthority.USER,
+            };
+            const expectedId = uuidFunction.v4();
+            const expectedResult: UpdateMemberResponseDto = {
+                id: expectedId,
+            };
+            const token: MemberToken = {
+                id: expectedId,
+                nickname: expectedNickname,
+                authority: MemberAuthority.ADMIN,
+            };
+            mockMemberService.updateMemberAuthority.mockResolvedValue(expectedResult);
+
+            // when
+            const response = await memberController.updateMemberAuthority(expectedId, requestBody, token);
+
+            // then
+            expect(response.data.id).toBe(expectedId);
+        });
+    });
+
+    describe("deleteMember", () => {
+        it("변환된 결과의 id를 반환한다.", async () => {
+            // given
+            const expectedNickname = "unitTestNickname";
+            const expectedId = uuidFunction.v4();
+            const expectedResult: UpdateMemberResponseDto = {
+                id: null,
+            };
+            const token: MemberToken = {
+                id: expectedId,
+                nickname: expectedNickname,
+                authority: MemberAuthority.USER,
+            };
+            mockMemberService.deleteMember.mockResolvedValue(expectedResult);
+
+            // when
+            const response = await memberController.deleteMember(expectedId, token);
+
+            // then
+            expect(response).toBeNull();
         });
     });
 });

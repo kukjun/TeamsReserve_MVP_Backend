@@ -17,11 +17,50 @@ import {
     PaginateData,
 } from "../../interface/response/paginate.data";
 import {
-    GetMemberDetailResponseDto, 
+    GetMemberDetailResponseDto,
 } from "./dto/res/get-member-detail.response.dto";
 import {
-    MemberOptionDto, 
+    MemberOptionDto,
 } from "../../interface/request/member-option.dto";
+import {
+    UpdateMemberRequestDto,
+} from "./dto/req/update-member.request.dto";
+import {
+    UpdateMemberResponseDto,
+} from "./dto/res/update-member.response.dto";
+import {
+    MemberToken,
+} from "../../interface/member-token";
+import {
+    ResourceUnauthorizedException,
+} from "../../exception/resource-unauthorized.exception";
+import {
+    MemberEntity,
+} from "./entity/member.entity";
+import {
+    DuplicateException,
+} from "../../exception/duplicate.exception";
+import {
+    UpdateMemberPasswordRequestDto,
+} from "./dto/req/update-member-password.request.dto";
+import {
+    bcryptFunction,
+} from "../../util/function/bcrypt.function";
+import {
+    PasswordIncorrectException,
+} from "../../exception/password-incorrect.exception";
+import {
+    UpdateMemberJoinStatusRequestDto,
+} from "./dto/req/update-member-join-status-request.dto";
+import {
+    BadRequestException,
+} from "../../exception/http/bad-request.exception";
+import {
+    UpdateMemberAuthorityRequestDto,
+} from "./dto/req/update-member-authority.request.dto";
+import {
+    MemberAuthority,
+} from "../../types/enums/member.authority.enum";
 
 @Injectable()
 export class MemberService {
@@ -97,6 +136,96 @@ export class MemberService {
                 hasNextPage,
             },
         };
+    }
+
+    async updateMember(id: string, updateDto: UpdateMemberRequestDto, token: MemberToken)
+        : Promise<UpdateMemberResponseDto> {
+        if (id !== token.id) throw new ResourceUnauthorizedException();
+        const member = await this.memberRepository.findMemberById(id);
+        if (!member) throw new MemberNotFoundException(`id: ${id}`);
+
+        const nicknameDuplicateMember = await this.memberRepository.findMemberByNickname(updateDto.nickname);
+        if (nicknameDuplicateMember) throw new DuplicateException(`nickname: ${updateDto.nickname}`);
+
+        const updatedMember: MemberEntity = {
+            ...member,
+            ...updateDto,
+        };
+
+        const resultId = await this.memberRepository.updateMember(updatedMember);
+
+        return {
+            id: resultId,
+        };
+    }
+
+    async updateMemberPassword(id: string, dto: UpdateMemberPasswordRequestDto, token: MemberToken)
+        : Promise<UpdateMemberResponseDto> {
+        if (id !== token.id) throw new ResourceUnauthorizedException();
+        const member = await this.memberRepository.findMemberById(id);
+        if (!member) throw new MemberNotFoundException(`id: ${id}`);
+        if (!await bcryptFunction.compare(dto.currentPassword, member.password)) throw new PasswordIncorrectException();
+
+        const encryptPassword = await bcryptFunction.hash(dto.newPassword, await bcryptFunction.genSalt());
+        const updatedMember: MemberEntity = {
+            ...member,
+            password: encryptPassword,
+        };
+
+        const resultId = await this.memberRepository.updateMember(updatedMember);
+
+        return {
+            id: resultId,
+        };
+    }
+
+    async updateMemberJoinStatus(id: string, dto: UpdateMemberJoinStatusRequestDto, token: MemberToken)
+        : Promise<UpdateMemberResponseDto> {
+        const member = await this.memberRepository.findMemberById(id);
+        if (!member) throw new MemberNotFoundException(`id: ${id}`);
+        if (member.joinStatus === true) throw new BadRequestException("already join");
+
+        if (dto.joinStatus === false) await this.memberRepository.deleteMember(id);
+        else {
+            const updatedMember: MemberEntity = {
+                ...member,
+                joinStatus: true,
+            };
+            await this.memberRepository.updateMember(updatedMember);
+        }
+
+        return {
+            id,
+        };
+    }
+
+    async updateMemberAuthority(id: string, dto: UpdateMemberAuthorityRequestDto, token: MemberToken)
+        : Promise<UpdateMemberResponseDto> {
+        const member = await this.memberRepository.findMemberById(id);
+        if (!member) throw new MemberNotFoundException(`id: ${id}`);
+        if (member.joinStatus !== true) throw new BadRequestException("not join");
+        if (member.authority === MemberAuthority.ADMIN) throw new BadRequestException("Admin Member Can't Change");
+
+        const updatedMember: MemberEntity = {
+            ...member,
+            authority: dto.authority,
+        };
+        const resultId = await this.memberRepository.updateMember(updatedMember);
+
+        return {
+            id: resultId,
+        };
+
+    }
+
+    async deleteMember(id: string, token: MemberToken): Promise<null> {
+        if (id !== token.id) throw new ResourceUnauthorizedException();
+        const member = await this.memberRepository.findMemberById(id);
+        if (!member) throw new MemberNotFoundException(`id: ${id}`);
+
+        await this.memberRepository.deleteMember(member.id);
+
+        return null;
     }
 
 }

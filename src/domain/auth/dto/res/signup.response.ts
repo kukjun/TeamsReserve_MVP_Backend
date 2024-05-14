@@ -7,7 +7,7 @@ export class SignupResponse {
             type: String,
             description: "Member id",
             required: true,
-            example: "uuid",
+            example: "ebbadaa0-8361-448b-93bc-c6f3b6d0c142",
         })
         id: string;
 }
