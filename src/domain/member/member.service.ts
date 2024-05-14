@@ -47,14 +47,20 @@ import {
     bcryptFunction,
 } from "../../util/function/bcrypt.function";
 import {
-    PasswordIncorrectException, 
+    PasswordIncorrectException,
 } from "../../exception/password-incorrect.exception";
 import {
     UpdateMemberJoinStatusRequestDto,
 } from "./dto/req/update-member-join-status-request.dto";
 import {
-    BadRequestException, 
+    BadRequestException,
 } from "../../exception/http/bad-request.exception";
+import {
+    UpdateMemberAuthorityRequestDto,
+} from "./dto/req/update-member-authority.request.dto";
+import {
+    MemberAuthority,
+} from "../../types/enums/member.authority.enum";
 
 @Injectable()
 export class MemberService {
@@ -174,12 +180,12 @@ export class MemberService {
     }
 
     async updateMemberJoinStatus(id: string, dto: UpdateMemberJoinStatusRequestDto, token: MemberToken)
-    : Promise<UpdateMemberResponseDto> {
+        : Promise<UpdateMemberResponseDto> {
         const member = await this.memberRepository.findMemberById(id);
         if (!member) throw new MemberNotFoundException(`id: ${id}`);
-        if (member.joinStatus === true) throw new BadRequestException("already true");
+        if (member.joinStatus === true) throw new BadRequestException("already join");
 
-        if(dto.joinStatus === false) await this.memberRepository.deleteMember(id);
+        if (dto.joinStatus === false) await this.memberRepository.deleteMember(id);
         else {
             const updatedMember: MemberEntity = {
                 ...member,
@@ -191,6 +197,25 @@ export class MemberService {
         return {
             id,
         };
+    }
+
+    async updateMemberAuthority(id: string, dto: UpdateMemberAuthorityRequestDto, token: MemberToken)
+        : Promise<UpdateMemberResponseDto> {
+        const member = await this.memberRepository.findMemberById(id);
+        if (!member) throw new MemberNotFoundException(`id: ${id}`);
+        if (member.joinStatus !== true) throw new BadRequestException("not join");
+        if (member.authority === MemberAuthority.ADMIN) throw new BadRequestException("Admin Member Can't Change");
+
+        const updatedMember: MemberEntity = {
+            ...member,
+            authority: dto.authority,
+        };
+        const resultId = await this.memberRepository.updateMember(updatedMember);
+
+        return {
+            id: resultId,
+        };
+
     }
 
 }

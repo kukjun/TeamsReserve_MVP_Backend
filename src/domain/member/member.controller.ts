@@ -59,6 +59,9 @@ import {
 import {
     UpdateMemberJoinStatusRequestDto,
 } from "./dto/req/update-member-join-status-request.dto";
+import {
+    UpdateMemberAuthorityRequestDto, 
+} from "./dto/req/update-member-authority.request.dto";
 
 @ApiTags("members")
 @ApiExtraModels(DefaultResponse)
@@ -164,6 +167,23 @@ export class MemberController {
                            @Request() req)
     : Promise<DefaultResponse<UpdateMemberResponseDto>> {
         const data = await this.memberService.updateMemberJoinStatus(id, requestBody, req.user);
+
+        return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.ADMIN)
+    @ApiOperation({
+        summary: "회원 권한 부여",
+        description: "회원가입 한 회원에게 권한을 부여할 수 있다.",
+    })
+    @ApiDefaultResponse(GetMemberResponseDto)
+    @HttpCode(HttpStatus.CREATED)
+    @Patch("/:id/authority")
+    async updateMemberAuthority(@Param("id") id: string,
+                                @Body() requestBody: UpdateMemberAuthorityRequestDto,
+                                @Request() req)
+        : Promise<DefaultResponse<UpdateMemberResponseDto>> {
+        const data = await this.memberService.updateMemberAuthority(id, requestBody, req.user);
 
         return new DefaultResponse(data);
     }

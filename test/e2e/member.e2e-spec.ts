@@ -78,11 +78,14 @@ import {
     UpdateMemberResponseDto,
 } from "../../src/domain/member/dto/res/update-member.response.dto";
 import {
-    UpdateMemberPasswordRequestDto, 
+    UpdateMemberPasswordRequestDto,
 } from "../../src/domain/member/dto/req/update-member-password.request.dto";
 import {
     UpdateMemberJoinStatusRequestDto,
 } from "../../src/domain/member/dto/req/update-member-join-status-request.dto";
+import {
+    UpdateMemberAuthorityRequestDto,
+} from "../../src/domain/member/dto/req/update-member-authority.request.dto";
 
 describe("Member e2e Test", () => {
     let app: INestApplication;
@@ -508,7 +511,7 @@ describe("Member e2e Test", () => {
                 const token = jwtService.sign(payload, {
                     secret: configService.get<string>("JWT_SECRET_KEY"),
                 });
-                const requestBody: UpdateMemberPasswordRequestDto ={
+                const requestBody: UpdateMemberPasswordRequestDto = {
                     currentPassword: currentPassword,
                     newPassword: newPassword,
                 };
@@ -549,7 +552,7 @@ describe("Member e2e Test", () => {
                 const token = jwtService.sign(payload, {
                     secret: configService.get<string>("JWT_SECRET_KEY"),
                 });
-                const requestBody: UpdateMemberPasswordRequestDto ={
+                const requestBody: UpdateMemberPasswordRequestDto = {
                     currentPassword: randomPassword,
                     newPassword: newPassword,
                 };
@@ -642,8 +645,8 @@ describe("Member e2e Test", () => {
                         joinStatus: true,
                     };
 
-                    // when
-                    const response = await supertestRequestFunction(app.getHttpServer())
+                    // when, then
+                    await supertestRequestFunction(app.getHttpServer())
                         .patch(`/members/${anotherStoredMember.id}/join`)
                         .send(requestBody)
                         .set("Authorization", `Bearer ${token}`)
@@ -671,7 +674,7 @@ describe("Member e2e Test", () => {
 
                 const anotherRandomPassword = generateRandomPasswordFunction();
                 const anotherEncryptedPassword
-                        = await bcryptFunction.hash(anotherRandomPassword, await bcryptFunction.genSalt());
+                    = await bcryptFunction.hash(anotherRandomPassword, await bcryptFunction.genSalt());
                 const anotherMember = memberRandomFixture(anotherEncryptedPassword, true);
                 const anotherStoredMember = await prismaService.member.create({
                     data: anotherMember,
@@ -688,6 +691,157 @@ describe("Member e2e Test", () => {
                     .expect(HttpStatus.FORBIDDEN);
             });
         });
+    });
 
+    describe("updateMemberAuthority", () => {
+        describe("AMDIN 권한이라면, ", () => {
+            describe("ADMIN 권한의 사용자를 수정하지 않는다면, ", () => {
+                describe("대상이 회원가입을 완료했다면, ", () => {
+                    it("대상의 권한을 변경해야 한다.", async () => {
+                        // given
+                        const randomPassword = generateRandomPasswordFunction();
+                        const encryptedPassword
+                            = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                        const member = memberFixture(encryptedPassword, true, MemberAuthority.ADMIN);
+                        const storedMember = await prismaService.member.create({
+                            data: member,
+                        });
+                        const payload: MemberToken = {
+                            id: storedMember.id,
+                            nickname: storedMember.nickname,
+                            authority: storedMember.authority,
+                        };
+                        const token = jwtService.sign(payload, {
+                            secret: configService.get<string>("JWT_SECRET_KEY"),
+                        });
+
+                        const anotherRandomPassword = generateRandomPasswordFunction();
+                        const anotherEncryptedPassword
+                            = await bcryptFunction.hash(anotherRandomPassword, await bcryptFunction.genSalt());
+                        const anotherMember = memberRandomFixture(anotherEncryptedPassword, true);
+                        const anotherStoredMember = await prismaService.member.create({
+                            data: anotherMember,
+                        });
+                        const requestBody: UpdateMemberAuthorityRequestDto = {
+                            authority: MemberAuthority.MANAGER,
+                        };
+
+                        // when
+                        const response = await supertestRequestFunction(app.getHttpServer())
+                            .patch(`/members/${anotherStoredMember.id}/authority`)
+                            .send(requestBody)
+                            .set("Authorization", `Bearer ${token}`)
+                            .expect(HttpStatus.CREATED);
+
+                        const actual = response.body as DefaultResponse<UpdateMemberResponseDto>;
+                        const actualMember = await prismaService.member.findUnique({
+                            where: {
+                                id: actual.data.id,
+                            },
+                        });
+                        expect(actualMember.id).toBe(anotherStoredMember.id);
+                        expect(actualMember.authority).toBe(requestBody.authority);
+                    });
+                });
+                describe("대상이 회원가입을 완료하지 않았다면, ", () => {
+                    it("잘못된 요청 예외를 발생시킨다.", async () => {
+                        // given
+                        const randomPassword = generateRandomPasswordFunction();
+                        const encryptedPassword =
+                            await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                        const member = memberFixture(encryptedPassword, true, MemberAuthority.ADMIN);
+                        const storedMember = await prismaService.member.create({
+                            data: member,
+                        });
+                        const payload: MemberToken = {
+                            id: storedMember.id,
+                            nickname: storedMember.nickname,
+                            authority: storedMember.authority,
+                        };
+                        const token = jwtService.sign(payload, {
+                            secret: configService.get<string>("JWT_SECRET_KEY"),
+                        });
+
+                        const anotherRandomPassword = generateRandomPasswordFunction();
+                        const anotherEncryptedPassword
+                            = await bcryptFunction.hash(anotherRandomPassword, await bcryptFunction.genSalt());
+                        const anotherMember = memberRandomFixture(anotherEncryptedPassword, false);
+                        const anotherStoredMember = await prismaService.member.create({
+                            data: anotherMember,
+                        });
+                        const requestBody: UpdateMemberAuthorityRequestDto = {
+                            authority: MemberAuthority.MANAGER,
+                        };
+
+                        // when
+                        await supertestRequestFunction(app.getHttpServer())
+                            .patch(`/members/${anotherStoredMember.id}/authority`)
+                            .send(requestBody)
+                            .set("Authorization", `Bearer ${token}`)
+                            .expect(HttpStatus.BAD_REQUEST);
+                    });
+                });
+            });
+            describe("ADMIN 권한의 사용자를 수정한다면, ", () => {
+                it("ADMIN 권한은 수정할 수 없다는 예외를 발생시켜야 한다.", async () => {
+                    // given
+                    const randomPassword = generateRandomPasswordFunction();
+                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                    const member = memberFixture(encryptedPassword, true, MemberAuthority.ADMIN);
+                    const storedMember = await prismaService.member.create({
+                        data: member,
+                    });
+                    const payload: MemberToken = {
+                        id: storedMember.id,
+                        nickname: storedMember.nickname,
+                        authority: storedMember.authority,
+                    };
+                    const token = jwtService.sign(payload, {
+                        secret: configService.get<string>("JWT_SECRET_KEY"),
+                    });
+
+                    const requestBody: UpdateMemberAuthorityRequestDto = {
+                        authority: MemberAuthority.MANAGER,
+                    };
+
+                    // when
+                    await supertestRequestFunction(app.getHttpServer())
+                        .patch(`/members/${storedMember.id}/authority`)
+                        .send(requestBody)
+                        .set("Authorization", `Bearer ${token}`)
+                        .expect(HttpStatus.BAD_REQUEST);
+                });
+            });
+        });
+        describe("AMDIN 권한이 아니라면, ", () => {
+            it("권한 부족 예외를 발생시킨다.", async () => {
+                // given
+                const randomPassword = generateRandomPasswordFunction();
+                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                const member = memberFixture(encryptedPassword, true, MemberAuthority.MANAGER);
+                const storedMember = await prismaService.member.create({
+                    data: member,
+                });
+                const payload: MemberToken = {
+                    id: storedMember.id,
+                    nickname: storedMember.nickname,
+                    authority: storedMember.authority,
+                };
+                const token = jwtService.sign(payload, {
+                    secret: configService.get<string>("JWT_SECRET_KEY"),
+                });
+
+                const requestBody: UpdateMemberAuthorityRequestDto = {
+                    authority: MemberAuthority.MANAGER,
+                };
+
+                // when
+                await supertestRequestFunction(app.getHttpServer())
+                    .patch(`/members/${storedMember.id}/authority`)
+                    .send(requestBody)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.FORBIDDEN);
+            });
+        });
     });
 });

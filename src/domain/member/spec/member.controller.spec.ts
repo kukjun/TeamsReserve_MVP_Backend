@@ -45,6 +45,9 @@ import {
 import {
     UpdateMemberJoinStatusRequestDto,
 } from "../dto/req/update-member-join-status-request.dto";
+import {
+    UpdateMemberAuthorityRequestDto, 
+} from "../dto/req/update-member-authority.request.dto";
 
 const mockMemberService = {
     getMember: jest.fn(),
@@ -52,6 +55,7 @@ const mockMemberService = {
     updateMember: jest.fn(),
     updateMemberPassword: jest.fn(),
     updateMemberJoinStatus: jest.fn(),
+    updateMemberAuthority: jest.fn(),
 };
 describe("MemberController Unit Test", () => {
     let memberController: MemberController;
@@ -228,12 +232,38 @@ describe("MemberController Unit Test", () => {
             const token: MemberToken = {
                 id: expectedId,
                 nickname: expectedNickname,
-                authority: MemberAuthority.USER,
+                authority: MemberAuthority.ADMIN,
             };
             mockMemberService.updateMemberJoinStatus.mockResolvedValue(expectedResult);
 
             // when
             const response = await memberController.updateMemberJoinStatus(expectedId, requestBody, token);
+
+            // then
+            expect(response.data.id).toBe(expectedId);
+        });
+    });
+
+    describe("updateMemberJoinStatus", () => {
+        it("변환된 결과의 id를 반환한다.", async () => {
+            // given
+            const expectedNickname = "unitTestNickname";
+            const requestBody: UpdateMemberAuthorityRequestDto = {
+                authority: MemberAuthority.USER,
+            };
+            const expectedId = uuidFunction.v4();
+            const expectedResult: UpdateMemberResponseDto = {
+                id: expectedId,
+            };
+            const token: MemberToken = {
+                id: expectedId,
+                nickname: expectedNickname,
+                authority: MemberAuthority.ADMIN,
+            };
+            mockMemberService.updateMemberAuthority.mockResolvedValue(expectedResult);
+
+            // when
+            const response = await memberController.updateMemberAuthority(expectedId, requestBody, token);
 
             // then
             expect(response.data.id).toBe(expectedId);
