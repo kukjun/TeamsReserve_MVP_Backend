@@ -62,6 +62,15 @@ import {
 import {
     PaginateData,
 } from "../../src/interface/response/paginate.data";
+import {
+    MemberOptionDto,
+} from "../../src/interface/request/member-option.dto";
+import {
+    GetMemberDetailResponseDto,
+} from "../../src/domain/member/dto/res/get-member-detail.response.dto";
+import {
+    MemberAuthority, 
+} from "../../src/types/enums/member.authority.enum";
 
 describe("Member e2e Test", () => {
     let app: INestApplication;
@@ -251,6 +260,105 @@ describe("Member e2e Test", () => {
             expect(actual.data.meta.page).toBe(request.page);
             expect(actual.data.meta.take).toBe(request.limit);
             expect(actual.data.meta.hasNextPage).toEqual(request.page < Math.ceil((randomNumber + 1) / request.limit));
+        });
+    });
+
+    describe("getMemberDetailList", () => {
+        describe("ADMIN, MANAGER의 권한을 가지는 JWT Token이면, ", () => {
+            it("조건에 맞는 MemberList 정보를 보여줘야 한다.", async () => {
+                // given
+                const randomPassword = generateRandomPasswordFunction();
+                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                const member = memberFixture(encryptedPassword, true, MemberAuthority.MANAGER);
+                const storedMember = await prismaService.member.create({
+                    data: member,
+                });
+                const payload: MemberToken = {
+                    id: storedMember.id,
+                    nickname: storedMember.nickname,
+                    authority: storedMember.authority,
+                };
+                const token = jwtService.sign(payload, {
+                    secret: configService.get<string>("JWT_SECRET_KEY"),
+                });
+                const randomNumber = Math.ceil(Math.random() * 20);
+                const storedMembers: MemberEntity[] = [];
+                for (let i = 0; i < randomNumber; i++) {
+                    storedMembers.push(memberRandomFixture(
+                        await bcryptFunction.hash(generateRandomPasswordFunction(), await bcryptFunction.genSalt()),
+                        true,
+                        i
+                    ));
+                }
+                await prismaService.member.createMany({
+                    data: storedMembers,
+                });
+                const paginateDto: PaginateRequestDto = {
+                    page: 1,
+                    limit: 10,
+                };
+                const memberOptionDto: MemberOptionDto = {
+                    joinStatus: true,
+                };
+
+                // when
+                const response = await supertestRequestFunction(app.getHttpServer())
+                    .get("/members/detail")
+                    .query({
+                        ...paginateDto,
+                        ...memberOptionDto,
+                    })
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.OK);
+
+                // then
+                const actual = response.body as DefaultResponse<PaginateData<GetMemberDetailResponseDto>>;
+                expect(actual.data.meta.totalCount).toBe(randomNumber + 1);
+                expect(actual.data.meta.totalPage).toEqual(Math.ceil((randomNumber + 1) / paginateDto.limit));
+                expect(actual.data.meta.page).toBe(paginateDto.page);
+                expect(actual.data.meta.take).toBe(paginateDto.limit);
+                expect(actual.data.meta.hasNextPage)
+                    .toEqual(paginateDto.page < Math.ceil((randomNumber + 1) / paginateDto.limit));
+                actual.data.data.map(
+                    (actualData) => expect(actualData.joinStatus).toEqual(memberOptionDto.joinStatus)
+                );
+            });
+        });
+        describe("MANAGER, ADMIN 권한이 아니라면, ", () => {
+            it("권한 예외가 발생한다.", async () => {
+                // given
+                const randomPassword = generateRandomPasswordFunction();
+                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                const member = memberFixture(encryptedPassword, true);
+                const storedMember = await prismaService.member.create({
+                    data: member,
+                });
+                const payload: MemberToken = {
+                    id: storedMember.id,
+                    nickname: storedMember.nickname,
+                    authority: storedMember.authority,
+                };
+                const token = jwtService.sign(payload, {
+                    secret: configService.get<string>("JWT_SECRET_KEY"),
+                });
+                const paginateDto: PaginateRequestDto = {
+                    page: 1,
+                    limit: 10,
+                };
+                const memberOptionDto: MemberOptionDto = {
+                    joinStatus: true,
+                };
+
+                // when
+                await supertestRequestFunction(app.getHttpServer())
+                    .get("/members/detail")
+                    .query({
+                        ...paginateDto,
+                        ...memberOptionDto,
+                    })
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.FORBIDDEN);
+            });
         });
     });
 });
