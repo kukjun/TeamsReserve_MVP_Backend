@@ -10,6 +10,9 @@ import {
 import {
     PaginateRequestDto,
 } from "../../interface/request/paginate.request.dto";
+import {
+    MemberOptionDto, 
+} from "../../interface/request/member-option.dto";
 
 @Injectable()
 export class MemberRepository {
@@ -21,25 +24,43 @@ export class MemberRepository {
     /**
      * paging 검색
      */
-    async findMemberByPaging(paginateDto: PaginateRequestDto): Promise<MemberEntity[]> {
-        const members = await this.prismaService.member.findMany({
-            skip: (paginateDto.page-1) * paginateDto.limit,
-            take: paginateDto.limit,
-            orderBy: {
-                createdAt: "desc",
-            },
-        });
-
-        return members;
+    async findMemberByPaging(paginateDto: PaginateRequestDto, optionDto: MemberOptionDto = null)
+        : Promise<MemberEntity[]> {
+        if(!optionDto) {
+            return await this.prismaService.member.findMany({
+                skip: (paginateDto.page-1) * paginateDto.limit,
+                take: paginateDto.limit,
+                orderBy: {
+                    createdAt: "desc",
+                },
+            });
+        } else {
+            return await this.prismaService.member.findMany({
+                skip: (paginateDto.page-1) * paginateDto.limit,
+                take: paginateDto.limit,
+                where: {
+                    joinStatus: optionDto.joinStatus,
+                },
+                orderBy: {
+                    createdAt: "desc",
+                },
+            });
+        }
     }
 
     /**
      * member count 집계
      */
-    async findMemberCount(): Promise<number> {
-        const count = await this.prismaService.member.count();
-
-        return count;
+    async findMemberCount(optionDto: MemberOptionDto = null): Promise<number> {
+        if(!optionDto) {
+            return await this.prismaService.member.count();
+        } else {
+            return await this.prismaService.member.count({
+                where: {
+                    joinStatus: optionDto.joinStatus,
+                },
+            });
+        }
     }
 
     /**

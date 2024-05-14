@@ -16,6 +16,12 @@ import {
 import {
     PaginateData,
 } from "../../interface/response/paginate.data";
+import {
+    GetMemberDetailResponseDto, 
+} from "./dto/res/get-member-detail.response.dto";
+import {
+    MemberOptionDto, 
+} from "../../interface/request/member-option.dto";
 
 @Injectable()
 export class MemberService {
@@ -48,6 +54,36 @@ export class MemberService {
             };
         });
         const totalCount = await this.memberRepository.findMemberCount();
+        const totalPage = Math.ceil(totalCount / paginateDto.limit);
+        const hasNextPage = paginateDto.page < totalPage;
+
+        return {
+            data: data,
+            meta: {
+                page: paginateDto.page,
+                take: paginateDto.limit,
+                totalCount,
+                totalPage,
+                hasNextPage,
+            },
+        };
+    }
+
+    async getMemberDetailList(paginateDto: PaginateRequestDto, optionDto: MemberOptionDto)
+        : Promise<PaginateData<GetMemberDetailResponseDto>> {
+        const members = await this.memberRepository.findMemberByPaging(paginateDto, optionDto);
+        const data: GetMemberDetailResponseDto[] = members.map(member => {
+            return {
+                id: member.id,
+                email: member.email,
+                nickname: member.nickname,
+                teamCode: member.teamCode,
+                introduce: member.introduce,
+                authority: member.authority,
+                joinStatus: member.joinStatus,
+            };
+        });
+        const totalCount = await this.memberRepository.findMemberCount(optionDto);
         const totalPage = Math.ceil(totalCount / paginateDto.limit);
         const hasNextPage = paginateDto.page < totalPage;
 

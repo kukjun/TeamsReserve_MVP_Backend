@@ -18,10 +18,11 @@ import {
     PaginateData, 
 } from "../../../interface/response/paginate.data";
 import {
-    getMemberListFixture, 
+    getMemberListDetailFixture,
+    getMemberListFixture,
 } from "./fixture/paginate.response";
 import {
-    PaginateRequestDto, 
+    PaginateRequestDto,
 } from "../../../interface/request/paginate.request.dto";
 
 const mockMemberService = {
@@ -104,6 +105,25 @@ describe("MemberController Unit Test", () => {
                 limit: 10,
             };
             const expectedResponse: PaginateData<GetMemberResponseDto> = getMemberListFixture;
+            mockMemberService.getMemberList.mockResolvedValue(expectedResponse);
+
+            // when
+            const response = await memberController.getMemberList(paginateDto);
+
+            // then
+            expect(response.data.meta).toBe(expectedResponse.meta);
+            expect(response.data.data[0].id).toBe(expectedResponse.data[0].id);
+        });
+    });
+
+    describe("getMemberList", () => {
+        it("member detail Dto 배열과 paginate된 결과를 반환한다.", async () => {
+            // given
+            const paginateDto: PaginateRequestDto = {
+                page: 1,
+                limit: 10,
+            };
+            const expectedResponse: PaginateData<GetMemberResponseDto> = getMemberListDetailFixture;
             mockMemberService.getMemberList.mockResolvedValue(expectedResponse);
 
             // when
