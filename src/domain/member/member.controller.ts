@@ -1,5 +1,5 @@
 import {
-    Controller, Get, HttpCode, HttpStatus, Param, Query,
+    Controller, Get, HttpCode, HttpStatus, Param, Query, UseGuards,
 } from "@nestjs/common";
 import {
     MemberService,
@@ -29,10 +29,13 @@ import {
 import {
     PaginateData,
 } from "../../interface/response/paginate.data";
+import {
+    JwtGuard, 
+} from "../auth/guards/jwt.guard";
 
 @ApiTags("members")
 @ApiExtraModels(DefaultResponse)
-// @UseGuards(JwtGuard)
+@UseGuards(JwtGuard)
 @Controller("members")
 export class MemberController {
     constructor(private readonly memberService: MemberService) {
@@ -52,7 +55,7 @@ export class MemberController {
         return new DefaultResponse(data);
     }
 
-    // @Roles(MemberAuthority.USER, MemberAuthority.MANAGER, MemberAuthority.ADMIN)
+    @Roles(MemberAuthority.USER, MemberAuthority.MANAGER, MemberAuthority.ADMIN)
     @ApiOperation({
         summary: "멤버 Paginate 조회",
         description: "멤버의 정보를 Paginate 해서, 조회할 수 있다.",

@@ -17,3 +17,16 @@ export const memberFixture = (encryptedPassword: string, joinStatus: boolean = t
             joinStatus: joinStatus,
         }
     );
+
+export const memberRandomFixture = (encryptedPassword: string, joinStatus: boolean = true, count: number=1): MemberEntity =>
+    new MemberEntity(
+        {
+            email: `fixtureEmail${count}@naver.com`,
+            password: encryptedPassword,
+            nickname: `fixtureName${count}`,
+            introduce: "fixtureTestIntroduce",
+            teamCode: "ABCDEF-001",
+            authority: MemberAuthority.USER,
+            joinStatus: joinStatus,
+        }
+    );
