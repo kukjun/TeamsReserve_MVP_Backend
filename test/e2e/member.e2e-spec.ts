@@ -80,6 +80,9 @@ import {
 import {
     UpdateMemberPasswordRequestDto, 
 } from "../../src/domain/member/dto/req/update-member-password.request.dto";
+import {
+    UpdateMemberJoinStatusRequestDto,
+} from "../../src/domain/member/dto/req/update-member-join-status-request.dto";
 
 describe("Member e2e Test", () => {
     let app: INestApplication;
@@ -273,7 +276,7 @@ describe("Member e2e Test", () => {
     });
 
     describe("getMemberDetailList", () => {
-        describe("ADMIN, MANAGER의 권한을 가지는 JWT Token이면, ", () => {
+        describe("ADMIN, MANAGER의 권한의 사용자라면, ", () => {
             it("조건에 맞는 MemberList 정보를 보여줘야 한다.", async () => {
                 // given
                 const randomPassword = generateRandomPasswordFunction();
@@ -557,6 +560,132 @@ describe("Member e2e Test", () => {
                     .send(requestBody)
                     .set("Authorization", `Bearer ${token}`)
                     .expect(HttpStatus.BAD_REQUEST);
+            });
+        });
+
+    });
+
+    describe("updateMemberJoinStatus", () => {
+        describe("MANAGER, ADMIN 권한이라면, ", () => {
+            describe("아직 회원가입 승인이 안된 사용자라면,", () => {
+                it("회원가입을 하고 id를 돌려준다.", async () => {
+                    // given
+                    const randomPassword = generateRandomPasswordFunction();
+                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                    const member = memberFixture(encryptedPassword, true, MemberAuthority.MANAGER);
+                    const storedMember = await prismaService.member.create({
+                        data: member,
+                    });
+                    const payload: MemberToken = {
+                        id: storedMember.id,
+                        nickname: storedMember.nickname,
+                        authority: storedMember.authority,
+                    };
+                    const token = jwtService.sign(payload, {
+                        secret: configService.get<string>("JWT_SECRET_KEY"),
+                    });
+
+                    const anotherRandomPassword = generateRandomPasswordFunction();
+                    const anotherEncryptedPassword
+                        = await bcryptFunction.hash(anotherRandomPassword, await bcryptFunction.genSalt());
+                    const anotherMember = memberRandomFixture(anotherEncryptedPassword, false);
+                    const anotherStoredMember = await prismaService.member.create({
+                        data: anotherMember,
+                    });
+                    const requestBody: UpdateMemberJoinStatusRequestDto = {
+                        joinStatus: true,
+                    };
+
+                    // when
+                    const response = await supertestRequestFunction(app.getHttpServer())
+                        .patch(`/members/${anotherStoredMember.id}/join`)
+                        .send(requestBody)
+                        .set("Authorization", `Bearer ${token}`)
+                        .expect(HttpStatus.CREATED);
+
+                    // then
+                    const actual = response.body as DefaultResponse<UpdateMemberResponseDto>;
+                    const actualMember = await prismaService.member.findUnique({
+                        where: {
+                            id: actual.data.id,
+                        },
+                    });
+                    expect(actualMember.joinStatus).toBe(true);
+                });
+            });
+            describe("이미 회원가입 승인이 된 사용자라면,", () => {
+                it("잘못된 요청이라는 예외를 발생시킨다.", async () => {
+                    // given
+                    const randomPassword = generateRandomPasswordFunction();
+                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                    const member = memberFixture(encryptedPassword, true, MemberAuthority.MANAGER);
+                    const storedMember = await prismaService.member.create({
+                        data: member,
+                    });
+                    const payload: MemberToken = {
+                        id: storedMember.id,
+                        nickname: storedMember.nickname,
+                        authority: storedMember.authority,
+                    };
+                    const token = jwtService.sign(payload, {
+                        secret: configService.get<string>("JWT_SECRET_KEY"),
+                    });
+
+                    const anotherRandomPassword = generateRandomPasswordFunction();
+                    const anotherEncryptedPassword
+                        = await bcryptFunction.hash(anotherRandomPassword, await bcryptFunction.genSalt());
+                    const anotherMember = memberRandomFixture(anotherEncryptedPassword, true);
+                    const anotherStoredMember = await prismaService.member.create({
+                        data: anotherMember,
+                    });
+                    const requestBody: UpdateMemberJoinStatusRequestDto = {
+                        joinStatus: true,
+                    };
+
+                    // when
+                    const response = await supertestRequestFunction(app.getHttpServer())
+                        .patch(`/members/${anotherStoredMember.id}/join`)
+                        .send(requestBody)
+                        .set("Authorization", `Bearer ${token}`)
+                        .expect(HttpStatus.BAD_REQUEST);
+                });
+            });
+        });
+        describe("ADMIN, MANGAER 권한의 사용자가 아니라면, ", () => {
+            it("비인가 예외를 발생시켜야 한다.", async () => {
+                // given
+                const randomPassword = generateRandomPasswordFunction();
+                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                const member = memberFixture(encryptedPassword, true, MemberAuthority.USER);
+                const storedMember = await prismaService.member.create({
+                    data: member,
+                });
+                const payload: MemberToken = {
+                    id: storedMember.id,
+                    nickname: storedMember.nickname,
+                    authority: storedMember.authority,
+                };
+                const token = jwtService.sign(payload, {
+                    secret: configService.get<string>("JWT_SECRET_KEY"),
+                });
+
+                const anotherRandomPassword = generateRandomPasswordFunction();
+                const anotherEncryptedPassword
+                        = await bcryptFunction.hash(anotherRandomPassword, await bcryptFunction.genSalt());
+                const anotherMember = memberRandomFixture(anotherEncryptedPassword, true);
+                const anotherStoredMember = await prismaService.member.create({
+                    data: anotherMember,
+                });
+                const requestBody: UpdateMemberJoinStatusRequestDto = {
+                    joinStatus: true,
+                };
+
+                // when
+                await supertestRequestFunction(app.getHttpServer())
+                    .patch(`/members/${anotherStoredMember.id}/join`)
+                    .send(requestBody)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.FORBIDDEN);
             });
         });
 

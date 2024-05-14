@@ -42,12 +42,16 @@ import {
 import {
     UpdateMemberPasswordRequestDto, 
 } from "../dto/req/update-member-password.request.dto";
+import {
+    UpdateMemberJoinStatusRequestDto,
+} from "../dto/req/update-member-join-status-request.dto";
 
 const mockMemberService = {
     getMember: jest.fn(),
     getMemberList: jest.fn(),
     updateMember: jest.fn(),
     updateMemberPassword: jest.fn(),
+    updateMemberJoinStatus: jest.fn(),
 };
 describe("MemberController Unit Test", () => {
     let memberController: MemberController;
@@ -183,7 +187,7 @@ describe("MemberController Unit Test", () => {
         });
     });
 
-    describe("updateMember", () => {
+    describe("updateMemberPassword", () => {
         it("변환된 결과의 id를 반환한다.", async () => {
             // given
             const expectedNickname = "unitTestNickname";
@@ -204,6 +208,32 @@ describe("MemberController Unit Test", () => {
 
             // when
             const response = await memberController.updateMemberPassword(expectedId, requestBody, token);
+
+            // then
+            expect(response.data.id).toBe(expectedId);
+        });
+    });
+
+    describe("updateMemberJoinStatus", () => {
+        it("변환된 결과의 id를 반환한다.", async () => {
+            // given
+            const expectedNickname = "unitTestNickname";
+            const requestBody: UpdateMemberJoinStatusRequestDto = {
+                joinStatus: true,
+            };
+            const expectedId = uuidFunction.v4();
+            const expectedResult: UpdateMemberResponseDto = {
+                id: expectedId,
+            };
+            const token: MemberToken = {
+                id: expectedId,
+                nickname: expectedNickname,
+                authority: MemberAuthority.USER,
+            };
+            mockMemberService.updateMemberJoinStatus.mockResolvedValue(expectedResult);
+
+            // when
+            const response = await memberController.updateMemberJoinStatus(expectedId, requestBody, token);
 
             // then
             expect(response.data.id).toBe(expectedId);

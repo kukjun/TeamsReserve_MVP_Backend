@@ -49,6 +49,12 @@ import {
 import {
     PasswordIncorrectException, 
 } from "../../exception/password-incorrect.exception";
+import {
+    UpdateMemberJoinStatusRequestDto,
+} from "./dto/req/update-member-join-status-request.dto";
+import {
+    BadRequestException, 
+} from "../../exception/http/bad-request.exception";
 
 @Injectable()
 export class MemberService {
@@ -164,6 +170,26 @@ export class MemberService {
 
         return {
             id: resultId,
+        };
+    }
+
+    async updateMemberJoinStatus(id: string, dto: UpdateMemberJoinStatusRequestDto, token: MemberToken)
+    : Promise<UpdateMemberResponseDto> {
+        const member = await this.memberRepository.findMemberById(id);
+        if (!member) throw new MemberNotFoundException(`id: ${id}`);
+        if (member.joinStatus === true) throw new BadRequestException("already true");
+
+        if(dto.joinStatus === false) await this.memberRepository.deleteMember(id);
+        else {
+            const updatedMember: MemberEntity = {
+                ...member,
+                joinStatus: true,
+            };
+            await this.memberRepository.updateMember(updatedMember);
+        }
+
+        return {
+            id,
         };
     }
 

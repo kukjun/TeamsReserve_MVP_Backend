@@ -23,6 +23,8 @@ export class MemberRepository {
 
     /**
      * paging 검색
+     * @param paginateDto
+     * @param optionDto
      */
     async findMemberByPaging(paginateDto: PaginateRequestDto, optionDto: MemberOptionDto = null)
         : Promise<MemberEntity[]> {
@@ -50,6 +52,7 @@ export class MemberRepository {
 
     /**
      * member count 집계
+     * @param optionDto
      */
     async findMemberCount(optionDto: MemberOptionDto = null): Promise<number> {
         if(!optionDto) {
@@ -64,7 +67,8 @@ export class MemberRepository {
     }
 
     /**
-     * id 검색
+     *
+     * @param id
      */
     async findMemberById(id: string): Promise<MemberEntity | null> {
         const member = await this.prismaService.member.findUnique({
@@ -130,6 +134,20 @@ export class MemberRepository {
                 id: member.id,
             },
             data: member,
+        });
+
+        return updatedMember.id;
+    }
+
+    /**
+     * member 삭제
+     * @param id
+     */
+    async deleteMember(id: string): Promise<string | null> {
+        const updatedMember = await this.prismaService.member.delete({
+            where: {
+                id,
+            },
         });
 
         return updatedMember.id;
