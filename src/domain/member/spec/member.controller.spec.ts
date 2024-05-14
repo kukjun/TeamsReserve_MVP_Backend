@@ -39,9 +39,6 @@ import {
 import {
     MemberAuthority,
 } from "../../../types/enums/member.authority.enum";
-import {
-    ResourceUnauthorizedException, 
-} from "../../../exception/resource-unauthorized.exception";
 
 const mockMemberService = {
     getMember: jest.fn(),

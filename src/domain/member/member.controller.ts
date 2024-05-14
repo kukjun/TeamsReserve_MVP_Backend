@@ -1,6 +1,6 @@
 import {
     Body,
-    Controller, Get, HttpCode, HttpStatus, Param, Patch, Put, Query, Request, UseGuards,
+    Controller, Get, HttpCode, HttpStatus, Param, Put, Query, Request, UseGuards,
 } from "@nestjs/common";
 import {
     MemberService,

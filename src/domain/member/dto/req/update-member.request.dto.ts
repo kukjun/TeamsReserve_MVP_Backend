@@ -13,7 +13,7 @@ export class UpdateMemberRequestDto {
         example: "테스트 닉네임",
     })
     @MinLength(3)
-    @MaxLength(10)
+    @MaxLength(20)
     @IsOptional()
     nickname?: string;
 

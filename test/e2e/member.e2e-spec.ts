@@ -69,8 +69,14 @@ import {
     GetMemberDetailResponseDto,
 } from "../../src/domain/member/dto/res/get-member-detail.response.dto";
 import {
-    MemberAuthority, 
+    MemberAuthority,
 } from "../../src/types/enums/member.authority.enum";
+import {
+    UpdateMemberRequestDto,
+} from "../../src/domain/member/dto/req/update-member.request.dto";
+import {
+    UpdateMemberResponseDto,
+} from "../../src/domain/member/dto/res/update-member.response.dto";
 
 describe("Member e2e Test", () => {
     let app: INestApplication;
@@ -356,6 +362,119 @@ describe("Member e2e Test", () => {
                         ...paginateDto,
                         ...memberOptionDto,
                     })
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.FORBIDDEN);
+            });
+        });
+    });
+
+    describe("updateMember", () => {
+        describe("자신의 정보를 바꾸는 경우", () => {
+            describe("중복된 닉네임인 경우,", () => {
+                it("중복 예외가 발생한다.", async () => {
+                    // given
+                    const randomPassword = generateRandomPasswordFunction();
+                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                    const member = memberFixture(encryptedPassword, true);
+                    const storedMember = await prismaService.member.create({
+                        data: member,
+                    });
+                    const payload: MemberToken = {
+                        id: storedMember.id,
+                        nickname: storedMember.nickname,
+                        authority: storedMember.authority,
+                    };
+                    const token = jwtService.sign(payload, {
+                        secret: configService.get<string>("JWT_SECRET_KEY"),
+                    });
+                    const requestBody: UpdateMemberRequestDto = {
+                        nickname: member.nickname,
+                        introduce: "updatedIntroduce",
+                    };
+
+                    // when, then
+                    await supertestRequestFunction(app.getHttpServer())
+                        .put(`/members/${storedMember.id}`)
+                        .send(requestBody)
+                        .set("Authorization", `Bearer ${token}`)
+                        .expect(HttpStatus.BAD_REQUEST);
+                });
+            });
+            describe("중복된 닉네임이 아닌 경우", () => {
+                it("dto기반으로 값을 변경한다.", async () => {
+                    // given
+                    const randomPassword = generateRandomPasswordFunction();
+                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                    const member = memberFixture(encryptedPassword, true);
+                    const storedMember = await prismaService.member.create({
+                        data: member,
+                    });
+                    const payload: MemberToken = {
+                        id: storedMember.id,
+                        nickname: storedMember.nickname,
+                        authority: storedMember.authority,
+                    };
+                    const token = jwtService.sign(payload, {
+                        secret: configService.get<string>("JWT_SECRET_KEY"),
+                    });
+                    const requestBody: UpdateMemberRequestDto = {
+                        nickname: "updatedName",
+                        introduce: "updatedIntroduce",
+                    };
+
+                    // when
+                    const response = await supertestRequestFunction(app.getHttpServer())
+                        .put(`/members/${storedMember.id}`)
+                        .send(requestBody)
+                        .set("Authorization", `Bearer ${token}`)
+                        .expect(HttpStatus.OK);
+
+                    // then
+                    const actual = response.body as DefaultResponse<UpdateMemberResponseDto>;
+                    const actualMember = await prismaService.member.findUnique({
+                        where: {
+                            id: actual.data.id,
+                        },
+                    });
+                    expect(actualMember.nickname).toBe(requestBody.nickname);
+                    expect(actualMember.introduce).toBe(requestBody.introduce);
+                });
+            });
+        });
+        describe("다른 사람의 정보를 바꾸는 경우", () => {
+            it("다른 자원에 접근했다는 예외가 발생한다.", async () => {
+                // given
+                const randomPassword = generateRandomPasswordFunction();
+                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                const member = memberFixture(encryptedPassword, true);
+                const storedMember = await prismaService.member.create({
+                    data: member,
+                });
+
+                const anotherRandomPassword = generateRandomPasswordFunction();
+                const anotherEncryptedPassword
+                    = await bcryptFunction.hash(anotherRandomPassword, await bcryptFunction.genSalt());
+                const anotherMember = memberRandomFixture(anotherEncryptedPassword, true);
+                const anotherStoredMember = await prismaService.member.create({
+                    data: anotherMember,
+                });
+                const payload: MemberToken = {
+                    id: storedMember.id,
+                    nickname: storedMember.nickname,
+                    authority: storedMember.authority,
+                };
+                const token = jwtService.sign(payload, {
+                    secret: configService.get<string>("JWT_SECRET_KEY"),
+                });
+                const requestBody: UpdateMemberRequestDto = {
+                    nickname: "updatedName",
+                    introduce: "updatedIntroduce",
+                };
+
+                // when
+                await supertestRequestFunction(app.getHttpServer())
+                    .put(`/members/${anotherStoredMember.id}`)
+                    .send(requestBody)
                     .set("Authorization", `Bearer ${token}`)
                     .expect(HttpStatus.FORBIDDEN);
             });

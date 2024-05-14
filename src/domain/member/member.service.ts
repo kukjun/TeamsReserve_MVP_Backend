@@ -50,7 +50,6 @@ export class MemberService {
     async getMember(id: string): Promise<GetMemberResponseDto> {
         const member = await this.memberRepository.findMemberById(id);
         if (!member) throw new MemberNotFoundException(`id: ${id}`);
-        console.log(444,member);
 
         return {
             id: member.id,
