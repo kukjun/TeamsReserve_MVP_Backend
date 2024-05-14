@@ -14,9 +14,19 @@ import {
 import {
     MemberNotFoundException, 
 } from "../../../exception/member-not-found.exception";
+import {
+    PaginateData, 
+} from "../../../interface/response/paginate.data";
+import {
+    getMemberListFixture, 
+} from "./fixture/paginate.response";
+import {
+    PaginateRequestDto, 
+} from "../../../interface/request/paginate.request.dto";
 
 const mockMemberService = {
     getMember: jest.fn(),
+    getMemberList: jest.fn(),
 };
 describe("MemberController Unit Test", () => {
     let memberController: MemberController;
@@ -83,6 +93,25 @@ describe("MemberController Unit Test", () => {
                 // then
                 expect(error instanceof MemberNotFoundException).toBe(true);
             }
+        });
+    });
+
+    describe("getMemberList", () => {
+        it("member Dto 배열과 paginate된 결과를 반환한다.", async () => {
+            // given
+            const paginateDto: PaginateRequestDto = {
+                page: 1,
+                limit: 10,
+            };
+            const expectedResponse: PaginateData<GetMemberResponseDto> = getMemberListFixture;
+            mockMemberService.getMemberList.mockResolvedValue(expectedResponse);
+
+            // when
+            const response = await memberController.getMemberList(paginateDto);
+
+            // then
+            expect(response.data.meta).toBe(expectedResponse.meta);
+            expect(response.data.data[0].id).toBe(expectedResponse.data[0].id);
         });
     });
 });

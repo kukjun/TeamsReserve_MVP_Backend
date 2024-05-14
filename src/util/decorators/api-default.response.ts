@@ -7,7 +7,7 @@ import {
 } from "@nestjs/swagger";
 import {
     DefaultResponse, 
-} from "../../response/default.response";
+} from "../../interface/response/default.response";
 
 export const ApiDefaultResponse = <TModel extends Type<any>>(model: TModel) => {
     return applyDecorators(

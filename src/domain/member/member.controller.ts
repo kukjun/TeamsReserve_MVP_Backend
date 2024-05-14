@@ -1,35 +1,38 @@
 import {
-    Controller, Get, HttpCode, HttpStatus, Param, UseGuards, 
+    Controller, Get, HttpCode, HttpStatus, Param, Query,
 } from "@nestjs/common";
 import {
-    MemberService, 
+    MemberService,
 } from "./member.service";
 import {
     ApiExtraModels,
     ApiOperation, ApiTags,
 } from "@nestjs/swagger";
 import {
-    ApiDefaultResponse, 
+    ApiDefaultResponse,
 } from "../../util/decorators/api-default.response";
 import {
-    GetMemberResponseDto, 
+    GetMemberResponseDto,
 } from "./dto/res/get-member.response.dto";
 import {
-    DefaultResponse, 
-} from "../../response/default.response";
+    DefaultResponse,
+} from "../../interface/response/default.response";
 import {
-    JwtGuard, 
-} from "../auth/guards/jwt.guard";
-import {
-    Roles, 
+    Roles,
 } from "../../util/decorators/permission";
 import {
-    MemberAuthority, 
+    MemberAuthority,
 } from "../../types/enums/member.authority.enum";
+import {
+    PaginateRequestDto,
+} from "../../interface/request/paginate.request.dto";
+import {
+    PaginateData,
+} from "../../interface/response/paginate.data";
 
 @ApiTags("members")
 @ApiExtraModels(DefaultResponse)
-@UseGuards(JwtGuard)
+// @UseGuards(JwtGuard)
 @Controller("members")
 export class MemberController {
     constructor(private readonly memberService: MemberService) {
@@ -45,6 +48,21 @@ export class MemberController {
     @Get("/:id")
     async getMember(@Param("id") id: string): Promise<DefaultResponse<GetMemberResponseDto>> {
         const data = await this.memberService.getMember(id);
+
+        return new DefaultResponse(data);
+    }
+
+    // @Roles(MemberAuthority.USER, MemberAuthority.MANAGER, MemberAuthority.ADMIN)
+    @ApiOperation({
+        summary: "멤버 Paginate 조회",
+        description: "멤버의 정보를 Paginate 해서, 조회할 수 있다.",
+    })
+    @ApiDefaultResponse(GetMemberResponseDto)
+    @HttpCode(HttpStatus.OK)
+    @Get()
+    async getMemberList(@Query() paginateDto: PaginateRequestDto)
+        : Promise<DefaultResponse<PaginateData<GetMemberResponseDto>>> {
+        const data = await this.memberService.getMemberList(paginateDto);
 
         return new DefaultResponse(data);
     }

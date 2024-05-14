@@ -7,12 +7,39 @@ import {
 import {
     MemberEntity,
 } from "./entity/member.entity";
+import {
+    PaginateRequestDto,
+} from "../../interface/request/paginate.request.dto";
 
 @Injectable()
 export class MemberRepository {
     constructor(
         private readonly prismaService: PrismaService
     ) {
+    }
+
+    /**
+     * paging 검색
+     */
+    async findMemberByPaging(paginateDto: PaginateRequestDto): Promise<MemberEntity[]> {
+        const members = await this.prismaService.member.findMany({
+            skip: (paginateDto.page-1) * paginateDto.limit,
+            take: paginateDto.limit,
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+
+        return members;
+    }
+
+    /**
+     * member count 집계
+     */
+    async findMemberCount(): Promise<number> {
+        const count = await this.prismaService.member.count();
+
+        return count;
     }
 
     /**

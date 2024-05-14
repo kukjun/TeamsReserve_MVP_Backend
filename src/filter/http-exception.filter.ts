@@ -4,10 +4,10 @@ import {
 } from "@nestjs/common";
 import {
     ErrorData, 
-} from "../response/error.data";
+} from "../interface/response/error.data";
 import {
     DefaultResponse, 
-} from "../response/default.response";
+} from "../interface/response/default.response";
 import {
     Request, Response, 
 } from "express";

@@ -31,7 +31,7 @@ import {
 } from "../../src/interface/member-token";
 import {
     DefaultResponse, 
-} from "../../src/response/default.response";
+} from "../../src/interface/response/default.response";
 import {
     GetMemberResponseDto, 
 } from "../../src/domain/member/dto/res/get-member.response.dto";
@@ -40,7 +40,7 @@ import {
 } from "@nestjs/config";
 import {
     ErrorData, 
-} from "../../src/response/error.data";
+} from "../../src/interface/response/error.data";
 import {
     bcryptFunction, 
 } from "../../src/util/function/bcrypt.function";

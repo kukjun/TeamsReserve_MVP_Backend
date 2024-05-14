@@ -13,7 +13,7 @@ import {
 } from "./dto/req/validate-email.request";
 import {
     DefaultResponse,
-} from "../../response/default.response";
+} from "../../interface/response/default.response";
 import {
     ConfirmEmailRequest,
 } from "./dto/req/confirm-email.request";

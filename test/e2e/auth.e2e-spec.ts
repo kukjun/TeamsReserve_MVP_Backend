@@ -35,13 +35,13 @@ import {
 } from "../../src/domain/auth/dto/req/confirm-email.request";
 import {
     DefaultResponse,
-} from "../../src/response/default.response";
+} from "../../src/interface/response/default.response";
 import {
     ConfirmEmailResponse,
 } from "../../src/domain/auth/dto/res/confirm-email.response";
 import {
     ErrorData,
-} from "../../src/response/error.data";
+} from "../../src/interface/response/error.data";
 import {
     SignupRequest,
 } from "../../src/domain/auth/dto/req/signup.request";
