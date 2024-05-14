@@ -39,11 +39,15 @@ import {
 import {
     MemberAuthority,
 } from "../../../types/enums/member.authority.enum";
+import {
+    UpdateMemberPasswordRequestDto, 
+} from "../dto/req/update-member-password.request.dto";
 
 const mockMemberService = {
     getMember: jest.fn(),
     getMemberList: jest.fn(),
     updateMember: jest.fn(),
+    updateMemberPassword: jest.fn(),
 };
 describe("MemberController Unit Test", () => {
     let memberController: MemberController;
@@ -176,6 +180,33 @@ describe("MemberController Unit Test", () => {
             // then
             expect(response.data.id).toBe(expectedId);
 
+        });
+    });
+
+    describe("updateMember", () => {
+        it("변환된 결과의 id를 반환한다.", async () => {
+            // given
+            const expectedNickname = "unitTestNickname";
+            const requestBody: UpdateMemberPasswordRequestDto = {
+                currentPassword: "currentPassword",
+                newPassword: "newPassword",
+            };
+            const expectedId = uuidFunction.v4();
+            const expectedResult: UpdateMemberResponseDto = {
+                id: expectedId,
+            };
+            const token: MemberToken = {
+                id: expectedId,
+                nickname: expectedNickname,
+                authority: MemberAuthority.USER,
+            };
+            mockMemberService.updateMemberPassword.mockResolvedValue(expectedResult);
+
+            // when
+            const response = await memberController.updateMemberPassword(expectedId, requestBody, token);
+
+            // then
+            expect(response.data.id).toBe(expectedId);
         });
     });
 });

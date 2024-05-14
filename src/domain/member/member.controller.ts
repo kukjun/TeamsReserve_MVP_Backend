@@ -1,6 +1,6 @@
 import {
     Body,
-    Controller, Get, HttpCode, HttpStatus, Param, Put, Query, Request, UseGuards,
+    Controller, Get, HttpCode, HttpStatus, Param, Patch, Put, Query, Request, UseGuards,
 } from "@nestjs/common";
 import {
     MemberService,
@@ -44,6 +44,9 @@ import {
 import {
     UpdateMemberResponseDto,
 } from "./dto/res/update-member.response.dto";
+import {
+    UpdateMemberPasswordRequestDto, 
+} from "./dto/req/update-member-password.request.dto";
 
 @ApiTags("members")
 @ApiExtraModels(DefaultResponse)
@@ -102,11 +105,11 @@ export class MemberController {
 
     @Roles(MemberAuthority.USER, MemberAuthority.MANAGER, MemberAuthority.ADMIN)
     @ApiOperation({
-        summary: "멤버 조회",
-        description: "멤버의 정보를 조회할 수 있다.",
+        summary: "정보 수정",
+        description: "자신의 정보를 수정할 수 있다.",
     })
     @ApiDefaultResponse(GetMemberResponseDto)
-    @HttpCode(HttpStatus.OK)
+    @HttpCode(HttpStatus.CREATED)
     @Put("/:id")
     async updateMember(@Param("id") id: string,
                        @Body() requestBody: UpdateMemberRequestDto,
@@ -118,4 +121,21 @@ export class MemberController {
         return new DefaultResponse(data);
     }
 
+    @Roles(MemberAuthority.USER, MemberAuthority.MANAGER, MemberAuthority.ADMIN)
+    @ApiOperation({
+        summary: "비밀번호 변경",
+        description: "자신의 비밀번호를 변경할 수 있다.",
+    })
+    @ApiDefaultResponse(GetMemberResponseDto)
+    @HttpCode(HttpStatus.CREATED)
+    @Patch("/:id/password")
+    async updateMemberPassword(@Param("id") id: string,
+                               @Body() requestBody: UpdateMemberPasswordRequestDto,
+                               @Request() req
+    )
+        : Promise<DefaultResponse<UpdateMemberResponseDto>> {
+        const data = await this.memberService.updateMemberPassword(id, requestBody, req.user);
+
+        return new DefaultResponse(data);
+    }
 }

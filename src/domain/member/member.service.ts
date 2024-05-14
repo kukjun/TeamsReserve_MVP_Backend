@@ -38,8 +38,17 @@ import {
     MemberEntity,
 } from "./entity/member.entity";
 import {
-    DuplicateException, 
+    DuplicateException,
 } from "../../exception/duplicate.exception";
+import {
+    UpdateMemberPasswordRequestDto,
+} from "./dto/req/update-member-password.request.dto";
+import {
+    bcryptFunction,
+} from "../../util/function/bcrypt.function";
+import {
+    PasswordIncorrectException, 
+} from "../../exception/password-incorrect.exception";
 
 @Injectable()
 export class MemberService {
@@ -124,11 +133,31 @@ export class MemberService {
         if (!member) throw new MemberNotFoundException(`id: ${id}`);
 
         const nicknameDuplicateMember = await this.memberRepository.findMemberByNickname(updateDto.nickname);
-        if(nicknameDuplicateMember) throw new DuplicateException(`nickname: ${updateDto.nickname}`);
+        if (nicknameDuplicateMember) throw new DuplicateException(`nickname: ${updateDto.nickname}`);
 
         const updatedMember: MemberEntity = {
             ...member,
             ...updateDto,
+        };
+
+        const resultId = await this.memberRepository.updateMember(updatedMember);
+
+        return {
+            id: resultId,
+        };
+    }
+
+    async updateMemberPassword(id: string, dto: UpdateMemberPasswordRequestDto, token: MemberToken)
+        : Promise<UpdateMemberResponseDto> {
+        if (id !== token.id) throw new ResourceUnauthorizedException();
+        const member = await this.memberRepository.findMemberById(id);
+        if (!member) throw new MemberNotFoundException(`id: ${id}`);
+        if (!await bcryptFunction.compare(dto.currentPassword, member.password)) throw new PasswordIncorrectException();
+
+        const encryptPassword = await bcryptFunction.hash(dto.newPassword, await bcryptFunction.genSalt());
+        const updatedMember: MemberEntity = {
+            ...member,
+            password: encryptPassword,
         };
 
         const resultId = await this.memberRepository.updateMember(updatedMember);

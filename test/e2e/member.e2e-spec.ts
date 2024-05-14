@@ -77,6 +77,9 @@ import {
 import {
     UpdateMemberResponseDto,
 } from "../../src/domain/member/dto/res/update-member.response.dto";
+import {
+    UpdateMemberPasswordRequestDto, 
+} from "../../src/domain/member/dto/req/update-member-password.request.dto";
 
 describe("Member e2e Test", () => {
     let app: INestApplication;
@@ -368,6 +371,9 @@ describe("Member e2e Test", () => {
         });
     });
 
+    /**
+     * 자신이 아닌 다른 멤버에 접근하는 예외는 이곳에서 처리하므로 중복되는 테스트는 진행하지 않음
+     */
     describe("updateMember", () => {
         describe("자신의 정보를 바꾸는 경우", () => {
             describe("중복된 닉네임인 경우,", () => {
@@ -427,7 +433,7 @@ describe("Member e2e Test", () => {
                         .put(`/members/${storedMember.id}`)
                         .send(requestBody)
                         .set("Authorization", `Bearer ${token}`)
-                        .expect(HttpStatus.OK);
+                        .expect(HttpStatus.CREATED);
 
                     // then
                     const actual = response.body as DefaultResponse<UpdateMemberResponseDto>;
@@ -450,7 +456,6 @@ describe("Member e2e Test", () => {
                 const storedMember = await prismaService.member.create({
                     data: member,
                 });
-
                 const anotherRandomPassword = generateRandomPasswordFunction();
                 const anotherEncryptedPassword
                     = await bcryptFunction.hash(anotherRandomPassword, await bcryptFunction.genSalt());
@@ -479,5 +484,81 @@ describe("Member e2e Test", () => {
                     .expect(HttpStatus.FORBIDDEN);
             });
         });
+    });
+
+    describe("updateMemberPassword", () => {
+        describe("현재 비밀번호가 일치하면,", () => {
+            it("새로운 비밀번호로 비밀번호가 변경된다.", async () => {
+                // given
+                const currentPassword = generateRandomPasswordFunction();
+                const newPassword = generateRandomPasswordFunction();
+                const encryptedPassword = await bcryptFunction.hash(currentPassword, await bcryptFunction.genSalt());
+                const member = memberFixture(encryptedPassword, true);
+                const storedMember = await prismaService.member.create({
+                    data: member,
+                });
+                const payload: MemberToken = {
+                    id: storedMember.id,
+                    nickname: storedMember.nickname,
+                    authority: storedMember.authority,
+                };
+                const token = jwtService.sign(payload, {
+                    secret: configService.get<string>("JWT_SECRET_KEY"),
+                });
+                const requestBody: UpdateMemberPasswordRequestDto ={
+                    currentPassword: currentPassword,
+                    newPassword: newPassword,
+                };
+
+                // when
+                const response = await supertestRequestFunction(app.getHttpServer())
+                    .patch(`/members/${storedMember.id}/password`)
+                    .send(requestBody)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.CREATED);
+
+                // then
+                const actual = response.body as DefaultResponse<UpdateMemberResponseDto>;
+                const actualMember = await prismaService.member.findUnique({
+                    where: {
+                        id: actual.data.id,
+                    },
+                });
+                expect(await bcryptFunction.compare(newPassword, actualMember.password)).toBe(true);
+            });
+        });
+        describe("현재 비밀번호가 일치하지 않으면,", () => {
+            it("비밀번호가 틀렸다는 예외가 발생한다.", async () => {
+                // given
+                const currentPassword = generateRandomPasswordFunction();
+                const randomPassword = generateRandomPasswordFunction();
+                const newPassword = generateRandomPasswordFunction();
+                const encryptedPassword = await bcryptFunction.hash(currentPassword, await bcryptFunction.genSalt());
+                const member = memberFixture(encryptedPassword, true);
+                const storedMember = await prismaService.member.create({
+                    data: member,
+                });
+                const payload: MemberToken = {
+                    id: storedMember.id,
+                    nickname: storedMember.nickname,
+                    authority: storedMember.authority,
+                };
+                const token = jwtService.sign(payload, {
+                    secret: configService.get<string>("JWT_SECRET_KEY"),
+                });
+                const requestBody: UpdateMemberPasswordRequestDto ={
+                    currentPassword: randomPassword,
+                    newPassword: newPassword,
+                };
+
+                // when
+                await supertestRequestFunction(app.getHttpServer())
+                    .patch(`/members/${storedMember.id}/password`)
+                    .send(requestBody)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.BAD_REQUEST);
+            });
+        });
+
     });
 });
