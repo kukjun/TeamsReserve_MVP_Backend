@@ -17,11 +17,29 @@ import {
     PaginateData,
 } from "../../interface/response/paginate.data";
 import {
-    GetMemberDetailResponseDto, 
+    GetMemberDetailResponseDto,
 } from "./dto/res/get-member-detail.response.dto";
 import {
-    MemberOptionDto, 
+    MemberOptionDto,
 } from "../../interface/request/member-option.dto";
+import {
+    UpdateMemberRequestDto,
+} from "./dto/req/update-member.request.dto";
+import {
+    UpdateMemberResponseDto,
+} from "./dto/res/update-member.response.dto";
+import {
+    MemberToken,
+} from "../../interface/member-token";
+import {
+    ResourceUnauthorizedException,
+} from "../../exception/resource-unauthorized.exception";
+import {
+    MemberEntity,
+} from "./entity/member.entity";
+import {
+    DuplicateException, 
+} from "../../exception/duplicate.exception";
 
 @Injectable()
 export class MemberService {
@@ -32,6 +50,7 @@ export class MemberService {
     async getMember(id: string): Promise<GetMemberResponseDto> {
         const member = await this.memberRepository.findMemberById(id);
         if (!member) throw new MemberNotFoundException(`id: ${id}`);
+        console.log(444,member);
 
         return {
             id: member.id,
@@ -96,6 +115,27 @@ export class MemberService {
                 totalPage,
                 hasNextPage,
             },
+        };
+    }
+
+    async updateMember(id: string, updateDto: UpdateMemberRequestDto, token: MemberToken)
+        : Promise<UpdateMemberResponseDto> {
+        if (id !== token.id) throw new ResourceUnauthorizedException();
+        const member = await this.memberRepository.findMemberById(id);
+        if (!member) throw new MemberNotFoundException(`id: ${id}`);
+
+        const nicknameDuplicateMember = await this.memberRepository.findMemberByNickname(updateDto.nickname);
+        if(nicknameDuplicateMember) throw new DuplicateException(`nickname: ${updateDto.nickname}`);
+
+        const updatedMember: MemberEntity = {
+            ...member,
+            ...updateDto,
+        };
+
+        const resultId = await this.memberRepository.updateMember(updatedMember);
+
+        return {
+            id: resultId,
         };
     }
 

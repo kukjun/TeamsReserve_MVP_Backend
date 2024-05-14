@@ -93,7 +93,6 @@ export class AuthService {
             id: result,
         };
     }
-
     async validateSignin(request: SigninRequest): Promise<string> {
         const member = await this.memberRepository.findMemberByEmail(request.email);
         if(!member || member.joinStatus === false) throw new SigninFailException();

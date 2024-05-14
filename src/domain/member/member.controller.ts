@@ -1,42 +1,49 @@
 import {
-    Controller, Get, HttpCode, HttpStatus, Param, Query, UseGuards, 
+    Body,
+    Controller, Get, HttpCode, HttpStatus, Param, Patch, Put, Query, Request, UseGuards,
 } from "@nestjs/common";
 import {
-    MemberService, 
+    MemberService,
 } from "./member.service";
 import {
-    ApiExtraModels, ApiOperation, ApiTags, 
+    ApiExtraModels, ApiOperation, ApiTags,
 } from "@nestjs/swagger";
 import {
-    ApiDefaultResponse, 
+    ApiDefaultResponse,
 } from "../../util/decorators/api-default.response";
 import {
-    GetMemberResponseDto, 
+    GetMemberResponseDto,
 } from "./dto/res/get-member.response.dto";
 import {
-    DefaultResponse, 
+    DefaultResponse,
 } from "../../interface/response/default.response";
 import {
-    Roles, 
+    Roles,
 } from "../../util/decorators/permission";
 import {
-    MemberAuthority, 
+    MemberAuthority,
 } from "../../types/enums/member.authority.enum";
 import {
-    PaginateRequestDto, 
+    PaginateRequestDto,
 } from "../../interface/request/paginate.request.dto";
 import {
-    PaginateData, 
+    PaginateData,
 } from "../../interface/response/paginate.data";
 import {
-    JwtGuard, 
+    JwtGuard,
 } from "../auth/guards/jwt.guard";
 import {
-    GetMemberDetailResponseDto, 
+    GetMemberDetailResponseDto,
 } from "./dto/res/get-member-detail.response.dto";
 import {
-    MemberOptionDto, 
+    MemberOptionDto,
 } from "../../interface/request/member-option.dto";
+import {
+    UpdateMemberRequestDto,
+} from "./dto/req/update-member.request.dto";
+import {
+    UpdateMemberResponseDto,
+} from "./dto/res/update-member.response.dto";
 
 @ApiTags("members")
 @ApiExtraModels(DefaultResponse)
@@ -71,9 +78,9 @@ export class MemberController {
     @Get("/detail")
     async getMemberDetailList(
         @Query() paginateDto: PaginateRequestDto,
-        @Query() optionDto: MemberOptionDto,
+        @Query() optionDto: MemberOptionDto
     )
-    :Promise<DefaultResponse<PaginateData<GetMemberDetailResponseDto>>> {
+        : Promise<DefaultResponse<PaginateData<GetMemberDetailResponseDto>>> {
         const data = await this.memberService.getMemberDetailList(paginateDto, optionDto);
 
         return new DefaultResponse(data);
@@ -89,6 +96,24 @@ export class MemberController {
     @Get("/:id")
     async getMember(@Param("id") id: string): Promise<DefaultResponse<GetMemberResponseDto>> {
         const data = await this.memberService.getMember(id);
+
+        return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.USER, MemberAuthority.MANAGER, MemberAuthority.ADMIN)
+    @ApiOperation({
+        summary: "멤버 조회",
+        description: "멤버의 정보를 조회할 수 있다.",
+    })
+    @ApiDefaultResponse(GetMemberResponseDto)
+    @HttpCode(HttpStatus.OK)
+    @Put("/:id")
+    async updateMember(@Param("id") id: string,
+                       @Body() requestBody: UpdateMemberRequestDto,
+                       @Request() req
+    )
+        : Promise<DefaultResponse<UpdateMemberResponseDto>> {
+        const data = await this.memberService.updateMember(id, requestBody, req.user);
 
         return new DefaultResponse(data);
     }
