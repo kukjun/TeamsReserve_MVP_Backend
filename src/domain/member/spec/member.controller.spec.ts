@@ -56,6 +56,7 @@ const mockMemberService = {
     updateMemberPassword: jest.fn(),
     updateMemberJoinStatus: jest.fn(),
     updateMemberAuthority: jest.fn(),
+    deleteMember: jest.fn(),
 };
 describe("MemberController Unit Test", () => {
     let memberController: MemberController;
@@ -267,6 +268,29 @@ describe("MemberController Unit Test", () => {
 
             // then
             expect(response.data.id).toBe(expectedId);
+        });
+    });
+
+    describe("deleteMember", () => {
+        it("변환된 결과의 id를 반환한다.", async () => {
+            // given
+            const expectedNickname = "unitTestNickname";
+            const expectedId = uuidFunction.v4();
+            const expectedResult: UpdateMemberResponseDto = {
+                id: null,
+            };
+            const token: MemberToken = {
+                id: expectedId,
+                nickname: expectedNickname,
+                authority: MemberAuthority.USER,
+            };
+            mockMemberService.deleteMember.mockResolvedValue(expectedResult);
+
+            // when
+            const response = await memberController.deleteMember(expectedId, token);
+
+            // then
+            expect(response).toBeNull();
         });
     });
 });

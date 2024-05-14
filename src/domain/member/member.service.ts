@@ -218,4 +218,14 @@ export class MemberService {
 
     }
 
+    async deleteMember(id: string, token: MemberToken): Promise<null> {
+        if (id !== token.id) throw new ResourceUnauthorizedException();
+        const member = await this.memberRepository.findMemberById(id);
+        if (!member) throw new MemberNotFoundException(`id: ${id}`);
+
+        await this.memberRepository.deleteMember(member.id);
+
+        return null;
+    }
+
 }

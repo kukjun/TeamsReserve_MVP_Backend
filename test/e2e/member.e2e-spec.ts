@@ -844,4 +844,40 @@ describe("Member e2e Test", () => {
             });
         });
     });
+
+    describe("deleteMember", () => {
+        describe("존재하는 대상인 경우 ", () => {
+            it("대상을 삭제하고 id는 null을 반환한다.", async () => {
+                // given
+                const randomPassword = generateRandomPasswordFunction();
+                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
+                const member = memberFixture(encryptedPassword, true);
+                const storedMember = await prismaService.member.create({
+                    data: member,
+                });
+                const payload: MemberToken = {
+                    id: storedMember.id,
+                    nickname: storedMember.nickname,
+                    authority: storedMember.authority,
+                };
+                const token = jwtService.sign(payload, {
+                    secret: configService.get<string>("JWT_SECRET_KEY"),
+                });
+
+                // when
+                await supertestRequestFunction(app.getHttpServer())
+                    .delete(`/members/${storedMember.id}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.NO_CONTENT);
+
+                // then
+                const actualMember = await prismaService.member.findUnique({
+                    where: {
+                        id: storedMember.id,
+                    },
+                });
+                expect(actualMember).toBeNull();
+            });
+        });
+    });
 });

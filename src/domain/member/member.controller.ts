@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
     HttpCode,
     HttpStatus,
@@ -12,55 +13,55 @@ import {
     UseGuards,
 } from "@nestjs/common";
 import {
-    MemberService, 
+    MemberService,
 } from "./member.service";
 import {
-    ApiExtraModels, ApiOperation, ApiTags, 
+    ApiExtraModels, ApiOperation, ApiTags,
 } from "@nestjs/swagger";
 import {
-    ApiDefaultResponse, 
+    ApiDefaultResponse,
 } from "../../util/decorators/api-default.response";
 import {
-    GetMemberResponseDto, 
+    GetMemberResponseDto,
 } from "./dto/res/get-member.response.dto";
 import {
-    DefaultResponse, 
+    DefaultResponse,
 } from "../../interface/response/default.response";
 import {
-    Roles, 
+    Roles,
 } from "../../util/decorators/permission";
 import {
-    MemberAuthority, 
+    MemberAuthority,
 } from "../../types/enums/member.authority.enum";
 import {
-    PaginateRequestDto, 
+    PaginateRequestDto,
 } from "../../interface/request/paginate.request.dto";
 import {
-    PaginateData, 
+    PaginateData,
 } from "../../interface/response/paginate.data";
 import {
-    JwtGuard, 
+    JwtGuard,
 } from "../auth/guards/jwt.guard";
 import {
-    GetMemberDetailResponseDto, 
+    GetMemberDetailResponseDto,
 } from "./dto/res/get-member-detail.response.dto";
 import {
-    MemberOptionDto, 
+    MemberOptionDto,
 } from "../../interface/request/member-option.dto";
 import {
-    UpdateMemberRequestDto, 
+    UpdateMemberRequestDto,
 } from "./dto/req/update-member.request.dto";
 import {
-    UpdateMemberResponseDto, 
+    UpdateMemberResponseDto,
 } from "./dto/res/update-member.response.dto";
 import {
-    UpdateMemberPasswordRequestDto, 
+    UpdateMemberPasswordRequestDto,
 } from "./dto/req/update-member-password.request.dto";
 import {
     UpdateMemberJoinStatusRequestDto,
 } from "./dto/req/update-member-join-status-request.dto";
 import {
-    UpdateMemberAuthorityRequestDto, 
+    UpdateMemberAuthorityRequestDto,
 } from "./dto/req/update-member-authority.request.dto";
 
 @ApiTags("members")
@@ -163,9 +164,9 @@ export class MemberController {
     @HttpCode(HttpStatus.CREATED)
     @Patch("/:id/join")
     async updateMemberJoinStatus(@Param("id") id: string,
-                           @Body() requestBody: UpdateMemberJoinStatusRequestDto,
-                           @Request() req)
-    : Promise<DefaultResponse<UpdateMemberResponseDto>> {
+                                 @Body() requestBody: UpdateMemberJoinStatusRequestDto,
+                                 @Request() req)
+        : Promise<DefaultResponse<UpdateMemberResponseDto>> {
         const data = await this.memberService.updateMemberJoinStatus(id, requestBody, req.user);
 
         return new DefaultResponse(data);
@@ -186,6 +187,22 @@ export class MemberController {
         const data = await this.memberService.updateMemberAuthority(id, requestBody, req.user);
 
         return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.ADMIN, MemberAuthority.MANAGER, MemberAuthority.USER)
+    @ApiOperation({
+        summary: "회원 탈퇴",
+        description: "본인이 자신 스스로 탈퇴할 수 있다.",
+    })
+    @ApiDefaultResponse(GetMemberResponseDto)
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @Delete("/:id")
+    async deleteMember(@Param("id") id: string,
+                       @Request() req)
+        : Promise<null> {
+        await this.memberService.deleteMember(id, req.user);
+
+        return null;
     }
 
 }
