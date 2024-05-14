@@ -15,7 +15,7 @@ import {
 } from "../member/member.module";
 import {
     MemberRepository, 
-} from "../member/repository/member.repository";
+} from "../member/member.repository";
 import {
     PrismaService, 
 } from "../../config/prisma/prisma.service";
@@ -31,10 +31,14 @@ import {
 import {
     JwtStrategy, 
 } from "./strategies/jwt.strategy";
+import {
+    PassportModule, 
+} from "@nestjs/passport";
 
 @Module({
     imports: [
         MemberModule,
+        PassportModule,
         JwtModule.registerAsync({
             imports: [ConfigModule,],
             inject: [ConfigService,],

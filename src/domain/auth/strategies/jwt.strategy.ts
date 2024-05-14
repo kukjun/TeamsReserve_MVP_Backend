@@ -13,7 +13,7 @@ import {
 } from "../../../interface/member-token";
 import {
     MemberRepository,
-} from "../../member/repository/member.repository";
+} from "../../member/member.repository";
 import {
     MemberNotFoundException,
 } from "../../../exception/member-not-found.exception";
@@ -31,6 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, JWT_STRATEGY) {
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            ignoreExpiration: false,
             secretOrKey: configService.get<string>("JWT_SECRET_KEY"),
         });
     }

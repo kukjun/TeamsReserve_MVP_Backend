@@ -3,16 +3,64 @@ import {
 } from "@nestjs/common";
 import {
     PrismaService,
-} from "../../../config/prisma/prisma.service";
+} from "../../config/prisma/prisma.service";
 import {
     MemberEntity,
-} from "../entity/member.entity";
+} from "./entity/member.entity";
+import {
+    PaginateRequestDto,
+} from "../../interface/request/paginate.request.dto";
+import {
+    MemberOptionDto, 
+} from "../../interface/request/member-option.dto";
 
 @Injectable()
 export class MemberRepository {
     constructor(
         private readonly prismaService: PrismaService
     ) {
+    }
+
+    /**
+     * paging 검색
+     */
+    async findMemberByPaging(paginateDto: PaginateRequestDto, optionDto: MemberOptionDto = null)
+        : Promise<MemberEntity[]> {
+        if(!optionDto) {
+            return await this.prismaService.member.findMany({
+                skip: (paginateDto.page-1) * paginateDto.limit,
+                take: paginateDto.limit,
+                orderBy: {
+                    createdAt: "desc",
+                },
+            });
+        } else {
+            return await this.prismaService.member.findMany({
+                skip: (paginateDto.page-1) * paginateDto.limit,
+                take: paginateDto.limit,
+                where: {
+                    joinStatus: optionDto.joinStatus,
+                },
+                orderBy: {
+                    createdAt: "desc",
+                },
+            });
+        }
+    }
+
+    /**
+     * member count 집계
+     */
+    async findMemberCount(optionDto: MemberOptionDto = null): Promise<number> {
+        if(!optionDto) {
+            return await this.prismaService.member.count();
+        } else {
+            return await this.prismaService.member.count({
+                where: {
+                    joinStatus: optionDto.joinStatus,
+                },
+            });
+        }
     }
 
     /**
@@ -72,6 +120,10 @@ export class MemberRepository {
         return savedMember.id;
     }
 
+    /**
+     * member 수정
+     * @param member
+     */
     async updateMember(member: MemberEntity): Promise<string | null> {
         const updatedMember = await this.prismaService.member.update({
             where: {

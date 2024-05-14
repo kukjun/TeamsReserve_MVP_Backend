@@ -14,7 +14,7 @@ import {
 } from "./dto/res/signup.response";
 import {
     MemberRepository,
-} from "../member/repository/member.repository";
+} from "../member/member.repository";
 import {
     DuplicateException,
 } from "../../exception/duplicate.exception";
@@ -96,7 +96,6 @@ export class AuthService {
 
     async validateSignin(request: SigninRequest): Promise<string> {
         const member = await this.memberRepository.findMemberByEmail(request.email);
-
         if(!member || member.joinStatus === false) throw new SigninFailException();
         if(!await bcrypt.compare(request.password, member.password)) throw new SigninFailException();
 

@@ -1,13 +1,5 @@
-import * as request from "supertest";
-import * as bcrypt from "bcrypt";
 import {
-    exec,
-} from "child_process";
-import {
-    promisify,
-} from "util";
-import {
-    PostgreSqlContainer, StartedPostgreSqlContainer,
+    StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
 import {
     PrismaService,
@@ -27,12 +19,13 @@ import {
 } from "@liaoliaots/nestjs-redis";
 import Redis from "ioredis";
 import {
-    RedisContainer, StartedRedisContainer,
+    StartedRedisContainer,
 } from "@testcontainers/redis";
 import {
     HttpExceptionFilter,
 } from "../../src/filter/http-exception.filter";
 import {
+    DynamicModule,
     HttpStatus,
     INestApplication,
     ValidationPipe,
@@ -42,13 +35,13 @@ import {
 } from "../../src/domain/auth/dto/req/confirm-email.request";
 import {
     DefaultResponse,
-} from "../../src/response/default.response";
+} from "../../src/interface/response/default.response";
 import {
     ConfirmEmailResponse,
 } from "../../src/domain/auth/dto/res/confirm-email.response";
 import {
     ErrorData,
-} from "../../src/response/error.data";
+} from "../../src/interface/response/error.data";
 import {
     SignupRequest,
 } from "../../src/domain/auth/dto/req/signup.request";
@@ -59,13 +52,23 @@ import {
     memberFixture,
 } from "../fixture/entity/member.fixture";
 import {
-    SigninRequest, 
+    SigninRequest,
 } from "../../src/domain/auth/dto/req/signin.request";
 import {
-    SigninResponse, 
+    SigninResponse,
 } from "../../src/domain/auth/dto/res/signin.response";
-
-const execAsync = promisify(exec);
+import {
+    supertestRequestFunction,
+} from "../../src/util/function/supertest-request.function";
+import {
+    bcryptFunction,
+} from "../../src/util/function/bcrypt.function";
+import {
+    psqlTestContainerStarter,
+} from "../../src/util/function/postgresql-contrainer.function";
+import {
+    redisTestContainerStarter, 
+} from "../../src/util/function/redis-container.function";
 
 describe("Auth e2e Test", () => {
     let app: INestApplication;
@@ -74,51 +77,23 @@ describe("Auth e2e Test", () => {
     let postgresContainer: StartedPostgreSqlContainer;
     let redisClient: Redis;
     let jwtService: JwtService;
+    let redisModule: DynamicModule;
 
     beforeAll(async () => {
-        // Pg Test Container 시작
-        postgresContainer = await new PostgreSqlContainer().start();
-        const config = {
-            host: postgresContainer.getHost(),
-            port: postgresContainer.getMappedPort(5432),
-            database: postgresContainer.getDatabase(),
-            user: postgresContainer.getUsername(),
-            password: postgresContainer.getPassword(),
-        };
+        const psqlConfig = await psqlTestContainerStarter();
+        postgresContainer = psqlConfig.container;
+        prismaService = psqlConfig.service;
+        const redisConfig = await redisTestContainerStarter();
+        redisContainer = redisConfig.container;
+        redisModule = redisConfig.module;
 
-        // Container 가 가지는 db 주소를 반환
-        const databaseUrl = `postgresql://${config.user}:${config.password}@${config.host}:${config.port}/${config.database}`;
-
-        // 스크립트 실행을 통해 DB Container에 우리가 지정한 prisma model로 migrate 진행
-        await execAsync(
-            `DATABASE_URL=${databaseUrl} npx prisma migrate deploy --preview-feature`
-        );
-
-        // DB Container와 연결되는 Prisma Service를 반환
-        prismaService = new PrismaService({
-            datasources: {
-                db: {
-                    url: databaseUrl,
-                },
-            },
-        });
-
-        redisContainer = await new RedisContainer().start();
-
-        // 테스트를 시작할 때, Test Container를 사용하는 PrismaService를 주입받음
         const module: TestingModule = await Test.createTestingModule({
             imports: [AppModule,],
         })
             .overrideProvider(PrismaService)
             .useValue(prismaService)
             .overrideModule(RedisModule)
-            .useModule(RedisModule.forRoot({
-                readyLog: true,
-                config: {
-                    host: redisContainer.getHost(),
-                    port: redisContainer.getPort(),
-                },
-            }))
+            .useModule(redisModule)
             .compile();
 
         redisClient = module.get<Redis>(getRedisToken("default"));
@@ -165,7 +140,7 @@ describe("Auth e2e Test", () => {
             await redisClient.set("validateEmail-" + requestBody.email, requestBody.code, "EX", 360);
 
             // when
-            const response = await request(app.getHttpServer())
+            const response = await supertestRequestFunction(app.getHttpServer())
                 .post("/auth/confirm-email")
                 .send(requestBody)
                 .expect(HttpStatus.CREATED);
@@ -189,7 +164,7 @@ describe("Auth e2e Test", () => {
             await redisClient.set("validateEmail-" + requestBody.email, "123123", "EX", 360);
 
             // when
-            const response = await request(app.getHttpServer())
+            const response = await supertestRequestFunction(app.getHttpServer())
                 .post("/auth/confirm-email")
                 .send(requestBody)
                 .expect(HttpStatus.BAD_REQUEST);
@@ -220,7 +195,7 @@ describe("Auth e2e Test", () => {
                     await redisClient.set(requestBody.email, "validate", "EX", "3600");
 
                     // when
-                    const response = await request(app.getHttpServer())
+                    const response = await supertestRequestFunction(app.getHttpServer())
                         .post("/auth/signup")
                         .send(requestBody)
                         .expect(HttpStatus.CREATED);
@@ -233,7 +208,7 @@ describe("Auth e2e Test", () => {
                         },
                     });
                     expect(actualMember.email).toBe(requestBody.email);
-                    expect(await bcrypt.compare(requestBody.password, actualMember.password)).toBe(true);
+                    expect(await bcryptFunction.compare(requestBody.password, actualMember.password)).toBe(true);
                     expect(actualMember.nickname).toBe(requestBody.nickname);
                     expect(actualMember.teamCode).toBe(requestBody.teamCode);
                     expect(actualMember.introduce).toBe(requestBody.introduce);
@@ -254,7 +229,7 @@ describe("Auth e2e Test", () => {
                         await redisClient.set(requestBody.email, "validate", "EX", "3600");
 
                         // when
-                        const response = await request(app.getHttpServer())
+                        const response = await supertestRequestFunction(app.getHttpServer())
                             .post("/auth/signup")
                             .send(requestBody)
                             .expect(HttpStatus.UNAUTHORIZED);
@@ -274,7 +249,7 @@ describe("Auth e2e Test", () => {
                     const expectedStatus = HttpStatus.BAD_REQUEST;
                     const expectedError = HttpStatus[expectedStatus];
 
-                    const encryptedPassword = await bcrypt.hash("testPassword", await bcrypt.genSalt());
+                    const encryptedPassword = await bcryptFunction.hash("testPassword", await bcryptFunction.genSalt());
                     const storedMember = await prismaService.member.create({
                         data: memberFixture(encryptedPassword),
                     });
@@ -288,7 +263,7 @@ describe("Auth e2e Test", () => {
                     await redisClient.set(requestBody.email, "validate", "EX", "3600");
 
                     // when
-                    const response = await request(app.getHttpServer())
+                    const response = await supertestRequestFunction(app.getHttpServer())
                         .post("/auth/signup")
                         .send(requestBody)
                         .expect(HttpStatus.BAD_REQUEST);
@@ -318,7 +293,7 @@ describe("Auth e2e Test", () => {
                 };
 
                 // when
-                const response = await request(app.getHttpServer())
+                const response = await supertestRequestFunction(app.getHttpServer())
                     .post("/auth/signup")
                     .send(requestBody)
                     .expect(HttpStatus.UNAUTHORIZED);
@@ -337,7 +312,7 @@ describe("Auth e2e Test", () => {
             it("해당 member의 정보가 담긴 jwt token을 반환한다.", async () => {
                 // given
                 const password = "testPassword";
-                const encryptedPassword = await bcrypt.hash(password, await bcrypt.genSalt());
+                const encryptedPassword = await bcryptFunction.hash(password, await bcryptFunction.genSalt());
                 const storedMember = await prismaService.member.create({
                     data: memberFixture(encryptedPassword),
                 });
@@ -347,7 +322,7 @@ describe("Auth e2e Test", () => {
                 };
 
                 // when
-                const response = await request(app.getHttpServer())
+                const response = await supertestRequestFunction(app.getHttpServer())
                     .post("/auth/signin")
                     .send(requestBody)
                     .expect(HttpStatus.OK);
@@ -355,7 +330,7 @@ describe("Auth e2e Test", () => {
                 // then
                 const actual = response.body as DefaultResponse<SigninResponse>;
                 const {
-                    id, nickname, authority, 
+                    id, nickname, authority,
                 } = jwtService.decode(actual.data.accessToken);
                 expect(id).toBe(storedMember.id);
                 expect(nickname).toBe(storedMember.nickname);
@@ -375,7 +350,7 @@ describe("Auth e2e Test", () => {
                 };
 
                 // when
-                const response = await request(app.getHttpServer())
+                const response = await supertestRequestFunction(app.getHttpServer())
                     .post("/auth/signin")
                     .send(requestBody)
                     .expect(HttpStatus.BAD_REQUEST);
@@ -395,7 +370,7 @@ describe("Auth e2e Test", () => {
                 const expectedError = HttpStatus[expectedStatus];
 
                 const password = "testPassword";
-                const encryptedPassword = await bcrypt.hash(password, await bcrypt.genSalt());
+                const encryptedPassword = await bcryptFunction.hash(password, await bcryptFunction.genSalt());
                 const storedMember = await prismaService.member.create({
                     data: memberFixture(encryptedPassword, false),
                 });
@@ -405,7 +380,7 @@ describe("Auth e2e Test", () => {
                 };
 
                 // when
-                const response = await request(app.getHttpServer())
+                const response = await supertestRequestFunction(app.getHttpServer())
                     .post("/auth/signin")
                     .send(requestBody)
                     .expect(HttpStatus.BAD_REQUEST);
