@@ -27,18 +27,6 @@ import {
     HttpExceptionFilter,
 } from "../../src/filter/http-exception.filter";
 import {
-    generateRandomPasswordFunction,
-} from "../../src/util/function/random-password.function";
-import {
-    bcryptFunction,
-} from "../../src/util/function/bcrypt.function";
-import {
-    memberFixture,
-} from "../fixture/entity/member.fixture";
-import {
-    MemberToken,
-} from "../../src/interface/member-token";
-import {
     CreateSpaceRequestDto,
 } from "../../src/domain/space/dto/req/create-space.request.dto";
 import {
@@ -56,6 +44,9 @@ import {
 import {
     spaceFixture,
 } from "../fixture/entity/space.fixture";
+import {
+    generateJwtToken, 
+} from "../fixture/function/jwt-token";
 
 describe("Space e2e Test", () => {
     let app: INestApplication;
@@ -105,20 +96,9 @@ describe("Space e2e Test", () => {
             describe("Space Name이 중복이 아니라면, ", () => {
                 it("Space를 생성하고 생성된 Space의 Id를 반환해야 한다.", async () => {
                     // given
-                    const randomPassword = generateRandomPasswordFunction();
-                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                    const member = memberFixture(encryptedPassword, true, MemberAuthority.MANAGER);
-                    const storedMember = await prismaService.member.create({
-                        data: member,
-                    });
-                    const payload: MemberToken = {
-                        id: storedMember.id,
-                        nickname: storedMember.nickname,
-                        authority: storedMember.authority,
-                    };
-                    const token = jwtService.sign(payload, {
-                        secret: configService.get<string>("JWT_SECRET_KEY"),
-                    });
+                    const {
+                        token,
+                    } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
                     const requestBody: CreateSpaceRequestDto = {
                         name: "미래 인재관",
                         location: "서울시 용산구 한남대로 412-1",
@@ -150,20 +130,9 @@ describe("Space e2e Test", () => {
                     const storedSpace = await prismaService.space.create({
                         data: spaceFixture(),
                     });
-                    const randomPassword = generateRandomPasswordFunction();
-                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                    const member = memberFixture(encryptedPassword, true, MemberAuthority.MANAGER);
-                    const storedMember = await prismaService.member.create({
-                        data: member,
-                    });
-                    const payload: MemberToken = {
-                        id: storedMember.id,
-                        nickname: storedMember.nickname,
-                        authority: storedMember.authority,
-                    };
-                    const token = jwtService.sign(payload, {
-                        secret: configService.get<string>("JWT_SECRET_KEY"),
-                    });
+                    const {
+                        token,
+                    } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
                     const requestBody: CreateSpaceRequestDto = {
                         name: storedSpace.name,
                         location: "서울시 용산구 한남대로 412-1",
@@ -182,20 +151,9 @@ describe("Space e2e Test", () => {
         describe("ADMIN, MANAGER의 권한이 아니라면, ", () => {
             it("권한 부족 예외가 발생한다.", async () => {
                 // given
-                const randomPassword = generateRandomPasswordFunction();
-                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                const member = memberFixture(encryptedPassword, true, MemberAuthority.USER);
-                const storedMember = await prismaService.member.create({
-                    data: member,
-                });
-                const payload: MemberToken = {
-                    id: storedMember.id,
-                    nickname: storedMember.nickname,
-                    authority: storedMember.authority,
-                };
-                const token = jwtService.sign(payload, {
-                    secret: configService.get<string>("JWT_SECRET_KEY"),
-                });
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
                 const requestBody: CreateSpaceRequestDto = {
                     name: "미래 인재관",
                     location: "서울시 용산구 한남대로 412-1",

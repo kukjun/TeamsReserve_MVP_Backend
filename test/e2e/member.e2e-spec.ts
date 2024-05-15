@@ -21,14 +21,11 @@ import {
     HttpExceptionFilter,
 } from "../../src/filter/http-exception.filter";
 import {
-    memberFixture, memberRandomFixture,
+    memberRandomFixture,
 } from "../fixture/entity/member.fixture";
 import {
     generateRandomPasswordFunction,
 } from "../../src/util/function/random-password.function";
-import {
-    MemberToken,
-} from "../../src/interface/member-token";
 import {
     DefaultResponse,
 } from "../../src/interface/response/default.response";
@@ -86,6 +83,9 @@ import {
 import {
     UpdateMemberAuthorityRequestDto,
 } from "../../src/domain/member/dto/req/update-member-authority.request.dto";
+import {
+    generateJwtToken, 
+} from "../fixture/function/jwt-token";
 
 describe("Member e2e Test", () => {
     let app: INestApplication;
@@ -137,20 +137,9 @@ describe("Member e2e Test", () => {
             describe("해당하는 사용자 id가 있으면, ", () => {
                 it("사용자 정보를 반환해야 한다.", async () => {
                     // given
-                    const randomPassword = generateRandomPasswordFunction();
-                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                    const member = memberFixture(encryptedPassword, true);
-                    const storedMember = await prismaService.member.create({
-                        data: member,
-                    });
-                    const payload: MemberToken = {
-                        id: storedMember.id,
-                        nickname: storedMember.nickname,
-                        authority: storedMember.authority,
-                    };
-                    const token = jwtService.sign(payload, {
-                        secret: configService.get<string>("JWT_SECRET_KEY"),
-                    });
+                    const {
+                        storedMember, token,
+                    } = await generateJwtToken(prismaService, jwtService, configService);
                     // when
                     const response = await supertestRequestFunction(app.getHttpServer())
                         .get(`/members/${storedMember.id}`)
@@ -169,20 +158,9 @@ describe("Member e2e Test", () => {
             describe("해당하는 사용자가 없으면, ", () => {
                 it("사용자 정보를 찾을 수 없다는 예외를 발생시킨다.", async () => {
                     // given
-                    const randomPassword = generateRandomPasswordFunction();
-                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                    const member = memberFixture(encryptedPassword, true);
-                    const storedMember = await prismaService.member.create({
-                        data: member,
-                    });
-                    const payload: MemberToken = {
-                        id: storedMember.id,
-                        nickname: storedMember.nickname,
-                        authority: storedMember.authority,
-                    };
-                    const token = jwtService.sign(payload, {
-                        secret: configService.get<string>("JWT_SECRET_KEY"),
-                    });
+                    const {
+                        token,
+                    } = await generateJwtToken(prismaService, jwtService, configService);
 
                     const failId = uuidFunction.v4();
                     const expectedPath = `/members/${failId}`;
@@ -230,20 +208,9 @@ describe("Member e2e Test", () => {
     describe("getMemberList", () => {
         it("존재하는 MemberList 정보를 보여줘야 한다.", async () => {
             // given
-            const randomPassword = generateRandomPasswordFunction();
-            const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-            const member = memberFixture(encryptedPassword, true);
-            const storedMember = await prismaService.member.create({
-                data: member,
-            });
-            const payload: MemberToken = {
-                id: storedMember.id,
-                nickname: storedMember.nickname,
-                authority: storedMember.authority,
-            };
-            const token = jwtService.sign(payload, {
-                secret: configService.get<string>("JWT_SECRET_KEY"),
-            });
+            const {
+                token,
+            } = await generateJwtToken(prismaService, jwtService, configService);
             const randomNumber = Math.ceil(Math.random() * 20);
             const storedMembers: MemberEntity[] = [];
             for (let i = 0; i < randomNumber; i++) {
@@ -282,20 +249,9 @@ describe("Member e2e Test", () => {
         describe("ADMIN, MANAGER의 권한의 사용자라면, ", () => {
             it("조건에 맞는 MemberList 정보를 보여줘야 한다.", async () => {
                 // given
-                const randomPassword = generateRandomPasswordFunction();
-                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                const member = memberFixture(encryptedPassword, true, MemberAuthority.MANAGER);
-                const storedMember = await prismaService.member.create({
-                    data: member,
-                });
-                const payload: MemberToken = {
-                    id: storedMember.id,
-                    nickname: storedMember.nickname,
-                    authority: storedMember.authority,
-                };
-                const token = jwtService.sign(payload, {
-                    secret: configService.get<string>("JWT_SECRET_KEY"),
-                });
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
                 const randomNumber = Math.ceil(Math.random() * 20);
                 const storedMembers: MemberEntity[] = [];
                 for (let i = 0; i < randomNumber; i++) {
@@ -342,20 +298,9 @@ describe("Member e2e Test", () => {
         describe("MANAGER, ADMIN 권한이 아니라면, ", () => {
             it("권한 예외가 발생한다.", async () => {
                 // given
-                const randomPassword = generateRandomPasswordFunction();
-                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                const member = memberFixture(encryptedPassword, true);
-                const storedMember = await prismaService.member.create({
-                    data: member,
-                });
-                const payload: MemberToken = {
-                    id: storedMember.id,
-                    nickname: storedMember.nickname,
-                    authority: storedMember.authority,
-                };
-                const token = jwtService.sign(payload, {
-                    secret: configService.get<string>("JWT_SECRET_KEY"),
-                });
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
                 const paginateDto: PaginateRequestDto = {
                     page: 1,
                     limit: 10,
@@ -385,22 +330,11 @@ describe("Member e2e Test", () => {
             describe("중복된 닉네임인 경우,", () => {
                 it("중복 예외가 발생한다.", async () => {
                     // given
-                    const randomPassword = generateRandomPasswordFunction();
-                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                    const member = memberFixture(encryptedPassword, true);
-                    const storedMember = await prismaService.member.create({
-                        data: member,
-                    });
-                    const payload: MemberToken = {
-                        id: storedMember.id,
-                        nickname: storedMember.nickname,
-                        authority: storedMember.authority,
-                    };
-                    const token = jwtService.sign(payload, {
-                        secret: configService.get<string>("JWT_SECRET_KEY"),
-                    });
+                    const {
+                        token,storedMember,
+                    } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
                     const requestBody: UpdateMemberRequestDto = {
-                        nickname: member.nickname,
+                        nickname: storedMember.nickname,
                         introduce: "updatedIntroduce",
                     };
 
@@ -415,20 +349,9 @@ describe("Member e2e Test", () => {
             describe("중복된 닉네임이 아닌 경우", () => {
                 it("dto기반으로 값을 변경한다.", async () => {
                     // given
-                    const randomPassword = generateRandomPasswordFunction();
-                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                    const member = memberFixture(encryptedPassword, true);
-                    const storedMember = await prismaService.member.create({
-                        data: member,
-                    });
-                    const payload: MemberToken = {
-                        id: storedMember.id,
-                        nickname: storedMember.nickname,
-                        authority: storedMember.authority,
-                    };
-                    const token = jwtService.sign(payload, {
-                        secret: configService.get<string>("JWT_SECRET_KEY"),
-                    });
+                    const {
+                        token,storedMember,
+                    } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
                     const requestBody: UpdateMemberRequestDto = {
                         nickname: "updatedName",
                         introduce: "updatedIntroduce",
@@ -456,26 +379,15 @@ describe("Member e2e Test", () => {
         describe("다른 사람의 정보를 바꾸는 경우", () => {
             it("다른 자원에 접근했다는 예외가 발생한다.", async () => {
                 // given
-                const randomPassword = generateRandomPasswordFunction();
-                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                const member = memberFixture(encryptedPassword, true);
-                const storedMember = await prismaService.member.create({
-                    data: member,
-                });
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
                 const anotherRandomPassword = generateRandomPasswordFunction();
                 const anotherEncryptedPassword
                     = await bcryptFunction.hash(anotherRandomPassword, await bcryptFunction.genSalt());
                 const anotherMember = memberRandomFixture(anotherEncryptedPassword, true);
                 const anotherStoredMember = await prismaService.member.create({
                     data: anotherMember,
-                });
-                const payload: MemberToken = {
-                    id: storedMember.id,
-                    nickname: storedMember.nickname,
-                    authority: storedMember.authority,
-                };
-                const token = jwtService.sign(payload, {
-                    secret: configService.get<string>("JWT_SECRET_KEY"),
                 });
                 const requestBody: UpdateMemberRequestDto = {
                     nickname: "updatedName",
@@ -496,21 +408,11 @@ describe("Member e2e Test", () => {
         describe("현재 비밀번호가 일치하면,", () => {
             it("새로운 비밀번호로 비밀번호가 변경된다.", async () => {
                 // given
-                const currentPassword = generateRandomPasswordFunction();
+                const {
+                    token, currentPassword, storedMember,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+                
                 const newPassword = generateRandomPasswordFunction();
-                const encryptedPassword = await bcryptFunction.hash(currentPassword, await bcryptFunction.genSalt());
-                const member = memberFixture(encryptedPassword, true);
-                const storedMember = await prismaService.member.create({
-                    data: member,
-                });
-                const payload: MemberToken = {
-                    id: storedMember.id,
-                    nickname: storedMember.nickname,
-                    authority: storedMember.authority,
-                };
-                const token = jwtService.sign(payload, {
-                    secret: configService.get<string>("JWT_SECRET_KEY"),
-                });
                 const requestBody: UpdateMemberPasswordRequestDto = {
                     currentPassword: currentPassword,
                     newPassword: newPassword,
@@ -536,22 +438,11 @@ describe("Member e2e Test", () => {
         describe("현재 비밀번호가 일치하지 않으면,", () => {
             it("비밀번호가 틀렸다는 예외가 발생한다.", async () => {
                 // given
-                const currentPassword = generateRandomPasswordFunction();
+                const {
+                    token, storedMember,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
                 const randomPassword = generateRandomPasswordFunction();
                 const newPassword = generateRandomPasswordFunction();
-                const encryptedPassword = await bcryptFunction.hash(currentPassword, await bcryptFunction.genSalt());
-                const member = memberFixture(encryptedPassword, true);
-                const storedMember = await prismaService.member.create({
-                    data: member,
-                });
-                const payload: MemberToken = {
-                    id: storedMember.id,
-                    nickname: storedMember.nickname,
-                    authority: storedMember.authority,
-                };
-                const token = jwtService.sign(payload, {
-                    secret: configService.get<string>("JWT_SECRET_KEY"),
-                });
                 const requestBody: UpdateMemberPasswordRequestDto = {
                     currentPassword: randomPassword,
                     newPassword: newPassword,
@@ -573,20 +464,9 @@ describe("Member e2e Test", () => {
             describe("아직 회원가입 승인이 안된 사용자라면,", () => {
                 it("회원가입을 하고 id를 돌려준다.", async () => {
                     // given
-                    const randomPassword = generateRandomPasswordFunction();
-                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                    const member = memberFixture(encryptedPassword, true, MemberAuthority.MANAGER);
-                    const storedMember = await prismaService.member.create({
-                        data: member,
-                    });
-                    const payload: MemberToken = {
-                        id: storedMember.id,
-                        nickname: storedMember.nickname,
-                        authority: storedMember.authority,
-                    };
-                    const token = jwtService.sign(payload, {
-                        secret: configService.get<string>("JWT_SECRET_KEY"),
-                    });
+                    const {
+                        token,
+                    } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
 
                     const anotherRandomPassword = generateRandomPasswordFunction();
                     const anotherEncryptedPassword
@@ -619,20 +499,9 @@ describe("Member e2e Test", () => {
             describe("이미 회원가입 승인이 된 사용자라면,", () => {
                 it("잘못된 요청이라는 예외를 발생시킨다.", async () => {
                     // given
-                    const randomPassword = generateRandomPasswordFunction();
-                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                    const member = memberFixture(encryptedPassword, true, MemberAuthority.MANAGER);
-                    const storedMember = await prismaService.member.create({
-                        data: member,
-                    });
-                    const payload: MemberToken = {
-                        id: storedMember.id,
-                        nickname: storedMember.nickname,
-                        authority: storedMember.authority,
-                    };
-                    const token = jwtService.sign(payload, {
-                        secret: configService.get<string>("JWT_SECRET_KEY"),
-                    });
+                    const {
+                        token,
+                    } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
 
                     const anotherRandomPassword = generateRandomPasswordFunction();
                     const anotherEncryptedPassword
@@ -657,20 +526,9 @@ describe("Member e2e Test", () => {
         describe("ADMIN, MANGAER 권한의 사용자가 아니라면, ", () => {
             it("비인가 예외를 발생시켜야 한다.", async () => {
                 // given
-                const randomPassword = generateRandomPasswordFunction();
-                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                const member = memberFixture(encryptedPassword, true, MemberAuthority.USER);
-                const storedMember = await prismaService.member.create({
-                    data: member,
-                });
-                const payload: MemberToken = {
-                    id: storedMember.id,
-                    nickname: storedMember.nickname,
-                    authority: storedMember.authority,
-                };
-                const token = jwtService.sign(payload, {
-                    secret: configService.get<string>("JWT_SECRET_KEY"),
-                });
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
 
                 const anotherRandomPassword = generateRandomPasswordFunction();
                 const anotherEncryptedPassword
@@ -698,22 +556,9 @@ describe("Member e2e Test", () => {
             describe("ADMIN 권한의 사용자를 수정하지 않는다면, ", () => {
                 describe("대상이 회원가입을 완료했다면, ", () => {
                     it("대상의 권한을 변경해야 한다.", async () => {
-                        // given
-                        const randomPassword = generateRandomPasswordFunction();
-                        const encryptedPassword
-                            = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                        const member = memberFixture(encryptedPassword, true, MemberAuthority.ADMIN);
-                        const storedMember = await prismaService.member.create({
-                            data: member,
-                        });
-                        const payload: MemberToken = {
-                            id: storedMember.id,
-                            nickname: storedMember.nickname,
-                            authority: storedMember.authority,
-                        };
-                        const token = jwtService.sign(payload, {
-                            secret: configService.get<string>("JWT_SECRET_KEY"),
-                        });
+                        const {
+                            token,
+                        } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.ADMIN);
 
                         const anotherRandomPassword = generateRandomPasswordFunction();
                         const anotherEncryptedPassword
@@ -746,21 +591,9 @@ describe("Member e2e Test", () => {
                 describe("대상이 회원가입을 완료하지 않았다면, ", () => {
                     it("잘못된 요청 예외를 발생시킨다.", async () => {
                         // given
-                        const randomPassword = generateRandomPasswordFunction();
-                        const encryptedPassword =
-                            await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                        const member = memberFixture(encryptedPassword, true, MemberAuthority.ADMIN);
-                        const storedMember = await prismaService.member.create({
-                            data: member,
-                        });
-                        const payload: MemberToken = {
-                            id: storedMember.id,
-                            nickname: storedMember.nickname,
-                            authority: storedMember.authority,
-                        };
-                        const token = jwtService.sign(payload, {
-                            secret: configService.get<string>("JWT_SECRET_KEY"),
-                        });
+                        const {
+                            token,
+                        } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.ADMIN);
 
                         const anotherRandomPassword = generateRandomPasswordFunction();
                         const anotherEncryptedPassword
@@ -785,20 +618,9 @@ describe("Member e2e Test", () => {
             describe("ADMIN 권한의 사용자를 수정한다면, ", () => {
                 it("ADMIN 권한은 수정할 수 없다는 예외를 발생시켜야 한다.", async () => {
                     // given
-                    const randomPassword = generateRandomPasswordFunction();
-                    const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                    const member = memberFixture(encryptedPassword, true, MemberAuthority.ADMIN);
-                    const storedMember = await prismaService.member.create({
-                        data: member,
-                    });
-                    const payload: MemberToken = {
-                        id: storedMember.id,
-                        nickname: storedMember.nickname,
-                        authority: storedMember.authority,
-                    };
-                    const token = jwtService.sign(payload, {
-                        secret: configService.get<string>("JWT_SECRET_KEY"),
-                    });
+                    const {
+                        token, storedMember,
+                    } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.ADMIN);
 
                     const requestBody: UpdateMemberAuthorityRequestDto = {
                         authority: MemberAuthority.MANAGER,
@@ -816,20 +638,9 @@ describe("Member e2e Test", () => {
         describe("AMDIN 권한이 아니라면, ", () => {
             it("권한 부족 예외를 발생시킨다.", async () => {
                 // given
-                const randomPassword = generateRandomPasswordFunction();
-                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                const member = memberFixture(encryptedPassword, true, MemberAuthority.MANAGER);
-                const storedMember = await prismaService.member.create({
-                    data: member,
-                });
-                const payload: MemberToken = {
-                    id: storedMember.id,
-                    nickname: storedMember.nickname,
-                    authority: storedMember.authority,
-                };
-                const token = jwtService.sign(payload, {
-                    secret: configService.get<string>("JWT_SECRET_KEY"),
-                });
+                const {
+                    token, storedMember,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
 
                 const requestBody: UpdateMemberAuthorityRequestDto = {
                     authority: MemberAuthority.MANAGER,
@@ -849,20 +660,9 @@ describe("Member e2e Test", () => {
         describe("존재하는 대상인 경우 ", () => {
             it("대상을 삭제하고 id는 null을 반환한다.", async () => {
                 // given
-                const randomPassword = generateRandomPasswordFunction();
-                const encryptedPassword = await bcryptFunction.hash(randomPassword, await bcryptFunction.genSalt());
-                const member = memberFixture(encryptedPassword, true);
-                const storedMember = await prismaService.member.create({
-                    data: member,
-                });
-                const payload: MemberToken = {
-                    id: storedMember.id,
-                    nickname: storedMember.nickname,
-                    authority: storedMember.authority,
-                };
-                const token = jwtService.sign(payload, {
-                    secret: configService.get<string>("JWT_SECRET_KEY"),
-                });
+                const {
+                    token, storedMember,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
 
                 // when
                 await supertestRequestFunction(app.getHttpServer())
