@@ -16,12 +16,16 @@ import {
 import {
     MemberModule, 
 } from "./domain/member/member.module";
+import {
+    SpaceModule, 
+} from "./domain/space/space.module";
 
 @Module({
     imports: [
         AuthModule,
         PrismaModule,
         MemberModule,
+        SpaceModule,
         ConfigModule.forRoot({
             isGlobal: true,
             envFilePath: ".env",

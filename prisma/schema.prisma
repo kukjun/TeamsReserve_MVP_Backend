@@ -30,7 +30,7 @@ model Member {
 
 model Space {
   id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String
+  name             String   @unique
   location         String
   description      String?  @db.Text
   createdAt        DateTime @default(now())
