@@ -23,4 +23,14 @@ export class PhotoRepository {
         return photo.id;
     }
 
+    async findPhotoListBySpaceId(id): Promise<PhotoEntity[]> {
+        const photoList = await this.prismaService.photo.findMany({
+            where: {
+                spaceId: id,
+            },
+        });
+
+        return photoList;
+    }
+
 }
