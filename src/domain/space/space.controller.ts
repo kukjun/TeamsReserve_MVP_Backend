@@ -49,6 +49,9 @@ import {
 import {
     GetPhotoListResponseDto, 
 } from "./dto/res/get-photo-list-response.dto";
+import {
+    GetSpaceResponseDto, 
+} from "./dto/res/get-space.response.dto";
 
 @ApiTags("spaces")
 @ApiExtraModels(DefaultResponse)
@@ -111,6 +114,20 @@ export class SpaceController {
     @Get("/:id/photos")
     async getPhotoList(@Param("id") id: string): Promise<DefaultResponse<GetPhotoListResponseDto>> {
         const data = await this.spaceService.getPhotoList(id);
+
+        return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.MANAGER, MemberAuthority.ADMIN, MemberAuthority.USER)
+    @ApiOperation({
+        summary: "공간 조회.",
+        description: "공간의 정보를 조회할 수 있다.",
+    })
+    @ApiDefaultResponse(GetPhotoListResponseDto)
+    @HttpCode(HttpStatus.OK)
+    @Get("/:id")
+    async getSpace(@Param("id") id: string): Promise<DefaultResponse<GetSpaceResponseDto>> {
+        const data = await this.spaceService.getSpace(id);
 
         return new DefaultResponse(data);
     }

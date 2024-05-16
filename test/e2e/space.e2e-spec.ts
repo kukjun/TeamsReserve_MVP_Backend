@@ -56,6 +56,9 @@ import {
 import {
     uuidFunction, 
 } from "../../src/util/function/uuid.function";
+import {
+    GetSpaceResponseDto, 
+} from "../../src/domain/space/dto/res/get-space.response.dto";
 
 describe("Space e2e Test", () => {
     let app: INestApplication;
@@ -226,6 +229,44 @@ describe("Space e2e Test", () => {
                     .expect(HttpStatus.NOT_FOUND);
             });
         });
-        
+    });
+    describe("getSpace", () => {
+        describe("공간이 존재하면,", () => {
+            it("공간을 조회할 수 있다.", async () => {
+                // given
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
+                const storedSpace = await prismaService.space.create({
+                    data: spaceFixture(),
+                });
+
+                // when
+                const response = await supertestRequestFunction(app.getHttpServer())
+                    .get(`/spaces/${storedSpace.id}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.OK);
+
+                // then
+                const actual = response.body as DefaultResponse<GetSpaceResponseDto>;
+                expect(actual.data.id).toBe(storedSpace.id);
+                expect(actual.data.name).toBe(storedSpace.name);
+                expect(actual.data.location).toBe(storedSpace.location);
+                expect(actual.data.description).toBe(storedSpace.description);
+            });
+        });
+        describe("공간이 존재하지 않으면, ", () => {
+            it("공간을 찾을 수 없다는 예외를 발생시킨다.", async () => {
+                // given
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
+                // when
+                const response = await supertestRequestFunction(app.getHttpServer())
+                    .get(`/spaces/${uuidFunction.v4()}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.NOT_FOUND);
+            });
+        });
     });
 });

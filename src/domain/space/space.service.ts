@@ -44,6 +44,9 @@ import {
 import {
     GetPhotoListResponseDto,
 } from "./dto/res/get-photo-list-response.dto";
+import {
+    GetSpaceResponseDto, 
+} from "./dto/res/get-space.response.dto";
 
 @Injectable()
 export class SpaceService {
@@ -123,6 +126,18 @@ export class SpaceService {
 
         return {
             data: result,
+        };
+    }
+
+    async getSpace(id: string): Promise<GetSpaceResponseDto> {
+        const space = await this.spaceRepository.findSpaceById(id);
+        if(!space) throw new SpaceNotFoundException(`id: ${id}`);
+
+        return {
+            id: space.id,
+            name: space.name,
+            location: space.location,
+            description: space.description,
         };
     }
 
