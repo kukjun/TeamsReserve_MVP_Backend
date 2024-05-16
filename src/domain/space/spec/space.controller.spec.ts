@@ -22,11 +22,22 @@ import {
 import {
     CreatePhotoResponseDto,
 } from "../dto/res/create-photo.response.dto";
+import {
+    GetSpaceResponseDto, 
+} from "../dto/res/get-space.response.dto";
+import {
+    getSpaceList, 
+} from "./fixture/paginate.response";
+import {
+    PaginateRequestDto, 
+} from "../../../interface/request/paginate.request.dto";
 
 const mockSpaceService = {
     createSpace: jest.fn(),
     createPhoto: jest.fn(),
     getPhotoList: jest.fn(),
+    getSpace: jest.fn(),
+    getSpaceList: jest.fn(),
 };
 
 describe("SpaceController Unit Test", () => {
@@ -102,6 +113,46 @@ describe("SpaceController Unit Test", () => {
             const result = await spaceController.getPhotoList(requestId);
             // then
             expect(result).not.toBeNull();
+            expect(result.data.data[0].id).toBe(expectedResponse.data[0].id);
+        });
+    });
+
+    describe("getSpace", () => {
+        it("id로 space를 조회할 수 있다.", async() => {
+            // given
+            const expectedResponse: GetSpaceResponseDto = {
+                id: uuidFunction.v4(),
+                name: "Test Space",
+                location: "Test Location",
+                description: "Space Description",
+            };
+            const requestId = uuidFunction.v4();
+            mockSpaceService.getSpace.mockResolvedValue(expectedResponse);
+            // when
+            const result = await spaceController.getSpace(requestId);
+            // then
+            expect(result).not.toBeNull();
+            expect(result.data.id).toBe(expectedResponse.id);
+            expect(result.data.name).toBe(expectedResponse.name);
+            expect(result.data.location).toBe(expectedResponse.location);
+            expect(result.data.description).toBe(expectedResponse.description);
+        });
+    });
+
+    describe("getSpaceList", () => {
+        it("pagiate된 결과를 받을 수 있다.", async () => {
+            // given
+            const expectedResponse = getSpaceList;
+            const paginateDto: PaginateRequestDto = {
+                page: 1,
+                limit: 10,
+            };
+            mockSpaceService.getSpaceList.mockResolvedValue(expectedResponse);
+            // when
+            const result = await spaceController.getSpaceList(paginateDto);
+            // then
+            expect(result).not.toBeNull();
+            expect(result.data.meta).toBe(expectedResponse.meta);
             expect(result.data.data[0].id).toBe(expectedResponse.data[0].id);
         });
     });

@@ -42,20 +42,32 @@ import {
     MemberAuthority,
 } from "../../src/types/enums/member.authority.enum";
 import {
-    spaceFixture,
+    spaceFixture, spaceRandomFixture,
 } from "../fixture/entity/space.fixture";
 import {
-    generateJwtToken, 
+    generateJwtToken,
 } from "../fixture/function/jwt-token";
 import {
-    photoFixture, 
+    photoFixture,
 } from "../fixture/entity/photo.fixture";
 import {
-    GetPhotoListResponseDto, 
+    GetPhotoListResponseDto,
 } from "../../src/domain/space/dto/res/get-photo-list-response.dto";
 import {
-    uuidFunction, 
+    uuidFunction,
 } from "../../src/util/function/uuid.function";
+import {
+    GetSpaceResponseDto,
+} from "../../src/domain/space/dto/res/get-space.response.dto";
+import {
+    SpaceEntity,
+} from "../../src/domain/space/entity/space.entity";
+import {
+    PaginateRequestDto,
+} from "../../src/interface/request/paginate.request.dto";
+import {
+    PaginateData,
+} from "../../src/interface/response/paginate.data";
 
 describe("Space e2e Test", () => {
     let app: INestApplication;
@@ -220,12 +232,86 @@ describe("Space e2e Test", () => {
                     token,
                 } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
                 // when
-                const response = await supertestRequestFunction(app.getHttpServer())
+                await supertestRequestFunction(app.getHttpServer())
                     .get(`/spaces/${uuidFunction.v4()}/photos`)
                     .set("Authorization", `Bearer ${token}`)
                     .expect(HttpStatus.NOT_FOUND);
             });
         });
-        
+    });
+    describe("getSpace", () => {
+        describe("공간이 존재하면,", () => {
+            it("공간을 조회할 수 있다.", async () => {
+                // given
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
+                const storedSpace = await prismaService.space.create({
+                    data: spaceFixture(),
+                });
+
+                // when
+                const response = await supertestRequestFunction(app.getHttpServer())
+                    .get(`/spaces/${storedSpace.id}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.OK);
+
+                // then
+                const actual = response.body as DefaultResponse<GetSpaceResponseDto>;
+                expect(actual.data.id).toBe(storedSpace.id);
+                expect(actual.data.name).toBe(storedSpace.name);
+                expect(actual.data.location).toBe(storedSpace.location);
+                expect(actual.data.description).toBe(storedSpace.description);
+            });
+        });
+        describe("공간이 존재하지 않으면, ", () => {
+            it("공간을 찾을 수 없다는 예외를 발생시킨다.", async () => {
+                // given
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
+                // when
+                await supertestRequestFunction(app.getHttpServer())
+                    .get(`/spaces/${uuidFunction.v4()}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.NOT_FOUND);
+            });
+        });
+    });
+    describe("getSpaceList", () => {
+        it("존재하는 SpaceList 정보를 보여줘야 한다.", async () => {
+            // given
+            const {
+                token,
+            } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
+
+            const randomNumber = Math.ceil(Math.random() * 20);
+            const storedSpaces: SpaceEntity[] = [];
+            for (let i = 0; i < randomNumber; i++) {
+                storedSpaces.push(spaceRandomFixture(i));
+            }
+            await prismaService.space.createMany({
+                data: storedSpaces,
+            });
+            const request: PaginateRequestDto = {
+                page: 1,
+                limit: 10,
+            };
+
+            // when
+            const response = await supertestRequestFunction(app.getHttpServer())
+                .get("/spaces")
+                .query(request)
+                .set("Authorization", `Bearer ${token}`)
+                .expect(HttpStatus.OK);
+
+            // then
+            const actual = response.body as DefaultResponse<PaginateData<GetSpaceResponseDto>>;
+            expect(actual.data.meta.totalCount).toBe(randomNumber);
+            expect(actual.data.meta.totalPage).toEqual(Math.ceil(randomNumber / request.limit));
+            expect(actual.data.meta.page).toBe(request.page);
+            expect(actual.data.meta.take).toBe(request.limit);
+            expect(actual.data.meta.hasNextPage).toEqual(request.page < Math.ceil((randomNumber + 1) / request.limit));
+        });
     });
 });

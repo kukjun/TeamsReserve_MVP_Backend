@@ -7,6 +7,9 @@ import {
 import {
     SpaceEntity, 
 } from "./entity/space.entity";
+import {
+    PaginateRequestDto, 
+} from "../../interface/request/paginate.request.dto";
 
 @Injectable()
 export class SpaceRepository {
@@ -39,5 +42,19 @@ export class SpaceRepository {
         });
 
         return result.id;
+    }
+
+    async findSpaceByPaging(paginateDto: PaginateRequestDto): Promise<SpaceEntity[]> {
+        return await this.prismaService.space.findMany({
+            skip: (paginateDto.page - 1) * paginateDto.limit,
+            take: paginateDto.limit,
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+    }
+
+    async findSpaceCount(): Promise<number> {
+        return await this.prismaService.space.count();
     }
 }
