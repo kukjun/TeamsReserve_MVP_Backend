@@ -5,7 +5,6 @@ import {
     Get,
     HttpCode,
     HttpStatus,
-    MaxFileSizeValidator,
     Param,
     ParseFilePipe,
     Post, Put, Query,
@@ -99,9 +98,6 @@ export class SpaceController {
     async createSpacePhoto(@Param("id") id: string, @UploadedFile(
         new ParseFilePipe({
             validators: [
-                new MaxFileSizeValidator({
-                    maxSize: 1000,
-                }),
                 new FileTypeValidator({
                     fileType: ".(png|jpeg|jpg)",
                 }),
@@ -126,6 +122,19 @@ export class SpaceController {
         const data = await this.spaceService.getPhotoList(id);
 
         return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.MANAGER, MemberAuthority.ADMIN, MemberAuthority.USER)
+    @ApiOperation({
+        summary: "공간 사진 삭제.",
+        description: "공간에 저장된 사진을 삭제할 수 있다.",
+    })
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @Delete("/:id/photos/:photoId")
+    async deletePhoto(@Param("id") id: string, @Param("photoId") photoId: string): Promise<DefaultResponse<null>> {
+        await this.spaceService.deletePhoto(id, photoId);
+
+        return new DefaultResponse(null);
     }
 
     @Roles(MemberAuthority.MANAGER, MemberAuthority.ADMIN, MemberAuthority.USER)
