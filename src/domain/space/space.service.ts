@@ -47,6 +47,12 @@ import {
 import {
     GetSpaceResponseDto, 
 } from "./dto/res/get-space.response.dto";
+import {
+    PaginateRequestDto, 
+} from "../../interface/request/paginate.request.dto";
+import {
+    PaginateData, 
+} from "../../interface/response/paginate.data";
 
 @Injectable()
 export class SpaceService {
@@ -138,6 +144,32 @@ export class SpaceService {
             name: space.name,
             location: space.location,
             description: space.description,
+        };
+    }
+
+    async getSpaceList(paginateDto: PaginateRequestDto): Promise<PaginateData<GetSpaceResponseDto>> {
+        const spaces = await this.spaceRepository.findSpaceByPaging(paginateDto);
+        const data: GetSpaceResponseDto[] = spaces.map(space => {
+            return {
+                id: space.id,
+                name: space.name,
+                location: space.location,
+                description: space.description,
+            };
+        });
+        const totalCount = await this.spaceRepository.findSpaceCount();
+        const totalPage = Math.ceil(totalCount / paginateDto.limit);
+        const hasNextPage = paginateDto.page < totalPage;
+
+        return {
+            data: data,
+            meta: {
+                page: paginateDto.page,
+                take: paginateDto.limit,
+                totalCount,
+                totalPage,
+                hasNextPage,
+            },
         };
     }
 

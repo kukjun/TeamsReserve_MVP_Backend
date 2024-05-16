@@ -12,3 +12,12 @@ export const spaceFixture
             }
         );
     };
+
+export const spaceRandomFixture
+    = (count: number = 0) => {
+        return new SpaceEntity({
+            name: `e2eName${count}`,
+            location: `e2e location name${count}`,
+            description: `e2e description${count}`,
+        });
+    };

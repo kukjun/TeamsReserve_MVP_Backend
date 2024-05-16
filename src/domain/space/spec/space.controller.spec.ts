@@ -25,12 +25,19 @@ import {
 import {
     GetSpaceResponseDto, 
 } from "../dto/res/get-space.response.dto";
+import {
+    getSpaceList, 
+} from "./fixture/paginate.response";
+import {
+    PaginateRequestDto, 
+} from "../../../interface/request/paginate.request.dto";
 
 const mockSpaceService = {
     createSpace: jest.fn(),
     createPhoto: jest.fn(),
     getPhotoList: jest.fn(),
     getSpace: jest.fn(),
+    getSpaceList: jest.fn(),
 };
 
 describe("SpaceController Unit Test", () => {
@@ -129,6 +136,24 @@ describe("SpaceController Unit Test", () => {
             expect(result.data.name).toBe(expectedResponse.name);
             expect(result.data.location).toBe(expectedResponse.location);
             expect(result.data.description).toBe(expectedResponse.description);
+        });
+    });
+
+    describe("getSpaceList", () => {
+        it("pagiate된 결과를 받을 수 있다.", async () => {
+            // given
+            const expectedResponse = getSpaceList;
+            const paginateDto: PaginateRequestDto = {
+                page: 1,
+                limit: 10,
+            };
+            mockSpaceService.getSpaceList.mockResolvedValue(expectedResponse);
+            // when
+            const result = await spaceController.getSpaceList(paginateDto);
+            // then
+            expect(result).not.toBeNull();
+            expect(result.data.meta).toBe(expectedResponse.meta);
+            expect(result.data.data[0].id).toBe(expectedResponse.data[0].id);
         });
     });
 

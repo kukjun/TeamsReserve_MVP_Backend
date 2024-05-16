@@ -8,58 +8,65 @@ import {
     MaxFileSizeValidator,
     Param,
     ParseFilePipe,
-    Post,
+    Post, Query,
     UploadedFile,
     UseGuards,
     UseInterceptors,
 } from "@nestjs/common";
 import {
-    SpaceService, 
+    SpaceService,
 } from "./space.service";
 import {
-    CreateSpaceRequestDto, 
+    CreateSpaceRequestDto,
 } from "./dto/req/create-space.request.dto";
 import {
-    DefaultResponse, 
+    DefaultResponse,
 } from "../../interface/response/default.response";
 import {
-    CreateSpaceResponseDto, 
+    CreateSpaceResponseDto,
 } from "./dto/res/create-space.response.dto";
 import {
-    ApiExtraModels, ApiOperation, ApiTags, 
+    ApiExtraModels, ApiOperation, ApiTags,
 } from "@nestjs/swagger";
 import {
-    ApiDefaultResponse, 
+    ApiDefaultResponse,
 } from "../../util/decorators/api-default.response";
 import {
-    Roles, 
+    Roles,
 } from "../../util/decorators/permission";
 import {
-    MemberAuthority, 
+    MemberAuthority,
 } from "../../types/enums/member.authority.enum";
 import {
-    JwtGuard, 
+    JwtGuard,
 } from "../auth/guards/jwt.guard";
 import {
-    FileInterceptor, 
+    FileInterceptor,
 } from "@nestjs/platform-express";
 import {
-    CreatePhotoResponseDto, 
+    CreatePhotoResponseDto,
 } from "./dto/res/create-photo.response.dto";
 import {
-    GetPhotoListResponseDto, 
+    GetPhotoListResponseDto,
 } from "./dto/res/get-photo-list-response.dto";
 import {
-    GetSpaceResponseDto, 
+    GetSpaceResponseDto,
 } from "./dto/res/get-space.response.dto";
+import {
+    PaginateRequestDto,
+} from "../../interface/request/paginate.request.dto";
+import {
+    PaginateData,
+} from "../../interface/response/paginate.data";
 
 @ApiTags("spaces")
 @ApiExtraModels(DefaultResponse)
+@ApiExtraModels(PaginateData)
 @UseGuards(JwtGuard)
 @Controller("spaces")
 export class SpaceController {
     constructor(
-        private readonly spaceService: SpaceService,
+        private readonly spaceService: SpaceService
     ) {
     }
 
@@ -90,10 +97,10 @@ export class SpaceController {
         new ParseFilePipe({
             validators: [
                 new MaxFileSizeValidator({
-                    maxSize: 1000, 
+                    maxSize: 1000,
                 }),
                 new FileTypeValidator({
-                    fileType:".(png|jpeg|jpg)",
+                    fileType: ".(png|jpeg|jpg)",
                 }),
             ],
         })
@@ -128,6 +135,21 @@ export class SpaceController {
     @Get("/:id")
     async getSpace(@Param("id") id: string): Promise<DefaultResponse<GetSpaceResponseDto>> {
         const data = await this.spaceService.getSpace(id);
+
+        return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.MANAGER, MemberAuthority.ADMIN, MemberAuthority.USER)
+    @ApiOperation({
+        summary: "공간 List 조회.",
+        description: "공간의 정보를 Paginate해서 조회할 수 있다.",
+    })
+    @ApiDefaultResponse(PaginateData<GetSpaceResponseDto>)
+    @HttpCode(HttpStatus.OK)
+    @Get()
+    async getSpaceList(@Query() paginateDto: PaginateRequestDto)
+        : Promise<DefaultResponse<PaginateData<GetSpaceResponseDto>>> {
+        const data = await this.spaceService.getSpaceList(paginateDto);
 
         return new DefaultResponse(data);
     }
