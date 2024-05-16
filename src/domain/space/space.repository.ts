@@ -70,6 +70,12 @@ export class SpaceRepository {
     }
 
     async deleteSpace(id: string): Promise<null> {
+        // HACK: Cascade 전략을 제고
+        await this.prismaService.photo.deleteMany({
+            where: {
+                spaceId: id,
+            },
+        });
         await this.prismaService.space.delete({
             where: {
                 id,

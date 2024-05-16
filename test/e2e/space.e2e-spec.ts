@@ -398,28 +398,64 @@ describe("Space e2e Test", () => {
 
     describe("deleteSpace", () => {
         describe("만약 공간이 존재한다면,", () => {
-            it("공간을 삭제하고 null을 반환한다.", async () => {
-                // given
-                const {
-                    token,
-                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
-                const storedSpace = await prismaService.space.create({
-                    data: spaceFixture(),
-                });
-                // when
-                await supertestRequestFunction(app.getHttpServer())
-                    .delete(`/spaces/${storedSpace.id}`)
-                    .set("Authorization", `Bearer ${token}`)
-                    .expect(HttpStatus.NO_CONTENT);
+            describe("만약 공간에 사진이 존재한다면, ", () => {
+                it("공간을 삭제하고 null을 반환한다.", async () => {
+                    // given
+                    const {
+                        token,
+                    } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+                    const storedSpace = await prismaService.space.create({
+                        data: spaceFixture(),
+                    });
+                    await prismaService.photo.create({
+                        data: photoFixture(storedSpace.id),
+                    });
+                    // when
+                    await supertestRequestFunction(app.getHttpServer())
+                        .delete(`/spaces/${storedSpace.id}`)
+                        .set("Authorization", `Bearer ${token}`)
+                        .expect(HttpStatus.NO_CONTENT);
 
-                // then
-                const actualSpace = await prismaService.space.findUnique({
-                    where: {
-                        id: storedSpace.id,
-                    },
+                    // then
+                    const actualSpace = await prismaService.space.findUnique({
+                        where: {
+                            id: storedSpace.id,
+                        },
+                    });
+                    expect(actualSpace).toBeNull();
+                    const actualPhotos = await prismaService.photo.findMany({
+                        where: {
+                            spaceId: storedSpace.id,
+                        },
+                    });
+                    expect(actualPhotos.length).toBe(0);
                 });
-                expect(actualSpace).toBeNull();
             });
+            describe("만약 공간에 사진이 존재하지 않으면, ", () => {
+                it("공간을 삭제하고 null을 반환한다.", async () => {
+                    // given
+                    const {
+                        token,
+                    } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+                    const storedSpace = await prismaService.space.create({
+                        data: spaceFixture(),
+                    });
+                    // when
+                    await supertestRequestFunction(app.getHttpServer())
+                        .delete(`/spaces/${storedSpace.id}`)
+                        .set("Authorization", `Bearer ${token}`)
+                        .expect(HttpStatus.NO_CONTENT);
+
+                    // then
+                    const actualSpace = await prismaService.space.findUnique({
+                        where: {
+                            id: storedSpace.id,
+                        },
+                    });
+                    expect(actualSpace).toBeNull();
+                });
+            });
+
         });
         describe("만약 공간이 존재하지 않는다면,", () => {
             it("공간이 존재하지 않는다는 예외를 발생시킨다.", async () => {
