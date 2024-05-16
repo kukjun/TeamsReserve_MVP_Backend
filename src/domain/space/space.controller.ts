@@ -1,6 +1,6 @@
 import {
     Body,
-    Controller,
+    Controller, Delete,
     FileTypeValidator,
     Get,
     HttpCode,
@@ -141,6 +141,20 @@ export class SpaceController {
         const data = await this.spaceService.updateSpace(id, requestBody);
 
         return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.MANAGER, MemberAuthority.ADMIN)
+    @ApiOperation({
+        summary: "공간 삭제.",
+        description: "생성된 공간을 삭제할 수 있다.",
+    })
+    @HttpCode(HttpStatus.NO_CONTENT)
+    @Delete("/:id")
+    async deleteSpace(@Param("id") id: string)
+        : Promise<DefaultResponse<null>> {
+        await this.spaceService.deleteSpace(id);
+
+        return new DefaultResponse(null);
     }
 
     @Roles(MemberAuthority.MANAGER, MemberAuthority.ADMIN, MemberAuthority.USER)

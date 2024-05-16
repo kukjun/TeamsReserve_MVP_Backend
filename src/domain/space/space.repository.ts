@@ -68,4 +68,14 @@ export class SpaceRepository {
 
         return result.id;
     }
+
+    async deleteSpace(id: string): Promise<null> {
+        await this.prismaService.space.delete({
+            where: {
+                id,
+            },
+        });
+
+        return null;
+    }
 }

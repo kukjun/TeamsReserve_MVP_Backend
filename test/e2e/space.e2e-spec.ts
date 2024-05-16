@@ -314,7 +314,7 @@ describe("Space e2e Test", () => {
             expect(actual.data.meta.totalPage).toEqual(Math.ceil(randomNumber / request.limit));
             expect(actual.data.meta.page).toBe(request.page);
             expect(actual.data.meta.take).toBe(request.limit);
-            expect(actual.data.meta.hasNextPage).toEqual(request.page < Math.ceil((randomNumber + 1) / request.limit));
+            expect(actual.data.meta.hasNextPage).toEqual(request.page < Math.ceil((randomNumber) / request.limit));
         });
     });
     describe("updateSpace", () => {
@@ -394,5 +394,47 @@ describe("Space e2e Test", () => {
                     .expect(HttpStatus.NOT_FOUND);
             });
         });
+    });
+
+    describe("deleteSpace", () => {
+        describe("만약 공간이 존재한다면,", () => {
+            it("공간을 삭제하고 null을 반환한다.", async () => {
+                // given
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+                const storedSpace = await prismaService.space.create({
+                    data: spaceFixture(),
+                });
+                // when
+                await supertestRequestFunction(app.getHttpServer())
+                    .delete(`/spaces/${storedSpace.id}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.NO_CONTENT);
+
+                // then
+                const actualSpace = await prismaService.space.findUnique({
+                    where: {
+                        id: storedSpace.id,
+                    },
+                });
+                expect(actualSpace).toBeNull();
+            });
+        });
+        describe("만약 공간이 존재하지 않는다면,", () => {
+            it("공간이 존재하지 않는다는 예외를 발생시킨다.", async () => {
+                // given
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+                const requestId = uuidFunction.v4();
+                // when, then
+                await supertestRequestFunction(app.getHttpServer())
+                    .delete(`/spaces/${requestId}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.NOT_FOUND);
+            });
+        });
+        
     });
 });

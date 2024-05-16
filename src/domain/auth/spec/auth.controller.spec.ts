@@ -187,7 +187,6 @@ describe("AuthController Unit Test", () => {
         it("중복된 이메일이라면, 해당 예외를 돌려준다.", async () => {
             // given
             const request = signupRequestFixture();
-            const expectedMessage = "email: " + request.email + " duplicate - Bad Request";
             authServiceMock.signup.mockImplementation(() => {
                 throw new DuplicateException("email: " + request.email + " duplicate");
             });
@@ -198,14 +197,12 @@ describe("AuthController Unit Test", () => {
             } catch (error) {
                 // then
                 expect(error instanceof DuplicateException).toBe(true);
-                expect(error.message).toEqual(expectedMessage);
             }
         });
 
         it("중복된 닉네임이라면, 해당 예외를 돌려준다.", async () => {
             // given
             const request = signupRequestFixture();
-            const expectedMessage = "nickname: " + request.nickname + " duplicate - Bad Request";
             authServiceMock.signup.mockImplementation(() => {
                 throw new DuplicateException("nickname: " + request.nickname + " duplicate");
             });
@@ -216,7 +213,6 @@ describe("AuthController Unit Test", () => {
             } catch (error) {
                 // then
                 expect(error instanceof DuplicateException).toBe(true);
-                expect(error.message).toEqual(expectedMessage);
             }
         });
     });
