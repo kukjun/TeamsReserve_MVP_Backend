@@ -53,6 +53,9 @@ import {
 import {
     PaginateData, 
 } from "../../interface/response/paginate.data";
+import {
+    UpdateSpaceRequestDto, 
+} from "./dto/req/update-space.request.dto";
 
 @Injectable()
 export class SpaceService {
@@ -170,6 +173,27 @@ export class SpaceService {
                 totalPage,
                 hasNextPage,
             },
+        };
+    }
+
+    async updateSpace(id: string, dto: UpdateSpaceRequestDto): Promise<CreateSpaceResponseDto> {
+        const space = await this.spaceRepository.findSpaceById(id);
+        if(!space) throw new SpaceNotFoundException(`id: ${id}`);
+
+        // 네임 중복 체크
+        if(dto?.name) {
+            const overlapSpace = await this.spaceRepository.findSpaceByName(dto.name);
+            if (overlapSpace) throw new DuplicateException(`name: ${dto.name}`);
+        }
+
+        const updatedSpace: SpaceEntity = {
+            ...space,
+            ...dto,
+        };
+        const resultId = await this.spaceRepository.updateSpace(updatedSpace);
+
+        return {
+            id: resultId,
         };
     }
 

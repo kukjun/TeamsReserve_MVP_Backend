@@ -8,7 +8,7 @@ import {
     MaxFileSizeValidator,
     Param,
     ParseFilePipe,
-    Post, Query,
+    Post, Put, Query,
     UploadedFile,
     UseGuards,
     UseInterceptors,
@@ -58,6 +58,9 @@ import {
 import {
     PaginateData,
 } from "../../interface/response/paginate.data";
+import {
+    UpdateSpaceRequestDto, 
+} from "./dto/req/update-space.request.dto";
 
 @ApiTags("spaces")
 @ApiExtraModels(DefaultResponse)
@@ -121,6 +124,21 @@ export class SpaceController {
     @Get("/:id/photos")
     async getPhotoList(@Param("id") id: string): Promise<DefaultResponse<GetPhotoListResponseDto>> {
         const data = await this.spaceService.getPhotoList(id);
+
+        return new DefaultResponse(data);
+    }
+
+    @Roles(MemberAuthority.MANAGER, MemberAuthority.ADMIN, MemberAuthority.USER)
+    @ApiOperation({
+        summary: "공간 수정.",
+        description: "공간의 내용을 수정할 수 있다.",
+    })
+    @ApiDefaultResponse(PaginateData<CreateSpaceResponseDto>)
+    @HttpCode(HttpStatus.CREATED)
+    @Put("/:id")
+    async updateSpace(@Param("id") id: string, @Body() requestBody: UpdateSpaceRequestDto)
+        : Promise<DefaultResponse<CreateSpaceResponseDto>> {
+        const data = await this.spaceService.updateSpace(id, requestBody);
 
         return new DefaultResponse(data);
     }

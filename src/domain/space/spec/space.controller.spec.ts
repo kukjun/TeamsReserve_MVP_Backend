@@ -31,6 +31,9 @@ import {
 import {
     PaginateRequestDto, 
 } from "../../../interface/request/paginate.request.dto";
+import {
+    UpdateSpaceRequestDto, 
+} from "../dto/req/update-space.request.dto";
 
 const mockSpaceService = {
     createSpace: jest.fn(),
@@ -38,6 +41,7 @@ const mockSpaceService = {
     getPhotoList: jest.fn(),
     getSpace: jest.fn(),
     getSpaceList: jest.fn(),
+    updateSpace: jest.fn(),
 };
 
 describe("SpaceController Unit Test", () => {
@@ -156,5 +160,26 @@ describe("SpaceController Unit Test", () => {
             expect(result.data.data[0].id).toBe(expectedResponse.data[0].id);
         });
     });
+
+    describe("updateSpace", () => {
+        it("pagiate된 결과를 받을 수 있다.", async () => {
+            // given
+            const expectedResponse: CreateSpaceResponseDto = {
+                id: uuidFunction.v4(),
+            };
+            const requestId = expectedResponse.id;
+            const dto: UpdateSpaceRequestDto = {
+                name: "changed name",
+            };
+            mockSpaceService.updateSpace.mockResolvedValue(expectedResponse);
+            // when
+            const result = await spaceController.updateSpace(requestId, dto);
+            // then
+            expect(result).not.toBeNull();
+            expect(result.data.id).toBe(requestId);
+        });
+    });
+
+    // updateSpace
 
 });

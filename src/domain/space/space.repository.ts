@@ -57,4 +57,15 @@ export class SpaceRepository {
     async findSpaceCount(): Promise<number> {
         return await this.prismaService.space.count();
     }
+
+    async updateSpace(space: SpaceEntity): Promise<string> {
+        const result = await this.prismaService.space.update({
+            where: {
+                id: space.id,
+            },
+            data: space,
+        });
+
+        return result.id;
+    }
 }
