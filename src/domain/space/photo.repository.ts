@@ -23,7 +23,7 @@ export class PhotoRepository {
         return photo.id;
     }
 
-    async findPhotoListBySpaceId(id): Promise<PhotoEntity[]> {
+    async findPhotoListBySpaceId(id: string): Promise<PhotoEntity[]> {
         const photoList = await this.prismaService.photo.findMany({
             where: {
                 spaceId: id,
@@ -31,6 +31,25 @@ export class PhotoRepository {
         });
 
         return photoList;
+    }
+
+    async findPhotoById(id: string): Promise<PhotoEntity | null> {
+        const photo = await this.prismaService.photo.findUnique({
+            where:{
+                id,
+            },
+        });
+
+        return photo;
+    }
+    async deletePhotoById(id: string): Promise<null> {
+        await this.prismaService.photo.delete({
+            where:{
+                id,
+            },
+        });
+
+        return null;
     }
 
 }

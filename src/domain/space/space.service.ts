@@ -29,6 +29,7 @@ import {
     uuidFunction,
 } from "../../util/function/uuid.function";
 import {
+    DeleteObjectCommand,
     PutObjectCommand,
     S3Client,
 } from "@aws-sdk/client-s3";
@@ -56,6 +57,9 @@ import {
 import {
     UpdateSpaceRequestDto, 
 } from "./dto/req/update-space.request.dto";
+import {
+    PhotoNotFoundException, 
+} from "../../exception/photo-not-found.exception";
 
 @Injectable()
 export class SpaceService {
@@ -76,7 +80,6 @@ export class SpaceService {
     }
 
     async createSpace(dto: CreateSpaceRequestDto): Promise<CreateSpaceResponseDto> {
-        // 동일 이름의 space가 있는지 조회
         const space = await this.spaceRepository.findSpaceByName(dto.name);
         if(space) throw new DuplicateException(`name: ${dto.name} space`);
 
@@ -96,7 +99,8 @@ export class SpaceService {
         const strings = file.originalname.split(".");
         const ext = strings[strings.length-1];
         const fileId = uuidFunction.v4();
-        const fileKey = `${this.configService.get("AWS_BUCKET_KEY_ENV")}/sapces/${id}/photos/${fileId}`;
+        const fileKey = `${this.configService.get("AWS_BUCKET_KEY_ENV")}/spaces/${id}/photos/${fileId}`;
+        const filePath = `https://s3.${this.configService.get("AWS_REGION")}.amazonaws.com/${this.configService.get("AWS_BUCKET_NAME")}/${fileKey}`;
 
         const command = new PutObjectCommand({
             Bucket: this.configService.get("AWS_BUCKET_NAME"), // S3 버킷 이름
@@ -109,7 +113,7 @@ export class SpaceService {
 
         const photoEntity: PhotoEntity = new PhotoEntity({
             id: fileId,
-            path: `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_S3_BUCKET_NAME}/${fileKey}`,
+            path: filePath,
             name: file.originalname,
             spaceId: space.id,
         });
@@ -136,6 +140,25 @@ export class SpaceService {
         return {
             data: result,
         };
+    }
+
+    async deletePhoto(id: string, photoId: string): Promise<null> {
+        const space = await this.spaceRepository.findSpaceById(id);
+        if(!space) throw new SpaceNotFoundException(`id: ${id}`);
+
+        const photo =  await this.photoRepository.findPhotoById(photoId);
+        if(!photo) throw new PhotoNotFoundException(`id: ${id}`);
+
+        const fileKey = `${this.configService.get("AWS_BUCKET_KEY_ENV")}/spaces/${id}/photos/${photoId}`;
+        const command = new DeleteObjectCommand({
+            Bucket: this.configService.get("AWS_BUCKET_NAME"),
+            Key: fileKey,
+        });
+        await this.s3Client.send(command);
+
+        await this.photoRepository.deletePhotoById(photoId);
+
+        return null;
     }
 
     async getSpace(id: string): Promise<GetSpaceResponseDto> {
