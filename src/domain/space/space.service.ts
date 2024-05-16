@@ -180,7 +180,6 @@ export class SpaceService {
         const space = await this.spaceRepository.findSpaceById(id);
         if(!space) throw new SpaceNotFoundException(`id: ${id}`);
 
-        // 네임 중복 체크
         if(dto?.name) {
             const overlapSpace = await this.spaceRepository.findSpaceByName(dto.name);
             if (overlapSpace) throw new DuplicateException(`name: ${dto.name}`);
@@ -195,6 +194,15 @@ export class SpaceService {
         return {
             id: resultId,
         };
+    }
+
+    async deleteSpace(id: string): Promise<null> {
+        const space = await this.spaceRepository.findSpaceById(id);
+        if(!space) throw new SpaceNotFoundException(`id: ${id}`);
+
+        await this.spaceRepository.deleteSpace(space.id);
+
+        return null;
     }
 
 }

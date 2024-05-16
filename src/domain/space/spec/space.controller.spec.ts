@@ -23,16 +23,16 @@ import {
     CreatePhotoResponseDto,
 } from "../dto/res/create-photo.response.dto";
 import {
-    GetSpaceResponseDto, 
+    GetSpaceResponseDto,
 } from "../dto/res/get-space.response.dto";
 import {
-    getSpaceList, 
+    getSpaceList,
 } from "./fixture/paginate.response";
 import {
-    PaginateRequestDto, 
+    PaginateRequestDto,
 } from "../../../interface/request/paginate.request.dto";
 import {
-    UpdateSpaceRequestDto, 
+    UpdateSpaceRequestDto,
 } from "../dto/req/update-space.request.dto";
 
 const mockSpaceService = {
@@ -42,6 +42,7 @@ const mockSpaceService = {
     getSpace: jest.fn(),
     getSpaceList: jest.fn(),
     updateSpace: jest.fn(),
+    deleteSpace: jest.fn(),
 };
 
 describe("SpaceController Unit Test", () => {
@@ -122,7 +123,7 @@ describe("SpaceController Unit Test", () => {
     });
 
     describe("getSpace", () => {
-        it("id로 space를 조회할 수 있다.", async() => {
+        it("id로 space를 조회할 수 있다.", async () => {
             // given
             const expectedResponse: GetSpaceResponseDto = {
                 id: uuidFunction.v4(),
@@ -162,7 +163,7 @@ describe("SpaceController Unit Test", () => {
     });
 
     describe("updateSpace", () => {
-        it("pagiate된 결과를 받을 수 있다.", async () => {
+        it("update 요청이 성공하면, 해당 id를 반환한다.", async () => {
             // given
             const expectedResponse: CreateSpaceResponseDto = {
                 id: uuidFunction.v4(),
@@ -179,7 +180,18 @@ describe("SpaceController Unit Test", () => {
             expect(result.data.id).toBe(requestId);
         });
     });
-
-    // updateSpace
+    describe("deleteSpace", () => {
+        it("delete 요청이 성공하면, null을 반환한다.", async () => {
+            // given
+            const expectedResponse = null;
+            const requestId = uuidFunction.v4();
+            mockSpaceService.deleteSpace.mockResolvedValue(expectedResponse);
+            // when
+            const result = await spaceController.deleteSpace(requestId);
+            // then
+            expect(result).not.toBeNull();
+            expect(result.data).toBeNull();
+        });
+    });
 
 });

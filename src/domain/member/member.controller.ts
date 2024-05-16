@@ -194,12 +194,11 @@ export class MemberController {
         summary: "회원 탈퇴",
         description: "본인이 자신 스스로 탈퇴할 수 있다.",
     })
-    @ApiDefaultResponse(GetMemberResponseDto)
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete("/:id")
     async deleteMember(@Param("id") id: string,
                        @Request() req)
-        : Promise<null> {
+        : Promise<DefaultResponse<null>> {
         await this.memberService.deleteMember(id, req.user);
 
         return null;
