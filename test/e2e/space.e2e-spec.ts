@@ -68,6 +68,9 @@ import {
 import {
     PaginateData,
 } from "../../src/interface/response/paginate.data";
+import {
+    UpdateSpaceRequestDto,
+} from "../../src/domain/space/dto/req/update-space.request.dto";
 
 describe("Space e2e Test", () => {
     let app: INestApplication;
@@ -312,6 +315,84 @@ describe("Space e2e Test", () => {
             expect(actual.data.meta.page).toBe(request.page);
             expect(actual.data.meta.take).toBe(request.limit);
             expect(actual.data.meta.hasNextPage).toEqual(request.page < Math.ceil((randomNumber + 1) / request.limit));
+        });
+    });
+    describe("updateSpace", () => {
+        describe("존재하는 공간을 변경하려고 하면,", () => {
+            describe("dto의 name에 중복이 없으면", () => {
+                it("변경하고자 하는 내용으로 공간 정보가 변경된다.", async () => {
+                    // given
+                    const {
+                        token,
+                    } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
+                    const storedSpace = await prismaService.space.create({
+                        data: spaceFixture(),
+                    });
+                    const updatedDto: UpdateSpaceRequestDto = {
+                        name: "updatedName",
+                    };
+
+                    // when
+                    const response = await supertestRequestFunction(app.getHttpServer())
+                        .put(`/spaces/${storedSpace.id}`)
+                        .send(updatedDto)
+                        .set("Authorization", `Bearer ${token}`)
+                        .expect(HttpStatus.CREATED);
+
+                    // then
+                    const actual = response.body as DefaultResponse<CreateSpaceResponseDto>;
+                    const actualSpace = await prismaService.space.findUnique({
+                        where: {
+                            id: actual.data.id,
+                        },
+                    });
+                    expect(actualSpace.name).toBe(updatedDto.name);
+                    expect(actualSpace.location).toBe(storedSpace.location);
+                    expect(actualSpace.description).toBe(storedSpace.description);
+                });
+            });
+            describe("dto의 name에 해당하는 공간이 이미 있으면, ", () => {
+                it("공간 이름에 중복이 발생했다는 예외를 발생시킨다.", async () => {
+                    // given
+                    const {
+                        token,
+                    } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
+                    const storedSpace = await prismaService.space.create({
+                        data: spaceFixture(),
+                    });
+                    const updatedDto: UpdateSpaceRequestDto = {
+                        name: storedSpace.name,
+                    };
+
+                    // when
+                    await supertestRequestFunction(app.getHttpServer())
+                        .put(`/spaces/${storedSpace.id}`)
+                        .send(updatedDto)
+                        .set("Authorization", `Bearer ${token}`)
+                        .expect(HttpStatus.BAD_REQUEST);
+
+                });
+
+            });
+        });
+        describe("존재하지 않는 공간을 변경하려고 하면,", () => {
+            it("공간이 존재하지 않는다는 예외를 발생시킨다.", async () => {
+                // given
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
+                const requestId= uuidFunction.v4();
+                const updatedDto: UpdateSpaceRequestDto = {
+                    name: "updatedName",
+                };
+
+                // when
+                await supertestRequestFunction(app.getHttpServer())
+                    .put(`/spaces/${requestId}`)
+                    .send(updatedDto)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.NOT_FOUND);
+            });
         });
     });
 });
