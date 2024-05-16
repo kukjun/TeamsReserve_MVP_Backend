@@ -1,43 +1,49 @@
 import {
-    Injectable, 
+    Injectable,
 } from "@nestjs/common";
 import {
-    SpaceRepository, 
+    SpaceRepository,
 } from "./space.repository";
 import {
-    PhotoRepository, 
+    PhotoRepository,
 } from "./photo.repository";
 import {
-    CreateSpaceRequestDto, 
+    CreateSpaceRequestDto,
 } from "./dto/req/create-space.request.dto";
 import {
-    CreateSpaceResponseDto, 
+    CreateSpaceResponseDto,
 } from "./dto/res/create-space.response.dto";
 import {
-    DuplicateException, 
+    DuplicateException,
 } from "../../exception/duplicate.exception";
 import {
-    SpaceEntity, 
+    SpaceEntity,
 } from "./entity/space.entity";
 import {
-    CreatePhotoResponseDto, 
+    CreatePhotoResponseDto,
 } from "./dto/res/create-photo.response.dto";
 import {
-    ConfigService, 
+    ConfigService,
 } from "@nestjs/config";
 import {
-    uuidFunction, 
+    uuidFunction,
 } from "../../util/function/uuid.function";
 import {
     PutObjectCommand,
     S3Client,
 } from "@aws-sdk/client-s3";
 import {
-    SpaceNotFoundException, 
+    SpaceNotFoundException,
 } from "../../exception/space-not-found.exception";
 import {
-    PhotoEntity, 
+    PhotoEntity,
 } from "./entity/photo.entity";
+import {
+    GetPhotoResponseDto,
+} from "./dto/res/get-photo-response.dto";
+import {
+    GetPhotoListResponseDto,
+} from "./dto/res/get-photo-list-response.dto";
 
 @Injectable()
 export class SpaceService {
@@ -100,7 +106,24 @@ export class SpaceService {
         return {
             id: resultId,
         };
+    }
 
+    async getPhotoList(id: string): Promise<GetPhotoListResponseDto> {
+        const space = await this.spaceRepository.findSpaceById(id);
+        if(!space) throw new SpaceNotFoundException(`id: ${id}`);
+
+        const photoList =  await this.photoRepository.findPhotoListBySpaceId(id);
+        const result: GetPhotoResponseDto[] = photoList.map(photo => {
+            return {
+                id: photo.id,
+                path: photo.path,
+                name: photo.name,
+            };
+        });
+
+        return {
+            data: result,
+        };
     }
 
 }

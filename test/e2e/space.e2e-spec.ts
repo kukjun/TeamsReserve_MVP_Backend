@@ -47,6 +47,15 @@ import {
 import {
     generateJwtToken, 
 } from "../fixture/function/jwt-token";
+import {
+    photoFixture, 
+} from "../fixture/entity/photo.fixture";
+import {
+    GetPhotoListResponseDto, 
+} from "../../src/domain/space/dto/res/get-photo-list-response.dto";
+import {
+    uuidFunction, 
+} from "../../src/util/function/uuid.function";
 
 describe("Space e2e Test", () => {
     let app: INestApplication;
@@ -84,6 +93,7 @@ describe("Space e2e Test", () => {
 
     afterEach(async () => {
         await prismaService.member.deleteMany({});
+        await prismaService.photo.deleteMany({});
         await prismaService.space.deleteMany({});
     });
 
@@ -168,5 +178,54 @@ describe("Space e2e Test", () => {
                     .expect(HttpStatus.FORBIDDEN);
             });
         });
+    });
+
+    describe("getPhotoList", () => {
+        describe("공간이 존재하면, ", () => {
+            it("해당 공간에 저장된 사진을 조회할 수 있다.", async () => {
+                // given
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
+                const storedSpace = await prismaService.space.create({
+                    data: spaceFixture(),
+                });
+                const storedPhoto = await prismaService.photo.create({
+                    data: photoFixture(storedSpace.id),
+                });
+
+                // when
+                const response = await supertestRequestFunction(app.getHttpServer())
+                    .get(`/spaces/${storedSpace.id}/photos`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.OK);
+
+                // then
+                const actual = response.body as DefaultResponse<GetPhotoListResponseDto>;
+                const actualPhoto = await prismaService.photo.findUnique({
+                    where: {
+                        id: actual.data.data[0].id,
+                    },
+                });
+
+                expect(actualPhoto.id).toBe(storedPhoto.id);
+                expect(actualPhoto.path).toBe(storedPhoto.path);
+                expect(actualPhoto.name).toBe(storedPhoto.name);
+            });
+        });
+        describe("공간이 존재하지 않으면, ", () => {
+            it("공간을 찾을 수 없다는 예외를 발생시킨다.", async () => {
+                // given
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.USER);
+                // when
+                const response = await supertestRequestFunction(app.getHttpServer())
+                    .get(`/spaces/${uuidFunction.v4()}/photos`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.NOT_FOUND);
+            });
+        });
+        
     });
 });

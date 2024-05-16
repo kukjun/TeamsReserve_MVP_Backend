@@ -1,24 +1,32 @@
 import {
-    SpaceController, 
+    SpaceController,
 } from "../space.controller";
 import {
-    SpaceService, 
+    SpaceService,
 } from "../space.service";
 import {
-    Test, 
+    Test,
 } from "@nestjs/testing";
 import {
-    CreateSpaceResponseDto, 
+    CreateSpaceResponseDto,
 } from "../dto/res/create-space.response.dto";
 import {
-    uuidFunction, 
+    uuidFunction,
 } from "../../../util/function/uuid.function";
 import {
-    CreateSpaceRequestDto, 
+    CreateSpaceRequestDto,
 } from "../dto/req/create-space.request.dto";
+import {
+    GetPhotoListResponseDto,
+} from "../dto/res/get-photo-list-response.dto";
+import {
+    CreatePhotoResponseDto,
+} from "../dto/res/create-photo.response.dto";
 
 const mockSpaceService = {
     createSpace: jest.fn(),
+    createPhoto: jest.fn(),
+    getPhotoList: jest.fn(),
 };
 
 describe("SpaceController Unit Test", () => {
@@ -47,7 +55,7 @@ describe("SpaceController Unit Test", () => {
             const expectedResponse: CreateSpaceResponseDto = {
                 id: uuidFunction.v4(),
             };
-            const requestBody: CreateSpaceRequestDto ={
+            const requestBody: CreateSpaceRequestDto = {
                 name: "Test Space",
                 location: "Test Location",
                 description: "Space Description",
@@ -60,4 +68,42 @@ describe("SpaceController Unit Test", () => {
             expect(result.data.id).toBe(expectedResponse.id);
         });
     });
+
+    describe("createSpacePhoto", () => {
+        it("photo를 생성하면, 저장된 photo id를 반환한다.", async () => {
+            // given
+            const expectedResponse: CreatePhotoResponseDto = {
+                id: uuidFunction.v4(),
+            };
+            const requestId = uuidFunction.v4();
+            const mockingFile: Express.Multer.File = null;
+            mockSpaceService.createPhoto.mockResolvedValue(expectedResponse);
+            // when
+            const result = await spaceController.createSpacePhoto(requestId, mockingFile);
+            // then
+            expect(result).not.toBeNull();
+            expect(result.data.id).toBe(expectedResponse.id);
+        });
+    });
+
+    describe("getPhotoList", () => {
+        it("photo를 조회하고, 결과 dto를 반환할 수 있다.", async () => {
+            // given
+            const expectedResponse: GetPhotoListResponseDto = {
+                data: [{
+                    id: uuidFunction.v4(),
+                    path: "unit/test/path",
+                    name: "unittest.png",
+                },],
+            };
+            const requestId = uuidFunction.v4();
+            mockSpaceService.getPhotoList.mockResolvedValue(expectedResponse);
+            // when
+            const result = await spaceController.getPhotoList(requestId);
+            // then
+            expect(result).not.toBeNull();
+            expect(result.data.data[0].id).toBe(expectedResponse.data[0].id);
+        });
+    });
+
 });
