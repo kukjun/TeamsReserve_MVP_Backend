@@ -23,6 +23,16 @@ export class SpaceRepository {
         return space;
     }
 
+    async findSpaceById(id: string): Promise<SpaceEntity | null> {
+        const sapce = await this.prismaService.space.findUnique({
+            where: {
+                id,
+            },
+        });
+
+        return sapce;
+    }
+
     async saveSpace(space: SpaceEntity): Promise<string> {
         const result = await this.prismaService.space.create({
             data: space,

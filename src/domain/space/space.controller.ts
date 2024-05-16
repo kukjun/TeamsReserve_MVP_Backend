@@ -1,44 +1,52 @@
 import {
-    Body, Controller, HttpCode, HttpStatus, Post, UseGuards,
+    Body, Controller, HttpCode, HttpStatus, Param, Post, UploadedFile, UseGuards, UseInterceptors,
 } from "@nestjs/common";
 import {
-    SpaceService, 
+    SpaceService,
 } from "./space.service";
 import {
-    CreateSpaceRequestDto, 
+    CreateSpaceRequestDto,
 } from "./dto/req/create-space.request.dto";
 import {
-    DefaultResponse, 
+    DefaultResponse,
 } from "../../interface/response/default.response";
 import {
-    CreateSpaceResponseDto, 
+    CreateSpaceResponseDto,
 } from "./dto/res/create-space.response.dto";
 import {
     ApiExtraModels,
     ApiOperation, ApiTags,
 } from "@nestjs/swagger";
 import {
-    ApiDefaultResponse, 
+    ApiDefaultResponse,
 } from "../../util/decorators/api-default.response";
 import {
-    Roles, 
+    Roles,
 } from "../../util/decorators/permission";
 import {
-    MemberAuthority, 
+    MemberAuthority,
 } from "../../types/enums/member.authority.enum";
 import {
-    JwtGuard, 
+    JwtGuard,
 } from "../auth/guards/jwt.guard";
+import {
+    FileInterceptor, 
+} from "@nestjs/platform-express";
+import {
+    CreatePhotoResponseDto, 
+} from "./dto/res/create-photo.response.dto";
 
 @ApiTags("spaces")
 @ApiExtraModels(DefaultResponse)
-@UseGuards(JwtGuard)
+// @UseGuards(JwtGuard)
 @Controller("spaces")
 export class SpaceController {
-    constructor(private readonly spaceService: SpaceService) {
+    constructor(
+        private readonly spaceService: SpaceService,
+    ) {
     }
 
-    @Roles(MemberAuthority.MANAGER, MemberAuthority.ADMIN)
+    // @Roles(MemberAuthority.MANAGER, MemberAuthority.ADMIN)
     @ApiOperation({
         summary: "공간 생성",
         description: "공간을 생성할 수 있다.",
@@ -48,6 +56,16 @@ export class SpaceController {
     @ApiDefaultResponse(CreateSpaceResponseDto)
     async createSpace(@Body() requestBody: CreateSpaceRequestDto): Promise<DefaultResponse<CreateSpaceResponseDto>> {
         const data = await this.spaceService.createSpace(requestBody);
+
+        return new DefaultResponse(data);
+    }
+
+    // @Roles(MemberAuthority.MANAGER, MemberAuthority.ADMIN)
+    @Post("/:id/photo")
+    @UseInterceptors(FileInterceptor("file"))
+    async createSpacePhoto(@Param("id") id: string, @UploadedFile() file: Express.Multer.File)
+    : Promise<DefaultResponse<CreatePhotoResponseDto>> {
+        const data = await this.spaceService.createPhoto(id, file);
 
         return new DefaultResponse(data);
     }

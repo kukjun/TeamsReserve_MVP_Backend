@@ -6,6 +6,9 @@ import {
 } from "@nestjs/swagger";
 
 export class PhotoEntity implements Photo {
+    constructor(dto: Partial<PhotoEntity>) {
+        Object.assign(this, dto);
+    }
     @ApiProperty()
     id: string;
     @ApiProperty()
