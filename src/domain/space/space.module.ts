@@ -27,6 +27,6 @@ import {
         PrismaService,
         SpaceRepository,
         PhotoRepository,],
-    exports:[],
+    exports:[SpaceRepository,],
 })
 export class SpaceModule {}

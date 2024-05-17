@@ -14,28 +14,30 @@ datasource db {
 }
 
 model Member {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email            String   @unique
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email            String    @unique
   password         String
-  nickname         String   @unique
-  introduce        String?  @db.Text
+  nickname         String    @unique
+  introduce        String?   @db.Text
   teamCode         String
-  joinStatus       Boolean  @default(false)
+  joinStatus       Boolean   @default(false)
   authority        String
-  createdAt        DateTime @default(now())
-  lastModifiedTime DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  lastModifiedTime DateTime  @updatedAt
+  Reserves         Reserve[]
 
   @@map("member")
 }
 
 model Space {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String   @unique
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String    @unique
   location         String
-  description      String?  @db.Text
-  createdAt        DateTime @default(now())
-  lastModifiedTime DateTime @updatedAt
+  description      String?   @db.Text
+  createdAt        DateTime  @default(now())
+  lastModifiedTime DateTime  @updatedAt
   Photo            Photo[]
+  Reserves         Reserve[]
 
   @@map("space")
 }
@@ -53,10 +55,15 @@ model Photo {
 
 model Reserve {
   id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  times            String
+  startTime        DateTime
+  endTime          DateTime
   description      String?  @db.Text
   createdAt        DateTime @default(now())
   lastModifiedTime DateTime @updatedAt
+  Space            Space    @relation(fields: [spaceId], references: [id])
+  spaceId          String   @db.Uuid
+  Member           Member   @relation(fields: [memberId], references: [id])
+  memberId         String   @db.Uuid
 
   @@map("reserve")
 }

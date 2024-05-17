@@ -2,33 +2,28 @@ import {
     ReserveLog,
 } from "@prisma/client";
 import {
-    ReserveLogDomain, 
-} from "../domain/reserve-log.domain";
+    ApiProperty, 
+} from "@nestjs/swagger";
 
 export class ReserveLogEntity implements ReserveLog {
-    constructor(
-        readonly id: string,
-        readonly reservedUser: string,
-        readonly reservedSpaceName: string,
-        readonly reservedLocation: string,
-        readonly reservedTimes: string,
-        readonly state: string,
-        readonly createdAt: Date,
-        readonly lastModifiedTime: Date
-    ) {
+    constructor(dto: Partial<ReserveLogEntity>) {
+        Object.assign(this, dto);
     }
-
-    toDomain() {
-        return new ReserveLogDomain(
-            this.id,
-            this.reservedUser,
-            this.reservedSpaceName,
-            this.reservedLocation,
-            this.reservedTimes,
-            this.state,
-            this.createdAt,
-            this.lastModifiedTime,
-        );
-    }
+    @ApiProperty()
+    readonly id: string;
+    @ApiProperty()
+    readonly reservedUser: string;
+    @ApiProperty()
+    readonly reservedSpaceName: string;
+    @ApiProperty()
+    readonly reservedLocation: string;
+    @ApiProperty()
+    readonly reservedTimes: string;
+    @ApiProperty()
+    readonly state: string;
+    @ApiProperty()
+    readonly createdAt: Date;
+    @ApiProperty()
+    readonly lastModifiedTime: Date;
 
 }

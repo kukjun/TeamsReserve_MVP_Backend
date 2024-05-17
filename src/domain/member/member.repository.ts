@@ -5,20 +5,23 @@ import {
     PrismaService,
 } from "../../config/prisma/prisma.service";
 import {
-    MemberEntity,
-} from "./entity/member.entity";
-import {
     PaginateRequestDto,
 } from "../../interface/request/paginate.request.dto";
 import {
-    MemberOptionDto, 
+    MemberOptionDto,
 } from "../../interface/request/member-option.dto";
+import {
+    MemberEntity,
+} from "./entity/member.entity";
 
 @Injectable()
 export class MemberRepository {
+    private readonly prismaMember: PrismaService["member"];
+
     constructor(
         private readonly prismaService: PrismaService
     ) {
+        this.prismaMember = prismaService.member;
     }
 
     /**
@@ -28,17 +31,17 @@ export class MemberRepository {
      */
     async findMemberByPaging(paginateDto: PaginateRequestDto, optionDto: MemberOptionDto = null)
         : Promise<MemberEntity[]> {
-        if(!optionDto) {
-            return await this.prismaService.member.findMany({
-                skip: (paginateDto.page-1) * paginateDto.limit,
+        if (!optionDto) {
+            return await this.prismaMember.findMany({
+                skip: (paginateDto.page - 1) * paginateDto.limit,
                 take: paginateDto.limit,
                 orderBy: {
                     createdAt: "desc",
                 },
             });
         } else {
-            return await this.prismaService.member.findMany({
-                skip: (paginateDto.page-1) * paginateDto.limit,
+            return await this.prismaMember.findMany({
+                skip: (paginateDto.page - 1) * paginateDto.limit,
                 take: paginateDto.limit,
                 where: {
                     joinStatus: optionDto.joinStatus,
@@ -55,10 +58,10 @@ export class MemberRepository {
      * @param optionDto
      */
     async findMemberCount(optionDto: MemberOptionDto = null): Promise<number> {
-        if(!optionDto) {
-            return await this.prismaService.member.count();
+        if (!optionDto) {
+            return await this.prismaMember.count();
         } else {
-            return await this.prismaService.member.count({
+            return await this.prismaMember.count({
                 where: {
                     joinStatus: optionDto.joinStatus,
                 },
@@ -69,14 +72,30 @@ export class MemberRepository {
     /**
      *
      * @param id
+     * @param txMember 주입받는 경우 사용하는 tx
      */
-    async findMemberById(id: string): Promise<MemberEntity | null> {
-        const member = await this.prismaService.member.findUnique({
+    async findMemberById(
+        id: string,
+        txMember?: PrismaService["member"]
+    ): Promise<MemberEntity | null> {
+        const prismClientMember = txMember ?? this.prismaMember;
+        const member = await prismClientMember.findUnique({
             where: {
                 id,
             },
         });
-        if(!member) return null;
+        if (!member) return null;
+
+        return member;
+    }
+
+    async findMemberByIdUseTx(id: string): Promise<MemberEntity | null> {
+        const member = await this.prismaMember.findUnique({
+            where: {
+                id,
+            },
+        });
+        if (!member) return null;
 
         return member;
     }
@@ -86,12 +105,12 @@ export class MemberRepository {
      * @param email
      */
     async findMemberByEmail(email: string): Promise<MemberEntity | null> {
-        const member = await this.prismaService.member.findUnique({
+        const member = await this.prismaMember.findUnique({
             where: {
                 email,
             },
         });
-        if(!member) return null;
+        if (!member) return null;
 
         return member;
     }
@@ -100,13 +119,13 @@ export class MemberRepository {
      * nickname 검색
      * @param nickname
      */
-    async findMemberByNickname(nickname: string):Promise<MemberEntity | null> {
-        const member = await this.prismaService.member.findUnique({
+    async findMemberByNickname(nickname: string): Promise<MemberEntity | null> {
+        const member = await this.prismaMember.findUnique({
             where: {
                 nickname,
             },
         });
-        if(!member) return null;
+        if (!member) return null;
 
         return member;
     }
@@ -116,10 +135,10 @@ export class MemberRepository {
      * @param member
      */
     async saveMember(member: MemberEntity): Promise<string | null> {
-        const savedMember = await this.prismaService.member.create({
+        const savedMember = await this.prismaMember.create({
             data: member,
         });
-        if(savedMember === null) return null;
+        if (savedMember === null) return null;
 
         return savedMember.id;
     }
@@ -129,7 +148,7 @@ export class MemberRepository {
      * @param member
      */
     async updateMember(member: MemberEntity): Promise<string | null> {
-        const updatedMember = await this.prismaService.member.update({
+        const updatedMember = await this.prismaMember.update({
             where: {
                 id: member.id,
             },
@@ -144,7 +163,7 @@ export class MemberRepository {
      * @param id
      */
     async deleteMember(id: string): Promise<string | null> {
-        const updatedMember = await this.prismaService.member.delete({
+        const updatedMember = await this.prismaMember.delete({
             where: {
                 id,
             },

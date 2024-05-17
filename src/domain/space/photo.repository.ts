@@ -10,13 +10,15 @@ import {
 
 @Injectable()
 export class PhotoRepository {
+    private readonly prismaPhoto: PrismaService["photo"];
     constructor(
         private readonly prismaService: PrismaService
     ) {
+        this.prismaPhoto = prismaService.photo;
     }
 
     async save(photoEntity: PhotoEntity): Promise<string> {
-        const photo = await this.prismaService.photo.create(({
+        const photo = await this.prismaPhoto.create(({
             data: photoEntity,
         }));
 
@@ -24,7 +26,7 @@ export class PhotoRepository {
     }
 
     async findPhotoListBySpaceId(id: string): Promise<PhotoEntity[]> {
-        const photoList = await this.prismaService.photo.findMany({
+        const photoList = await this.prismaPhoto.findMany({
             where: {
                 spaceId: id,
             },
@@ -34,7 +36,7 @@ export class PhotoRepository {
     }
 
     async findPhotoById(id: string): Promise<PhotoEntity | null> {
-        const photo = await this.prismaService.photo.findUnique({
+        const photo = await this.prismaPhoto.findUnique({
             where:{
                 id,
             },
@@ -43,7 +45,7 @@ export class PhotoRepository {
         return photo;
     }
     async deletePhotoById(id: string): Promise<null> {
-        await this.prismaService.photo.delete({
+        await this.prismaPhoto.delete({
             where:{
                 id,
             },
