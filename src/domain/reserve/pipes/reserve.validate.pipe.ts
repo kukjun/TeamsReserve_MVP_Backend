@@ -26,13 +26,13 @@ export class ReserveValidatePipe implements PipeTransform<CreateReserveRequestDt
         if (
             !this.reserveData.regex.test(value.startTime) ||
             !this.reserveData.regex.test(value.endTime)
-        ) throw new BadRequestException("Invalidate1");
+        ) throw new BadRequestException("Invalidate regex");
         const startDate = new Date(value.startTime);
         const endDate = new Date(value.endTime);
         if (
             isNaN(startDate.getTime()) ||
             isNaN(endDate.getTime())
-        ) throw new BadRequestException("Invalidate2");
+        ) throw new BadRequestException("Invalidate date structure");
 
         const [startDateString, startTime,] = value.startTime.split("T");
         const [startHour, startMinute,] = startTime.split(":");
@@ -40,7 +40,7 @@ export class ReserveValidatePipe implements PipeTransform<CreateReserveRequestDt
         const [endHour, endMinute,] = endTime.split(":");
 
         // 먼저 동일한 날짜여야 함
-        if (startDateString !== endDateString) throw new BadRequestException("Invalidate3");
+        if (startDateString !== endDateString) throw new BadRequestException("Invalidate same day");
 
         // 시간을 분으로 연산
         const startTimeValue: number = +startHour * 60 + +startMinute;
@@ -51,14 +51,13 @@ export class ReserveValidatePipe implements PipeTransform<CreateReserveRequestDt
         if (
             startTimeValue < this.reserveData.limitStartTimeValue ||
             endTimeValue > this.reserveData.limitEndTimeValue
-        ) throw new BadRequestException("Invalidate4");
+        ) throw new BadRequestException("Invalidate start, end time limit");
         // 2. 최소 30분, 최대 120분 예약 가능
         if (
             endTimeValue - startTimeValue < this.reserveData.limitMinimumReserveTime ||
             endTimeValue - startTimeValue > this.reserveData.limitMaximumReserveTime
-        ) throw new BadRequestException("Invalidate6");
+        ) throw new BadRequestException("Invalidate time min or max");
 
-        // 시간이 문제 없으면 변환해서 돌려줌
         return {
             spaceId: value.spaceId,
             memberId: value.memberId,
