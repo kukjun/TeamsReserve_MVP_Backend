@@ -1,27 +1,34 @@
 import {
-    Reserve, 
+    Reserve,
 } from "@prisma/client";
 import {
-    ReserveDomain, 
-} from "../domain/reserve.domain";
+    ApiProperty, 
+} from "@nestjs/swagger";
 
 export class ReserveEntity implements Reserve {
-    constructor(
-        readonly id: string,
-        readonly times: string,
-        readonly description: string | null,
-        readonly createdAt: Date,
-        readonly lastModifiedTime: Date,
-    ) {
+    constructor(dto: Partial<ReserveEntity>) {
+        Object.assign(this, dto);
     }
+    @ApiProperty()
+    readonly id: string;
+    @ApiProperty()
+    readonly startTime: Date;
+    @ApiProperty()
+    readonly endTime: Date;
+    @ApiProperty({
+        required: false,
+        nullable: true,
+    })
+    readonly description: string | null;
+    @ApiProperty()
+    readonly createdAt: Date;
+    @ApiProperty()
+    readonly lastModifiedTime: Date;
 
-    toDomain() {
-        return new ReserveDomain(
-            this.id,
-            this.times,
-            this.description,
-            this.createdAt,
-            this.lastModifiedTime,
-        );
-    }
+    @ApiProperty()
+    readonly spaceId: string;
+
+    @ApiProperty()
+    readonly memberId: string;
+
 }

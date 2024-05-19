@@ -13,11 +13,15 @@ import {
 
 @Injectable()
 export class SpaceRepository {
+    private readonly prismaSpace: PrismaService["space"];
+    private readonly prismaPhoto: PrismaService["photo"];
     constructor(private readonly prismaService: PrismaService) {
+        this.prismaSpace = prismaService.space;
+        this.prismaPhoto = prismaService.photo;
     }
 
     async findSpaceByName(name: string): Promise<SpaceEntity | null> {
-        const space = await this.prismaService.space.findUnique({
+        const space = await this.prismaSpace.findUnique({
             where: {
                 name,
             },
@@ -26,18 +30,27 @@ export class SpaceRepository {
         return space;
     }
 
-    async findSpaceById(id: string): Promise<SpaceEntity | null> {
-        const sapce = await this.prismaService.space.findUnique({
+    /**
+     * id 조회
+     * @param id
+     * @param txSpace Interact Transaction을 위한 선택적 주입
+     */
+    async findSpaceById(
+        id: string,
+        txSpace?: PrismaService["space"]
+    ): Promise<SpaceEntity | null> {
+        const prismaClientSpace = txSpace ?? this.prismaSpace;
+        const space = await prismaClientSpace.findUnique({
             where: {
                 id,
             },
         });
 
-        return sapce;
+        return space;
     }
 
     async saveSpace(space: SpaceEntity): Promise<string> {
-        const result = await this.prismaService.space.create({
+        const result = await this.prismaSpace.create({
             data: space,
         });
 
@@ -45,7 +58,7 @@ export class SpaceRepository {
     }
 
     async findSpaceByPaging(paginateDto: PaginateRequestDto): Promise<SpaceEntity[]> {
-        return await this.prismaService.space.findMany({
+        return await this.prismaSpace.findMany({
             skip: (paginateDto.page - 1) * paginateDto.limit,
             take: paginateDto.limit,
             orderBy: {
@@ -55,11 +68,11 @@ export class SpaceRepository {
     }
 
     async findSpaceCount(): Promise<number> {
-        return await this.prismaService.space.count();
+        return await this.prismaSpace.count();
     }
 
     async updateSpace(space: SpaceEntity): Promise<string> {
-        const result = await this.prismaService.space.update({
+        const result = await this.prismaSpace.update({
             where: {
                 id: space.id,
             },
@@ -71,12 +84,12 @@ export class SpaceRepository {
 
     async deleteSpace(id: string): Promise<null> {
         // HACK: Cascade 전략을 제고
-        await this.prismaService.photo.deleteMany({
+        await this.prismaPhoto.deleteMany({
             where: {
                 spaceId: id,
             },
         });
-        await this.prismaService.space.delete({
+        await this.prismaSpace.delete({
             where: {
                 id,
             },

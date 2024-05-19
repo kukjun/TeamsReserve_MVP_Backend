@@ -19,6 +19,9 @@ import {
 import {
     SpaceModule, 
 } from "./domain/space/space.module";
+import {
+    ReserveModule, 
+} from "./domain/reserve/reserve.module";
 
 @Module({
     imports: [
@@ -26,6 +29,7 @@ import {
         PrismaModule,
         MemberModule,
         SpaceModule,
+        ReserveModule,
         ConfigModule.forRoot({
             isGlobal: true,
             envFilePath: ".env",
