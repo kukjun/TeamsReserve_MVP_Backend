@@ -50,8 +50,17 @@ import {
     ReserveNotFoundException,
 } from "../../exception/reserve-not-found.exception";
 import {
-    GetReserveResponseDto, 
+    GetReserveResponseDto,
 } from "./dto/res/get-reserve.response.dto";
+import {
+    PaginateRequestDto,
+} from "../../interface/request/paginate.request.dto";
+import {
+    PaginateData,
+} from "../../interface/response/paginate.data";
+import {
+    ReserveOptionDto, 
+} from "../../interface/request/reserve-option.dto";
 
 @Injectable()
 export class ReserveService {
@@ -124,13 +133,42 @@ export class ReserveService {
 
     async getReserve(id: string, token: MemberToken): Promise<GetReserveResponseDto> {
         const reserve = await this.reserveRepository.findReserve(id);
-        if(!reserve) throw new ReserveNotFoundException(`id: ${id}`);
+        if (!reserve) throw new ReserveNotFoundException(`id: ${id}`);
 
         return {
             id: reserve.id,
             startTime: reserve.startTime.toISOString(),
             endTime: reserve.endTime.toISOString(),
             description: reserve.description,
+        };
+    }
+
+    async getReserveList(paginateDto: PaginateRequestDto, optionDto: ReserveOptionDto)
+        : Promise<PaginateData<GetReserveResponseDto>> {
+        const reserves = await this.reserveRepository.findReserveBySpaceIdAndPaging(paginateDto, optionDto);
+
+        const data: GetReserveResponseDto[] = reserves.map(reserve => {
+            return {
+                id: reserve.id,
+                startTime: reserve.startTime.toISOString(),
+                endTime: reserve.endTime.toISOString(),
+                description: reserve.description,
+            };
+        });
+
+        const totalCount = await this.reserveRepository.findReserveCount(optionDto);
+        const totalPage = Math.ceil(totalCount / paginateDto.limit);
+        const hasNextPage = paginateDto.page < totalPage;
+
+        return {
+            data: data,
+            meta: {
+                page: paginateDto.page,
+                take: paginateDto.limit,
+                totalCount,
+                totalPage,
+                hasNextPage,
+            },
         };
 
     }

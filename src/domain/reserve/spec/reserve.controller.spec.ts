@@ -19,11 +19,24 @@ import {
 import {
     GetReserveResponseDto, 
 } from "../dto/res/get-reserve.response.dto";
+import {
+    getReserveList, 
+} from "./fixture/paginate-response";
+import {
+    PaginateData, 
+} from "../../../interface/response/paginate.data";
+import {
+    PaginateRequestDto, 
+} from "../../../interface/request/paginate.request.dto";
+import {
+    ReserveOptionDto, 
+} from "../../../interface/request/reserve-option.dto";
 
 const mockReserveService = {
     createReserve: jest.fn(),
     deleteReserve: jest.fn(),
     getReserve: jest.fn(),
+    getReserveList: jest.fn(),
 };
 
 describe("ReserveController Unit Test", () => {
@@ -105,4 +118,27 @@ describe("ReserveController Unit Test", () => {
             expect(result.data.description).toBe(expectedResponse.description);
         });
     });
+
+    describe("getReserveList", () => {
+        it("paginateDto, reserveOptionDto로 요청을 보내고, paginate된 결과를 반환한다.", async () => {
+            // given
+            const paginateDto: PaginateRequestDto = {
+                page: 1,
+                limit: 10,
+            };
+            const optionDto: ReserveOptionDto = {
+                spaceId: uuidFunction.v4(),
+            };
+            const expectedResponse: PaginateData<GetReserveResponseDto> = getReserveList;
+            mockReserveService.getReserveList.mockResolvedValue(expectedResponse);
+
+            // when
+            const result = await reserveController.getReserveList(paginateDto, optionDto);
+            // then
+            expect(result).not.toBeNull();
+            expect(result.data.meta).toBe(expectedResponse.meta);
+            expect(result.data.data[0].id).toBe(expectedResponse.data[0].id);
+        });
+    });
+
 });
