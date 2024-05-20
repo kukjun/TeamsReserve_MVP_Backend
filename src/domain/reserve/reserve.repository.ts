@@ -106,4 +106,14 @@ export class ReserveRepository {
 
         return null;
     }
+
+    async findReserve(id: string) {
+        const reserve = await this.prismaReserve.findUnique({
+            where: {
+                id,
+            },
+        });
+
+        return reserve;
+    }
 }

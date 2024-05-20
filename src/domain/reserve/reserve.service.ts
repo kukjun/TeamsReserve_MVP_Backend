@@ -49,6 +49,9 @@ import {
 import {
     ReserveNotFoundException,
 } from "../../exception/reserve-not-found.exception";
+import {
+    GetReserveResponseDto, 
+} from "./dto/res/get-reserve.response.dto";
 
 @Injectable()
 export class ReserveService {
@@ -117,5 +120,18 @@ export class ReserveService {
         });
 
         return null;
+    }
+
+    async getReserve(id: string, token: MemberToken): Promise<GetReserveResponseDto> {
+        const reserve = await this.reserveRepository.findReserve(id);
+        if(!reserve) throw new ReserveNotFoundException(`id: ${id}`);
+
+        return {
+            id: reserve.id,
+            startTime: reserve.startTime,
+            endTime: reserve.endTime,
+            description: reserve.description,
+        };
+
     }
 }
