@@ -7,6 +7,9 @@ import {
 import {
     Injectable, 
 } from "@nestjs/common";
+import {
+    PaginateRequestDto, 
+} from "../../interface/request/paginate.request.dto";
 
 @Injectable()
 export class ReserveLogRepository {
@@ -25,5 +28,19 @@ export class ReserveLogRepository {
         });
 
         return log.id;
+    }
+
+    async findReserveLogsByPaging(paginateDto: PaginateRequestDto): Promise<ReserveLogEntity[]> {
+        return await this.prismaReserveLog.findMany({
+            skip: (paginateDto.page - 1) * paginateDto.limit,
+            take: paginateDto.limit,
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+    }
+
+    async findReserveLogsCount():Promise<number> {
+        return await this.prismaReserveLog.count();
     }
 }

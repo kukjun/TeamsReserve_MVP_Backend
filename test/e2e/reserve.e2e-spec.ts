@@ -65,6 +65,15 @@ import {
 import {
     PaginateData, 
 } from "../../src/interface/response/paginate.data";
+import {
+    GetReserveLogResponseDto, 
+} from "../../src/domain/reserve/dto/res/get-reserve-log.response.dto";
+import {
+    ReserveLogEntity, 
+} from "../../src/domain/reserve/entity/reserve-log.entity";
+import {
+    reserveLogFixture, 
+} from "../fixture/entity/reserve-log.fixture";
 
 describe("Reserve e2e Test ", () => {
     let app: INestApplication;
@@ -409,6 +418,41 @@ describe("Reserve e2e Test ", () => {
                 .expect(HttpStatus.OK);
             // then
             const actual = response.body as DefaultResponse<PaginateData<GetReserveResponseDto>>;
+            expect(actual.data.meta.totalCount).toBe(randomNumber);
+            expect(actual.data.meta.totalPage).toEqual(Math.ceil(randomNumber / request.limit));
+            expect(actual.data.meta.page).toBe(request.page);
+            expect(actual.data.meta.take).toBe(request.limit);
+            expect(actual.data.meta.hasNextPage).toEqual(request.page < Math.ceil((randomNumber) / request.limit));
+        });
+    });
+
+    describe("getMyReserveList", () => {
+        it("모든 Reserve Log를 Paginate된 결과로 볼 수 있다.", async () => {
+            // given
+            const {
+                token,
+            } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+            const randomNumber = Math.ceil(Math.random() * 15);
+            const storeReserveLogs: ReserveLogEntity[] = [];
+            for(let i =0; i< randomNumber; i++) {
+                storeReserveLogs.push(reserveLogFixture(i));
+            }
+            await prismaService.reserveLog.createMany({
+                data: storeReserveLogs,
+            });
+            const request= {
+                page: 1,
+                limit: 10,
+            };
+
+            // when
+            const response = await supertestRequestFunction(app.getHttpServer())
+                .get("/reserves/logs")
+                .query(request)
+                .set("Authorization", `Bearer ${token}`)
+                .expect(HttpStatus.OK);
+            // then
+            const actual = response.body as DefaultResponse<PaginateData<GetReserveLogResponseDto>>;
             expect(actual.data.meta.totalCount).toBe(randomNumber);
             expect(actual.data.meta.totalPage).toEqual(Math.ceil(randomNumber / request.limit));
             expect(actual.data.meta.page).toBe(request.page);
