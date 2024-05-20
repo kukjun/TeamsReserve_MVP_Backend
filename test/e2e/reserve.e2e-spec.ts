@@ -328,7 +328,7 @@ describe("Reserve e2e Test ", () => {
         });
     });
 
-    describe("getReserve", () => {
+    describe("getReserveList", () => {
         it("존재하는 ReserveList 정보를 보여줘야 한다.", async () => {
             // given
             const {
@@ -360,6 +360,50 @@ describe("Reserve e2e Test ", () => {
             // when
             const response = await supertestRequestFunction(app.getHttpServer())
                 .get("/reserves")
+                .query(request)
+                .set("Authorization", `Bearer ${token}`)
+                .expect(HttpStatus.OK);
+            // then
+            const actual = response.body as DefaultResponse<PaginateData<GetReserveResponseDto>>;
+            expect(actual.data.meta.totalCount).toBe(randomNumber);
+            expect(actual.data.meta.totalPage).toEqual(Math.ceil(randomNumber / request.limit));
+            expect(actual.data.meta.page).toBe(request.page);
+            expect(actual.data.meta.take).toBe(request.limit);
+            expect(actual.data.meta.hasNextPage).toEqual(request.page < Math.ceil((randomNumber) / request.limit));
+        });
+    });
+
+    describe("getMyReserveList", () => {
+        it("본인이 예약한 ReserveList를 보여줄 수 있어야 한다.", async () => {
+            // given
+            const {
+                token, storedMember,
+            } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+            const storeSpace = await prismaService.space.create({
+                data: spaceFixture(),
+            });
+            const randomNumber = Math.ceil(Math.random() * 15);
+            const storeReserves: ReserveEntity[] = [];
+            for(let i =0; i< randomNumber; i++) {
+                storeReserves.push(reserveFixture(
+                    storedMember.id,
+                    storeSpace.id,
+                    new Date(`2024-05-${i+10}T12:00`),
+                    new Date(`2024-05-${i+11}T12:00`),
+                    `e2e random value = ${i}`
+                ));
+            }
+            await prismaService.reserve.createMany({
+                data: storeReserves,
+            });
+            const request= {
+                page: 1,
+                limit: 10,
+            };
+
+            // when
+            const response = await supertestRequestFunction(app.getHttpServer())
+                .get("/reserves/my-reserve")
                 .query(request)
                 .set("Authorization", `Bearer ${token}`)
                 .expect(HttpStatus.OK);

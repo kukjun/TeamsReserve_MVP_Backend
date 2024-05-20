@@ -180,6 +180,7 @@ describe("SpaceController Unit Test", () => {
             expect(result.data.id).toBe(requestId);
         });
     });
+
     describe("deleteSpace", () => {
         it("delete 요청이 성공하면, null을 반환한다.", async () => {
             // given

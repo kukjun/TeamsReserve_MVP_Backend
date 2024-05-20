@@ -82,6 +82,20 @@ export class ReserveController {
     }
 
     @ApiOperation({
+        summary: "My 예약 조회 List API",
+        description: "본인이 예약한 정보를 Paginate된 예약List로 조회 할 수 있는 API",
+    })
+    @Roles(MemberAuthority.ADMIN, MemberAuthority.MANAGER, MemberAuthority.USER)
+    @HttpCode(HttpStatus.OK)
+    @Get("/my-reserve")
+    async getMyReserveList(@Query() paginateDto: PaginateRequestDto, @Request() req)
+        : Promise<DefaultResponse<PaginateData<GetReserveResponseDto>>> {
+        const data = await this.reserveService.getMyReserveList(paginateDto, req.user);
+
+        return new DefaultResponse(data);
+    }
+
+    @ApiOperation({
         summary: "예약 조회 API",
         description: "예약 단일 조회를 할 수 있는 API",
     })
