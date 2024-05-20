@@ -53,6 +53,9 @@ import {
 import {
     uuidFunction,
 } from "../../src/util/function/uuid.function";
+import {
+    GetReserveResponseDto, 
+} from "../../src/domain/reserve/dto/res/get-reserve.response.dto";
 
 describe("Reserve e2e Test ", () => {
     let app: INestApplication;
@@ -263,6 +266,53 @@ describe("Reserve e2e Test ", () => {
                 // when, then
                 await supertestRequestFunction(app.getHttpServer())
                     .delete(`/reserves/${uuidFunction.v4()}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.NOT_FOUND);
+
+            });
+        });
+    });
+
+    describe("getReserve", () => {
+        describe("존재하는 reserve를 조회하면,", () => {
+            it("reserve의 값들을 보여준다.", async () => {
+                // given
+                const {
+                    token, storedMember,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+                const storeSpace = await prismaService.space.create({
+                    data: spaceFixture(),
+                });
+                const startTimeString = "2024-05-30T12:00";
+                const endTimeString = "2024-05-30T12:30";
+                const storeReserve = await prismaService.reserve.create({
+                    data: reserveFixture(
+                        storedMember.id, storeSpace.id, new Date(startTimeString), new Date(endTimeString)
+                    ),
+                });
+                // when
+                const response = await supertestRequestFunction(app.getHttpServer())
+                    .get(`/reserves/${storeReserve.id}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.OK);
+                // then
+                const actual = response.body as DefaultResponse<GetReserveResponseDto>;
+                expect(actual.data.id).toBe(storeReserve.id);
+                expect(actual.data.startTime).toBe(storeReserve.startTime.toISOString());
+                expect(actual.data.endTime).toBe(storeReserve.endTime.toISOString());
+                expect(actual.data.description).toBe(storeReserve.description);
+
+            });
+        });
+        describe("존재하지 않는 reserve를 조회하려고 하면,", () => {
+            it("reserve를 찾을 수 없다는 예외를 발생시킨다.", async () => {
+                // given
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+                // when, then
+                await supertestRequestFunction(app.getHttpServer())
+                    .get(`/reserves/${uuidFunction.v4()}`)
                     .set("Authorization", `Bearer ${token}`)
                     .expect(HttpStatus.NOT_FOUND);
 

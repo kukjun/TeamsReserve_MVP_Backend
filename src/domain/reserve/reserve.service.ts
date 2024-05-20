@@ -128,8 +128,8 @@ export class ReserveService {
 
         return {
             id: reserve.id,
-            startTime: reserve.startTime,
-            endTime: reserve.endTime,
+            startTime: reserve.startTime.toISOString(),
+            endTime: reserve.endTime.toISOString(),
             description: reserve.description,
         };
 

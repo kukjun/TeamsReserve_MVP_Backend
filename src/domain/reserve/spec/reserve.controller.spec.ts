@@ -16,10 +16,14 @@ import {
 import {
     CreateReserveValidateRequestDto,
 } from "../dto/req/create-reserve-validate.request.dto";
+import {
+    GetReserveResponseDto, 
+} from "../dto/res/get-reserve.response.dto";
 
 const mockReserveService = {
     createReserve: jest.fn(),
     deleteReserve: jest.fn(),
+    getReserve: jest.fn(),
 };
 
 describe("ReserveController Unit Test", () => {
@@ -69,12 +73,36 @@ describe("ReserveController Unit Test", () => {
             // given
             const requestParam = uuidFunction.v4();
             const mockReq = {};
-            mockReserveService.deleteReserve.mockResolvedValue(requestParam);
+            mockReserveService.deleteReserve.mockResolvedValue(null);
 
             // when
             const result = await reserveController.deleteReserve(requestParam, mockReq);
             // then
             expect(result.data).toBeNull();
+        });
+    });
+
+    describe("getReserve", () => {
+        it("reserve를 조회 후 조회한 값을 반환한다.", async () => {
+            // given
+            const requestParam = uuidFunction.v4();
+            const expectedResponse: GetReserveResponseDto = {
+                "id": "a6237a39-1e31-4731-bce5-10064342bf16",
+                "startTime": new Date("2024-05-30T03:00").toISOString(),
+                "endTime": new Date("2024-05-30T03:30").toISOString(),
+                "description": "기획팀 정기 회의를 위한 예약입니다.",
+            };
+            const mockReq = {};
+            mockReserveService.getReserve.mockResolvedValue(expectedResponse);
+
+            // when
+            const result = await reserveController.getReserve(requestParam, mockReq);
+            // then
+            expect(result).not.toBeNull();
+            expect(result.data.id).toBe(expectedResponse.id);
+            expect(result.data.startTime).toBe(expectedResponse.startTime);
+            expect(result.data.endTime).toBe(expectedResponse.endTime);
+            expect(result.data.description).toBe(expectedResponse.description);
         });
     });
 });
