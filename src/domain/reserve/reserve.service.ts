@@ -61,6 +61,9 @@ import {
 import {
     ReserveOptionDto, 
 } from "../../interface/request/reserve-option.dto";
+import {
+    GetReserveLogResponseDto, 
+} from "./dto/res/get-reserve-log.response.dto";
 
 @Injectable()
 export class ReserveService {
@@ -187,6 +190,35 @@ export class ReserveService {
         });
 
         const totalCount = await this.reserveRepository.findMyReserveCount(token.id);
+        const totalPage = Math.ceil(totalCount / paginateDto.limit);
+        const hasNextPage = paginateDto.page < totalPage;
+
+        return {
+            data: data,
+            meta: {
+                page: paginateDto.page,
+                take: paginateDto.limit,
+                totalCount,
+                totalPage,
+                hasNextPage,
+            },
+        };
+    }
+
+    async getReserveLogList(paginateDto: PaginateRequestDto) {
+        const reserveLogs = await this.reserveLogRepository.findReserveLogsByPaging(paginateDto);
+        const data: GetReserveLogResponseDto[] = reserveLogs.map(reserveLogs => {
+            return {
+                id: reserveLogs.id,
+                reservedUser: reserveLogs.reservedUser,
+                reservedSpaceName: reserveLogs.reservedSpaceName,
+                reservedLocation: reserveLogs.reservedLocation,
+                reservedTimes: reserveLogs.reservedTimes,
+                state: reserveLogs.state,
+                createdAt: reserveLogs.createdAt.toISOString(),
+            };
+        });
+        const totalCount = await this.reserveLogRepository.findReserveLogsCount();
         const totalPage = Math.ceil(totalCount / paginateDto.limit);
         const hasNextPage = paginateDto.page < totalPage;
 

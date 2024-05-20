@@ -43,6 +43,9 @@ import {
 import {
     ReserveOptionDto, 
 } from "../../interface/request/reserve-option.dto";
+import {
+    GetReserveLogResponseDto, 
+} from "./dto/res/get-reserve-log.response.dto";
 
 @ApiTags("reserve")
 @ApiExtraModels(DefaultResponse)
@@ -96,6 +99,20 @@ export class ReserveController {
     }
 
     @ApiOperation({
+        summary: "예약 조회 Log List API",
+        description: "모든 예약의 Paginate된 예약 Log 정보를 조회 할 수 있는 API",
+    })
+    @Roles(MemberAuthority.ADMIN, MemberAuthority.MANAGER)
+    @HttpCode(HttpStatus.OK)
+    @Get("/logs")
+    async getReserveLogList(@Query() paginateDto: PaginateRequestDto)
+        : Promise<DefaultResponse<PaginateData<GetReserveLogResponseDto>>> {
+        const data = await this.reserveService.getReserveLogList(paginateDto);
+
+        return new DefaultResponse(data);
+    }
+
+    @ApiOperation({
         summary: "예약 조회 API",
         description: "예약 단일 조회를 할 수 있는 API",
     })
@@ -117,10 +134,9 @@ export class ReserveController {
     @HttpCode(HttpStatus.OK)
     @Get()
     async getReserveList(@Query() paginateDto: PaginateRequestDto, @Query() optionDto: ReserveOptionDto)
-    : Promise<DefaultResponse<PaginateData<GetReserveResponseDto>>> {
+        : Promise<DefaultResponse<PaginateData<GetReserveResponseDto>>> {
         const data = await this.reserveService.getReserveList(paginateDto, optionDto);
 
         return new DefaultResponse(data);
     }
-
 }

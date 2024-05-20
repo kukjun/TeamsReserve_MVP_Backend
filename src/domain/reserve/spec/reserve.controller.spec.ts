@@ -20,7 +20,7 @@ import {
     GetReserveResponseDto, 
 } from "../dto/res/get-reserve.response.dto";
 import {
-    getReserveList, 
+    getReserveList, getReserveLogList,
 } from "./fixture/paginate-response";
 import {
     PaginateData, 
@@ -31,6 +31,9 @@ import {
 import {
     ReserveOptionDto, 
 } from "../../../interface/request/reserve-option.dto";
+import {
+    GetReserveLogResponseDto, 
+} from "../dto/res/get-reserve-log.response.dto";
 
 const mockReserveService = {
     createReserve: jest.fn(),
@@ -38,6 +41,7 @@ const mockReserveService = {
     getReserve: jest.fn(),
     getReserveList: jest.fn(),
     getMyReserveList: jest.fn(),
+    getReserveLogList: jest.fn(),
 };
 
 describe("ReserveController Unit Test", () => {
@@ -159,6 +163,26 @@ describe("ReserveController Unit Test", () => {
             expect(result).not.toBeNull();
             expect(result.data.meta).toBe(expectedResponse.meta);
             expect(result.data.data[0].id).toBe(expectedResponse.data[0].id);
+        });
+    });
+
+    describe("getReserveLogList", () => {
+        it("paginateDto로 요청을 보내고 paging된 log를 반환한다.", async () => {
+            // given
+            const paginateDto: PaginateRequestDto = {
+                page: 1,
+                limit: 10,
+            };
+            const expectedResponse: PaginateData<GetReserveLogResponseDto> = getReserveLogList;
+            mockReserveService.getReserveLogList.mockResolvedValue(expectedResponse);
+
+            // when
+            const result = await reserveController.getReserveLogList(paginateDto);
+            // then
+            expect(result).not.toBeNull();
+            expect(result.data.meta).toBe(expectedResponse.meta);
+            expect(result.data.data[0].id).toBe(expectedResponse.data[0].id);
+
         });
     });
 
