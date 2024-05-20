@@ -1,5 +1,5 @@
 import {
-    Body, Controller, Delete, HttpCode, HttpStatus, Param, Post, Request, UseGuards,
+    Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query, Request, UseGuards,
 } from "@nestjs/common";
 import {
     ReserveService,
@@ -34,6 +34,15 @@ import {
 import {
     ApiDefaultResponse, 
 } from "../../util/decorators/api-default.response";
+import {
+    PaginateRequestDto, 
+} from "../../interface/request/paginate.request.dto";
+import {
+    GetReserveResponseDto, 
+} from "./dto/res/get-reserve.response.dto";
+import {
+    ReserveOptionDto, 
+} from "../../interface/request/reserve-option.dto";
 
 @ApiTags("reserve")
 @ApiExtraModels(DefaultResponse)
@@ -70,6 +79,34 @@ export class ReserveController {
         await this.reserveService.deleteReserve(id, req.user);
 
         return new DefaultResponse(null);
+    }
+
+    @ApiOperation({
+        summary: "예약 조회 API",
+        description: "예약 단일 조회를 할 수 있는 API",
+    })
+    @Roles(MemberAuthority.ADMIN, MemberAuthority.MANAGER, MemberAuthority.USER)
+    @HttpCode(HttpStatus.OK)
+    @Get(":id")
+    async getReserve(@Param("id") id: string, @Request() req)
+    : Promise<DefaultResponse<GetReserveResponseDto>> {
+        const data = await this.reserveService.getReserve(id, req.user);
+
+        return new DefaultResponse(data);
+    }
+
+    @ApiOperation({
+        summary: "예약 조회List API",
+        description: "SpaceId 별, Paginate된 예약List를 조회 할 수 있는 API",
+    })
+    @Roles(MemberAuthority.ADMIN, MemberAuthority.MANAGER, MemberAuthority.USER)
+    @HttpCode(HttpStatus.OK)
+    @Get()
+    async getReserveList(@Query() paginateDto: PaginateRequestDto, @Query() optionDto: ReserveOptionDto)
+    : Promise<DefaultResponse<PaginateData<GetReserveResponseDto>>> {
+        const data = await this.reserveService.getReserveList(paginateDto, optionDto);
+
+        return new DefaultResponse(data);
     }
 
 }

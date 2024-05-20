@@ -13,6 +13,12 @@ import {
 import {
     MemberEntity, 
 } from "../member/entity/member.entity";
+import {
+    PaginateRequestDto, 
+} from "../../interface/request/paginate.request.dto";
+import {
+    ReserveOptionDto, 
+} from "../../interface/request/reserve-option.dto";
 
 @Injectable()
 export class ReserveRepository {
@@ -105,5 +111,37 @@ export class ReserveRepository {
         });
 
         return null;
+    }
+
+    async findReserve(id: string) {
+        const reserve = await this.prismaReserve.findUnique({
+            where: {
+                id,
+            },
+        });
+
+        return reserve;
+    }
+
+    async findReserveBySpaceIdAndPaging(paginateDto: PaginateRequestDto, optionDto: ReserveOptionDto)
+        : Promise<ReserveEntity[]> {
+        return await this.prismaReserve.findMany({
+            where: {
+                spaceId: optionDto.spaceId,
+            },
+            skip: (paginateDto.page - 1) * paginateDto.limit,
+            take: paginateDto.limit,
+            orderBy: {
+                startTime: "desc",
+            },
+        });
+    }
+
+    async findReserveCount(optionDto: ReserveOptionDto): Promise<number> {
+        return await this.prismaReserve.count({
+            where: {
+                spaceId: optionDto.spaceId,
+            },
+        });
     }
 }

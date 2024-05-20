@@ -53,6 +53,18 @@ import {
 import {
     uuidFunction,
 } from "../../src/util/function/uuid.function";
+import {
+    GetReserveResponseDto,
+} from "../../src/domain/reserve/dto/res/get-reserve.response.dto";
+import {
+    ReserveEntity, 
+} from "../../src/domain/reserve/entity/reserve.entity";
+import {
+    PaginateRequestDto, 
+} from "../../src/interface/request/paginate.request.dto";
+import {
+    PaginateData, 
+} from "../../src/interface/response/paginate.data";
 
 describe("Reserve e2e Test ", () => {
     let app: INestApplication;
@@ -270,4 +282,96 @@ describe("Reserve e2e Test ", () => {
         });
     });
 
-});
+    describe("getReserve", () => {
+        describe("존재하는 reserve를 조회하면,", () => {
+            it("reserve의 값들을 보여준다.", async () => {
+                // given
+                const {
+                    token, storedMember,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+                const storeSpace = await prismaService.space.create({
+                    data: spaceFixture(),
+                });
+                const startTimeString = "2024-05-30T12:00";
+                const endTimeString = "2024-05-30T12:30";
+                const storeReserve = await prismaService.reserve.create({
+                    data: reserveFixture(
+                        storedMember.id, storeSpace.id, new Date(startTimeString), new Date(endTimeString)
+                    ),
+                });
+                // when
+                const response = await supertestRequestFunction(app.getHttpServer())
+                    .get(`/reserves/${storeReserve.id}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.OK);
+                // then
+                const actual = response.body as DefaultResponse<GetReserveResponseDto>;
+                expect(actual.data.id).toBe(storeReserve.id);
+                expect(actual.data.startTime).toBe(storeReserve.startTime.toISOString());
+                expect(actual.data.endTime).toBe(storeReserve.endTime.toISOString());
+                expect(actual.data.description).toBe(storeReserve.description);
+
+            });
+        });
+        describe("존재하지 않는 reserve를 조회하려고 하면,", () => {
+            it("reserve를 찾을 수 없다는 예외를 발생시킨다.", async () => {
+                // given
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+                // when, then
+                await supertestRequestFunction(app.getHttpServer())
+                    .get(`/reserves/${uuidFunction.v4()}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.NOT_FOUND);
+            });
+        });
+    });
+
+    describe("getReserve", () => {
+        it("존재하는 ReserveList 정보를 보여줘야 한다.", async () => {
+            // given
+            const {
+                token, storedMember,
+            } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+            const storeSpace = await prismaService.space.create({
+                data: spaceFixture(),
+            });
+            const randomNumber = Math.ceil(Math.random() * 15);
+            const storeReserves: ReserveEntity[] = [];
+            for(let i =0; i< randomNumber; i++) {
+                storeReserves.push(reserveFixture(
+                    storedMember.id,
+                    storeSpace.id,
+                    new Date(`2024-05-${i+10}T12:00`),
+                    new Date(`2024-05-${i+11}T12:00`),
+                    `e2e random value = ${i}`
+                ));
+            }
+            await prismaService.reserve.createMany({
+                data: storeReserves,
+            });
+            const request= {
+                page: 1,
+                limit: 10,
+                spaceId: storeSpace.id,
+            };
+
+            // when
+            const response = await supertestRequestFunction(app.getHttpServer())
+                .get("/reserves")
+                .query(request)
+                .set("Authorization", `Bearer ${token}`)
+                .expect(HttpStatus.OK);
+            // then
+            const actual = response.body as DefaultResponse<PaginateData<GetReserveResponseDto>>;
+            expect(actual.data.meta.totalCount).toBe(randomNumber);
+            expect(actual.data.meta.totalPage).toEqual(Math.ceil(randomNumber / request.limit));
+            expect(actual.data.meta.page).toBe(request.page);
+            expect(actual.data.meta.take).toBe(request.limit);
+            expect(actual.data.meta.hasNextPage).toEqual(request.page < Math.ceil((randomNumber) / request.limit));
+        });
+    });
+
+})
+;
