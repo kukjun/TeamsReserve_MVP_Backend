@@ -137,10 +137,32 @@ export class ReserveRepository {
         });
     }
 
+    async findReserveByMemberIdAndPaging(paginateDto: PaginateRequestDto, memberId: string)
+        : Promise<ReserveEntity[]> {
+        return await this.prismaReserve.findMany({
+            where: {
+                memberId: memberId,
+            },
+            skip: (paginateDto.page - 1) * paginateDto.limit,
+            take: paginateDto.limit,
+            orderBy: {
+                startTime: "desc",
+            },
+        });
+    }
+
     async findReserveCount(optionDto: ReserveOptionDto): Promise<number> {
         return await this.prismaReserve.count({
             where: {
                 spaceId: optionDto.spaceId,
+            },
+        });
+    }
+
+    async findMyReserveCount(memberId: string): Promise<number> {
+        return await this.prismaReserve.count({
+            where: {
+                memberId: memberId,
             },
         });
     }

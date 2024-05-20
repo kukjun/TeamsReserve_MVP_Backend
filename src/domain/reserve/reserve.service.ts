@@ -170,6 +170,35 @@ export class ReserveService {
                 hasNextPage,
             },
         };
+    }
 
+    async getMyReserveList(paginateDto: PaginateRequestDto, token: MemberToken)
+        : Promise<PaginateData<GetReserveResponseDto>> {
+
+        const reserves = await this.reserveRepository.findReserveByMemberIdAndPaging(paginateDto, token.id);
+
+        const data: GetReserveResponseDto[] = reserves.map(reserve => {
+            return {
+                id: reserve.id,
+                startTime: reserve.startTime.toISOString(),
+                endTime: reserve.endTime.toISOString(),
+                description: reserve.description,
+            };
+        });
+
+        const totalCount = await this.reserveRepository.findMyReserveCount(token.id);
+        const totalPage = Math.ceil(totalCount / paginateDto.limit);
+        const hasNextPage = paginateDto.page < totalPage;
+
+        return {
+            data: data,
+            meta: {
+                page: paginateDto.page,
+                take: paginateDto.limit,
+                totalCount,
+                totalPage,
+                hasNextPage,
+            },
+        };
     }
 }
