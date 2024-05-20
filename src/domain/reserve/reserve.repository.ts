@@ -89,8 +89,8 @@ export class ReserveRepository {
         });
 
         return {
-            member: reserve.Member,
-            space: reserve.Space,
+            member: reserve?.Member,
+            space: reserve?.Space,
             reserve: reserve,
         };
     }

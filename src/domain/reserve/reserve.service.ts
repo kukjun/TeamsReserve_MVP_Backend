@@ -102,6 +102,7 @@ export class ReserveService {
                 member,
                 space,
             } = await this.reserveRepository.findReserveIncludeMemberAndSpace(id, tx.reserve);
+            if (!reserve) throw new ReserveNotFoundException(`id: ${id}`);
             if (reserve.memberId !== token.id) throw new ResourceUnauthorizedException();
 
             await this.reserveRepository.deleteReserve(id, tx.reserve);

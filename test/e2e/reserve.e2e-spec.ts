@@ -39,19 +39,19 @@ import {
     CreateReserveRequestDto,
 } from "../../src/domain/reserve/dto/req/create-reserve.request.dto";
 import {
-    supertestRequestFunction, 
+    supertestRequestFunction,
 } from "../../src/util/function/supertest-request.function";
 import {
-    DefaultResponse, 
+    DefaultResponse,
 } from "../../src/interface/response/default.response";
 import {
-    CreateReserveResponseDto, 
+    CreateReserveResponseDto,
 } from "../../src/domain/reserve/dto/res/create-reserve.response.dto";
 import {
-    reserveFixture, 
+    reserveFixture,
 } from "../fixture/entity/reserve.fixture";
 import {
-    uuidFunction, 
+    uuidFunction,
 } from "../../src/util/function/uuid.function";
 
 describe("Reserve e2e Test ", () => {
@@ -146,7 +146,7 @@ describe("Reserve e2e Test ", () => {
                     const storeSpace = await prismaService.space.create({
                         data: spaceFixture(),
                     });
-                    const startTimeString =  "2024-05-30T12:00";
+                    const startTimeString = "2024-05-30T12:00";
                     const endTimeString = "2024-05-30T12:30";
                     await prismaService.reserve.create({
                         data: reserveFixture(
@@ -175,7 +175,7 @@ describe("Reserve e2e Test ", () => {
                     const {
                         token, storedMember,
                     } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
-                    const startTimeString =  "2024-05-30T12:00";
+                    const startTimeString = "2024-05-30T12:00";
                     const endTimeString = "2024-05-30T12:30";
 
                     const requestBody: CreateReserveRequestDto = {
@@ -202,7 +202,7 @@ describe("Reserve e2e Test ", () => {
                     const storeSpace = await prismaService.space.create({
                         data: spaceFixture(),
                     });
-                    const startTimeString =  "2024-05-30T12:00";
+                    const startTimeString = "2024-05-30T12:00";
                     const endTimeString = "2024-05-30T12:30";
                     const requestBody: CreateReserveRequestDto = {
                         startTime: startTimeString,
@@ -220,7 +220,54 @@ describe("Reserve e2e Test ", () => {
                 });
             });
         });
+    });
 
+    describe("deleteReserve", () => {
+        describe("존재하는 자신의 reserve를 삭제하려고 하면,", () => {
+            it("reserve를 삭제하고, null을 반환한다.", async () => {
+                // given
+                const {
+                    token, storedMember,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+                const storeSpace = await prismaService.space.create({
+                    data: spaceFixture(),
+                });
+                const startTimeString = "2024-05-30T12:00";
+                const endTimeString = "2024-05-30T12:30";
+                const storeReserve = await prismaService.reserve.create({
+                    data: reserveFixture(
+                        storedMember.id, storeSpace.id, new Date(startTimeString), new Date(endTimeString)
+                    ),
+                });
+                // when
+                await supertestRequestFunction(app.getHttpServer())
+                    .delete(`/reserves/${storeReserve.id}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.NO_CONTENT);
+                // then
+                const actualReserve = await prismaService.reserve.findUnique({
+                    where: {
+                        id: storeReserve.id,
+                    },
+                });
+                expect(actualReserve).toBeNull();
+
+            });
+        });
+        describe("존재하지 않는 reserve를 삭제하려고 하면,", () => {
+            it("reserve를 찾을 수 없다는 예외를 발생시킨다.", async () => {
+                // given
+                const {
+                    token,
+                } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
+                // when, then
+                await supertestRequestFunction(app.getHttpServer())
+                    .delete(`/reserves/${uuidFunction.v4()}`)
+                    .set("Authorization", `Bearer ${token}`)
+                    .expect(HttpStatus.NOT_FOUND);
+
+            });
+        });
     });
 
 });
