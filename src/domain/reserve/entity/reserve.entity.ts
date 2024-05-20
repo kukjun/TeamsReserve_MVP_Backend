@@ -4,6 +4,12 @@ import {
 import {
     ApiProperty, 
 } from "@nestjs/swagger";
+import {
+    SpaceEntity, 
+} from "../../space/entity/space.entity";
+import {
+    MemberEntity, 
+} from "../../member/entity/member.entity";
 
 export class ReserveEntity implements Reserve {
     constructor(dto: Partial<ReserveEntity>) {

@@ -46,6 +46,9 @@ import {
 import {
     PrismaService,
 } from "../../config/prisma/prisma.service";
+import {
+    ReserveNotFoundException,
+} from "../../exception/reserve-not-found.exception";
 
 @Injectable()
 export class ReserveService {
@@ -90,5 +93,28 @@ export class ReserveService {
         return {
             id: result,
         };
+    }
+
+    async deleteReserve(id: string, token: MemberToken): Promise<null> {
+        await this.prismaService.$transaction(async (tx) => {
+            const {
+                reserve,
+                member,
+                space,
+            } = await this.reserveRepository.findReserveIncludeMemberAndSpace(id, tx.reserve);
+            if (reserve.memberId !== token.id) throw new ResourceUnauthorizedException();
+
+            await this.reserveRepository.deleteReserve(id, tx.reserve);
+            const reserveLog: ReserveLogEntity = new ReserveLogEntity({
+                reservedUser: member.nickname,
+                reservedSpaceName: space.name,
+                reservedLocation: space.location,
+                reservedTimes: `${reserve.startTime.toISOString()} - ${reserve.endTime.toISOString()}`,
+                state: ReserveState.CANCEL,
+            });
+            await this.reserveLogRepository.saveReserveLog(reserveLog, tx.reserveLog);
+        });
+
+        return null;
     }
 }

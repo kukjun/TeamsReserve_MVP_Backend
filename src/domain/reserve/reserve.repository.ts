@@ -7,6 +7,12 @@ import {
 import {
     ReserveEntity,
 } from "./entity/reserve.entity";
+import {
+    SpaceEntity, 
+} from "../space/entity/space.entity";
+import {
+    MemberEntity, 
+} from "../member/entity/member.entity";
 
 @Injectable()
 export class ReserveRepository {
@@ -63,5 +69,41 @@ export class ReserveRepository {
         });
 
         return reserves;
+    }
+
+    async findReserveIncludeMemberAndSpace(reserveId: string, txReserve?: PrismaService["reserve"])
+        : Promise<{
+        reserve: ReserveEntity,
+        space: SpaceEntity,
+        member: MemberEntity
+    }> {
+        const prismaReserveClient = txReserve ?? this.prismaReserve;
+        const reserve = await prismaReserveClient.findUnique({
+            where: {
+                id: reserveId,
+            },
+            include: {
+                Member: true,
+                Space: true,
+            },
+        });
+
+        return {
+            member: reserve.Member,
+            space: reserve.Space,
+            reserve: reserve,
+        };
+    }
+
+    async deleteReserve(reserveId: string, txReserve?: PrismaService["reserve"])
+    : Promise<null> {
+        const prismaReserveClient = txReserve ?? this.prismaReserve;
+        await prismaReserveClient.delete({
+            where: {
+                id: reserveId,
+            },
+        });
+
+        return null;
     }
 }
