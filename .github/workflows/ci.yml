@@ -11,10 +11,12 @@ jobs:
       - name: Checkout Respository
         uses: actions/checkout@v4
 
-      - name: Setup Project
+      - name: Setup node
         uses: actions/setup-node@v3
         with:
           node-version: 20.12.2
+
+      - name: Setup pnpm
         run: npm install -g pnpm@9.1.1 && pnpm install
 
       - name: Setup Docker Env
