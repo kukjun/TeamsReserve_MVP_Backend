@@ -1,0 +1,30 @@
+# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
+# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main, test]
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Respository
+      - uses: actions/checkout@v4
+
+      - name: Setup Project
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20.12.2
+      - run: npm install -g pnpm@9.1.1
+      - run: pnpm install
+
+      - name: Setup Docker Env
+      - uses: docker/setup-buildx-action@v2
+
+      - name: Run Unit Test
+      - run: pnpm run test:unit
+
+      - name: Run E2E Test
+      - run: pnpm run test:e2e
