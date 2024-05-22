@@ -15,7 +15,6 @@ import {
 } from "@nestjs/jwt";
 import {
     getRedisToken,
-    RedisModule,
 } from "@liaoliaots/nestjs-redis";
 import Redis from "ioredis";
 import {
@@ -25,7 +24,6 @@ import {
     HttpExceptionFilter,
 } from "../../src/filter/http-exception.filter";
 import {
-    DynamicModule,
     HttpStatus,
     INestApplication,
     ValidationPipe,
@@ -67,8 +65,11 @@ import {
     psqlTestContainerStarter,
 } from "../../src/util/function/postgresql-contrainer.function";
 import {
-    redisTestContainerStarter, 
+    redisTestContainerStarter,
 } from "../../src/util/function/redis-container.function";
+import {
+    ConfigService,
+} from "@nestjs/config";
 
 describe("Auth e2e Test", () => {
     let app: INestApplication;
@@ -77,25 +78,32 @@ describe("Auth e2e Test", () => {
     let postgresContainer: StartedPostgreSqlContainer;
     let redisClient: Redis;
     let jwtService: JwtService;
-    let redisModule: DynamicModule;
 
     beforeAll(async () => {
         const psqlConfig = await psqlTestContainerStarter();
         postgresContainer = psqlConfig.container;
         prismaService = psqlConfig.service;
-        const redisConfig = await redisTestContainerStarter();
-        redisContainer = redisConfig.container;
-        redisModule = redisConfig.module;
+        redisContainer = await redisTestContainerStarter();
 
         const module: TestingModule = await Test.createTestingModule({
             imports: [AppModule,],
         })
             .overrideProvider(PrismaService)
             .useValue(prismaService)
-            .overrideModule(RedisModule)
-            .useModule(redisModule)
+            .overrideProvider(ConfigService)
+            .useValue({
+                get: (key: string) => {
+                    if (key === "REDIS_HOST") return redisContainer.getHost();
+                    if (key === "REDIS_PORT") return redisContainer.getPort();
+                    if (key === "JWT_EXPIRED_TIME") return "1h";
+                    if (key === "JWT_SECRET_KEY") return "teamReserveUnitTest";
+
+                    return null;
+                },
+            })
             .compile();
 
+        // 가져오는 redis module이 localhost:6400 (내가 지정한것)으로 가져옴
         redisClient = module.get<Redis>(getRedisToken("default"));
         jwtService = module.get<JwtService>(JwtService);
         app = module.createNestApplication();
@@ -189,10 +197,10 @@ describe("Auth e2e Test", () => {
                         email: "testEmail@naver.com",
                         password: "testPassword",
                         nickname: "testName",
-                        teamCode: "ABCDEF-001",
+                        teamCode: "TEAM_CODE",
                         introduce: "testIntroduce",
                     };
-                    await redisClient.set(requestBody.email, "validate", "EX", "3600");
+                    await redisClient.set(requestBody.email, "validate", "EX", 3600);
 
                     // when
                     const response = await supertestRequestFunction(app.getHttpServer())
@@ -223,7 +231,7 @@ describe("Auth e2e Test", () => {
                             email: "testEmail@naver.com",
                             password: "testPassword",
                             nickname: "testName",
-                            teamCode: "AFESAS-001",
+                            teamCode: "INVALID_TEAM_CODE",
                             introduce: "testIntroduce",
                         };
                         await redisClient.set(requestBody.email, "validate", "EX", "3600");
@@ -257,7 +265,7 @@ describe("Auth e2e Test", () => {
                         email: storedMember.email,
                         password: "testPassword",
                         nickname: "testName",
-                        teamCode: "ABCDEF-001",
+                        teamCode: "TEAM_CODE",
                         introduce: "testIntroduce",
                     };
                     await redisClient.set(requestBody.email, "validate", "EX", "3600");
@@ -288,7 +296,7 @@ describe("Auth e2e Test", () => {
                     email: "testEmail@naver.com",
                     password: "testPassword",
                     nickname: "testName",
-                    teamCode: "ABCDEF-001",
+                    teamCode: "TEAM_CODE",
                     introduce: "testIntroduce",
                 };
 

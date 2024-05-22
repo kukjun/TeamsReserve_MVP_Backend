@@ -65,8 +65,8 @@ export class EmailTransferService {
                 pass: configService.get<string>("EMAIL_PASSWORD"),
             },
         });
-        this.validateLimitTime = configService.get<number>("VALIDATE_LIMIT_TIME");
-        this.signupLimitTime = configService.get<number>("SIGNUP_LIMIT_TIME");
+        this.validateLimitTime = configService.get<number>("VALIDATE_LIMIT_TIME") ?? 600;
+        this.signupLimitTime = configService.get<number>("SIGNUP_LIMIT_TIME") ?? 3600;
     }
 
     async validateEmail(request: ValidateEmailRequest): Promise<ValidateEmailResponse> {
