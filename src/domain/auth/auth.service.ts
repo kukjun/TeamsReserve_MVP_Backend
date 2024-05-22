@@ -60,7 +60,7 @@ export class AuthService {
         configService: ConfigService,
     ) {
         this.secret = configService.get<string>("JWT_SECRET_KEY");
-        this.teamCode = configService.get<string>("TEAM_CODE");
+        this.teamCode = configService.get<string>("TEAM_CODE") ?? "TEAM_CODE";
     }
 
     async signup(request: SignupRequest): Promise<SignupResponse> {

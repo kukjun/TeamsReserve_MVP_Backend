@@ -86,11 +86,18 @@ import {
 import {
     generateJwtToken, 
 } from "../fixture/function/jwt-token";
+import {
+    redisTestContainerStarter, 
+} from "../../src/util/function/redis-container.function";
+import {
+    StartedRedisContainer, 
+} from "@testcontainers/redis";
 
 describe("Member e2e Test", () => {
     let app: INestApplication;
     let prismaService: PrismaService;
     let postgresContainer: StartedPostgreSqlContainer;
+    let redisContainer: StartedRedisContainer;
     let jwtService: JwtService;
     let configService: ConfigService;
 
@@ -98,12 +105,24 @@ describe("Member e2e Test", () => {
         const psqlConfig = await psqlTestContainerStarter();
         postgresContainer = psqlConfig.container;
         prismaService = psqlConfig.service;
+        redisContainer = await redisTestContainerStarter();
 
         const module: TestingModule = await Test.createTestingModule({
             imports: [AppModule,],
         })
             .overrideProvider(PrismaService)
             .useValue(prismaService)
+            .overrideProvider(ConfigService)
+            .useValue({
+                get: (key: string) => {
+                    if (key === "REDIS_HOST") return redisContainer.getHost();
+                    if (key === "REDIS_PORT") return redisContainer.getPort();
+                    if (key === "JWT_EXPIRED_TIME") return "1h";
+                    if (key === "JWT_SECRET_KEY") return "teamReserveUnitTest";
+
+                    return null;
+                },
+            })
             .compile();
 
         jwtService = module.get<JwtService>(JwtService);
@@ -118,6 +137,7 @@ describe("Member e2e Test", () => {
 
     afterAll(async () => {
         await app.close();
+        await redisContainer.stop();
         await postgresContainer.stop();
     });
 
