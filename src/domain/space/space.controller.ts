@@ -25,6 +25,7 @@ import {
     CreateSpaceResponseDto,
 } from "./dto/res/create-space.response.dto";
 import {
+    ApiBearerAuth,
     ApiExtraModels, ApiOperation, ApiTags,
 } from "@nestjs/swagger";
 import {
@@ -65,6 +66,7 @@ import {
 @ApiExtraModels(DefaultResponse)
 @ApiExtraModels(PaginateData)
 @UseGuards(JwtGuard)
+@ApiBearerAuth("token")
 @Controller("spaces")
 export class SpaceController {
     constructor(

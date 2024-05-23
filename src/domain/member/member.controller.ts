@@ -16,6 +16,7 @@ import {
     MemberService,
 } from "./member.service";
 import {
+    ApiBearerAuth,
     ApiExtraModels, ApiOperation, ApiTags,
 } from "@nestjs/swagger";
 import {
@@ -67,6 +68,7 @@ import {
 @ApiTags("members")
 @ApiExtraModels(DefaultResponse)
 @UseGuards(JwtGuard)
+@ApiBearerAuth("token")
 @Controller("members")
 export class MemberController {
     constructor(private readonly memberService: MemberService) {
