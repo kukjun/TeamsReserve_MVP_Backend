@@ -75,7 +75,9 @@
 <br>
 <br>
 
+### Test Coverage
 
+![Test_Coverage](resource/Test_Coverage.png)
 
 ### 그 외 작업물
 
