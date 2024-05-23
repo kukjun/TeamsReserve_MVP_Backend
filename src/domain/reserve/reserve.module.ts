@@ -2,9 +2,6 @@ import {
     Module, 
 } from "@nestjs/common";
 import {
-    PrismaService, 
-} from "../../config/prisma/prisma.service";
-import {
     PrismaModule, 
 } from "../../config/prisma/prisma.module";
 import {
@@ -25,24 +22,16 @@ import {
 import {
     SpaceModule, 
 } from "../space/space.module";
-import {
-    SpaceRepository, 
-} from "../space/space.repository";
-import {
-    MemberRepository, 
-} from "../member/member.repository";
 
 @Module({
     imports:[PrismaModule,
         MemberModule,
         SpaceModule,],
     controllers:[ReserveController,],
-    providers:[PrismaService,
+    providers:[
         ReserveService,
         ReserveRepository,
-        ReserveLogRepository,
-        SpaceRepository,
-        MemberRepository,],
+        ReserveLogRepository,],
     exports:[],
 })
 export class ReserveModule {}
