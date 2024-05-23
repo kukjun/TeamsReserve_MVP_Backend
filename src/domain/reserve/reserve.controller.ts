@@ -5,6 +5,7 @@ import {
     ReserveService,
 } from "./reserve.service";
 import {
+    ApiBearerAuth,
     ApiExtraModels, ApiOperation, ApiTags,
 } from "@nestjs/swagger";
 import {
@@ -51,6 +52,7 @@ import {
 @ApiExtraModels(DefaultResponse)
 @ApiExtraModels(PaginateData)
 @UseGuards(JwtGuard)
+@ApiBearerAuth("token")
 @Controller("reserves")
 export class ReserveController {
     constructor(private readonly reserveService: ReserveService) {
