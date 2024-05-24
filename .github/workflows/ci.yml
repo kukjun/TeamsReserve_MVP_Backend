@@ -4,6 +4,8 @@ name: CI
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [develop]
 jobs:
   Test:
     runs-on: ubuntu-latest
