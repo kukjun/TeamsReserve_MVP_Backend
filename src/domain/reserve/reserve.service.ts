@@ -59,55 +59,73 @@ import {
     PaginateData,
 } from "../../interface/response/paginate.data";
 import {
-    ReserveOptionDto, 
+    ReserveOptionDto,
 } from "../../interface/request/reserve-option.dto";
 import {
-    GetReserveLogResponseDto, 
+    GetReserveLogResponseDto,
 } from "./dto/res/get-reserve-log.response.dto";
+import {
+    InjectRedis,
+} from "@liaoliaots/nestjs-redis";
+import Redis from "ioredis";
+import {
+    ResourceLockException,
+} from "../../exception/resource-lock.exception";
 
 @Injectable()
 export class ReserveService {
+    private readonly REDIS_LOCK_CREATE_RESERVE = "redis_lock_create_reserve";
+
     constructor(
         private readonly reserveRepository: ReserveRepository,
         private readonly reserveLogRepository: ReserveLogRepository,
         private readonly spaceRepository: SpaceRepository,
         private readonly memberRepository: MemberRepository,
-        private readonly prismaService: PrismaService
+        private readonly prismaService: PrismaService,
+        @InjectRedis() private readonly redisClient: Redis
     ) {
     }
 
     async createReserve(dto: CreateReserveValidateRequestDto, token: MemberToken): Promise<CreateReserveResponseDto> {
         if (dto.memberId !== token.id) throw new ResourceUnauthorizedException();
 
-        const result = await this.prismaService.$transaction(async (tx) => {
-            const member = await this.memberRepository.findMemberById(dto.memberId, tx.member);
-            if (!member) throw new MemberNotFoundException(`id: ${dto.memberId}`);
-            const space = await this.spaceRepository.findSpaceById(dto.spaceId, tx.space);
-            if (!space) throw new SpaceNotFoundException(`id: ${dto.spaceId}`);
+        const lockStatus = await this.setLock(this.REDIS_LOCK_CREATE_RESERVE);
+        if (!lockStatus) throw new ResourceLockException("Create Reserve");
 
-            const duplicatedReserve
-                = await this.reserveRepository.findReserveForDuplicateReserve(
-                    dto.spaceId, dto.startTime, dto.endTime, tx.reserve
-                );
-            if (duplicatedReserve.length !== 0) throw new DuplicateException("Reserve");
-            const reserve = new ReserveEntity(dto);
-            const resultId = await this.reserveRepository.saveReserve(reserve);
+        try {
+            const result = await this.prismaService.$transaction(async (tx) => {
+                const member = await this.memberRepository.findMemberById(dto.memberId, tx.member);
+                if (!member) throw new MemberNotFoundException(`id: ${dto.memberId}`);
+                const space = await this.spaceRepository.findSpaceById(dto.spaceId, tx.space);
+                if (!space) throw new SpaceNotFoundException(`id: ${dto.spaceId}`);
 
-            const reserveLog = new ReserveLogEntity({
-                reservedUser: member.nickname,
-                reservedSpaceName: space.name,
-                reservedLocation: space.location,
-                reservedTimes: `${reserve.startTime.toISOString()} - ${reserve.endTime.toISOString()}`,
-                state: ReserveState.RESERVE,
+                const duplicatedReserve
+                    = await this.reserveRepository.findReserveForDuplicateReserve(
+                        dto.spaceId, dto.startTime, dto.endTime, tx.reserve
+                    );
+                if (duplicatedReserve.length !== 0) throw new DuplicateException("Reserve");
+                const reserve = new ReserveEntity(dto);
+                const resultId = await this.reserveRepository.saveReserve(reserve);
+
+                const reserveLog = new ReserveLogEntity({
+                    reservedUser: member.nickname,
+                    reservedSpaceName: space.name,
+                    reservedLocation: space.location,
+                    reservedTimes: `${reserve.startTime.toISOString()} - ${reserve.endTime.toISOString()}`,
+                    state: ReserveState.RESERVE,
+                });
+                await this.reserveLogRepository.saveReserveLog(reserveLog);
+
+                return resultId;
             });
-            await this.reserveLogRepository.saveReserveLog(reserveLog);
 
-            return resultId;
-        });
+            return {
+                id: result,
+            };
+        } finally {
+            await this.delLock(this.REDIS_LOCK_CREATE_RESERVE);
+        }
 
-        return {
-            id: result,
-        };
     }
 
     async deleteReserve(id: string, token: MemberToken): Promise<null> {
@@ -232,5 +250,17 @@ export class ReserveService {
                 hasNextPage,
             },
         };
+    }
+
+    private async setLock(key: string): Promise<boolean> {
+        const value = await this.redisClient.set(key, "locked", "EX", 3, "NX");
+
+        return value === "OK";
+    }
+
+    private async delLock(key: string) {
+        await this.redisClient.del(key);
+
+        return;
     }
 }
