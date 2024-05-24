@@ -35,7 +35,7 @@ async function bootstrap() {
     const options = new DocumentBuilder()
         .setTitle("Teams Reserve MVP Service")
         .setDescription("공간 예약 프로그램의 MVP Version")
-        .setVersion("1.0.0")
+        .setVersion("1.0.1")
         .addBearerAuth(
             {
                 type: "http",
