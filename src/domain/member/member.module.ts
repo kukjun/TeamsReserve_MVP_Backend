@@ -5,9 +5,6 @@ import {
     MemberRepository, 
 } from "./member.repository";
 import {
-    PrismaService, 
-} from "../../config/prisma/prisma.service";
-import {
     PrismaModule, 
 } from "../../config/prisma/prisma.module";
 import {
@@ -23,7 +20,6 @@ import {
         MemberController,
     ],
     providers: [
-        PrismaService,
         MemberRepository,
         MemberService,
     ],

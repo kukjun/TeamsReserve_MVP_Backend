@@ -14,9 +14,6 @@ import {
     PhotoRepository, 
 } from "./photo.repository";
 import {
-    PrismaService, 
-} from "../../config/prisma/prisma.service";
-import {
     PrismaModule, 
 } from "../../config/prisma/prisma.module";
 
@@ -24,7 +21,6 @@ import {
     imports:[PrismaModule,],
     controllers:[SpaceController,],
     providers: [SpaceService,
-        PrismaService,
         SpaceRepository,
         PhotoRepository,],
     exports:[SpaceRepository,],

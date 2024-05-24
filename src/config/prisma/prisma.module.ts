@@ -6,7 +6,11 @@ import {
 } from "@nestjs/common";
 
 @Module({
-    providers: [PrismaService,],
+    providers: [{
+        provide: PrismaService,
+        useFactory: () => new PrismaService(),
+        inject: [],
+    },],
     exports: [PrismaService,],
 })
 export class PrismaModule {}
