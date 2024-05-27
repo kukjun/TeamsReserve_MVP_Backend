@@ -2,14 +2,14 @@ import {
     ArgumentMetadata, PipeTransform,
 } from "@nestjs/common";
 import {
-    CreateReserveRequestDto,
-} from "../dto/req/create-reserve.request.dto";
+    CreateReserveRequestDto, 
+} from "@reserve/dto/req/create-reserve.request.dto";
 import {
-    CreateReserveValidateRequestDto,
-} from "../dto/req/create-reserve-validate.request.dto";
+    CreateReserveValidateRequestDto, 
+} from "@reserve/dto/req/create-reserve-validate.request.dto";
 import {
-    BadRequestException,
-} from "../../../exception/http/bad-request.exception";
+    BadRequestException, 
+} from "@root/exception/http/bad-request.exception";
 
 export class ReserveValidatePipe implements PipeTransform<CreateReserveRequestDto, CreateReserveValidateRequestDto> {
     readonly reserveData = {

@@ -1,7 +1,6 @@
 import {
     PostgreSqlContainer, StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
-
 import {
     exec,
 } from "child_process";
@@ -10,7 +9,7 @@ import {
 } from "util";
 import {
     PrismaService, 
-} from "../../config/prisma/prisma.service";
+} from "@root/config/prisma/prisma.service";
 
 const execAsync = promisify(exec);
 

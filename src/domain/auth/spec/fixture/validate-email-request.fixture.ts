@@ -1,6 +1,6 @@
 import {
-    ValidateEmailRequest,
-} from "../../dto/req/validate-email.request";
+    ValidateEmailRequest, 
+} from "@auth/dto/req/validate-email.request";
 
 export const validateEmailRequestFixture = (): ValidateEmailRequest => {
     return {

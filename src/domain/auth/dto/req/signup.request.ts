@@ -1,6 +1,6 @@
 import {
     MemberEntity,
-} from "../../../member/entity/member.entity";
+} from "@member/entity/member.entity";
 import {
     IsEmail, IsNotEmpty, IsOptional, MaxLength, MinLength,
 } from "class-validator";

@@ -1,15 +1,15 @@
 import {
-    GetMemberResponseDto,
-} from "./get-member.response.dto";
-import {
-    MemberEntity,
-} from "../../entity/member.entity";
-import {
     ApiProperty,
 } from "@nestjs/swagger";
 import {
-    MemberAuthority,
-} from "../../../../types/enums/member.authority.enum";
+    GetMemberResponseDto, 
+} from "@member/dto/res/get-member.response.dto";
+import {
+    MemberEntity, 
+} from "@member/entity/member.entity";
+import {
+    MemberAuthority, 
+} from "@root/types/enums/member.authority.enum";
 
 export class GetMemberDetailResponseDto
     extends GetMemberResponseDto implements Pick<MemberEntity, "authority" | "joinStatus"> {

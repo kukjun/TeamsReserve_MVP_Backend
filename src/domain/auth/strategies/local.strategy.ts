@@ -8,8 +8,8 @@ import {
     Strategy,
 } from "passport-local";
 import {
-    AuthService,
-} from "../auth.service";
+    AuthService, 
+} from "@auth/auth.service";
 
 export const LOCAL_STRATEGY: string = "local";
 

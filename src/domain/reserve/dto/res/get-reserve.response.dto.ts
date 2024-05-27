@@ -1,6 +1,6 @@
 import {
-    ReserveEntity,
-} from "../../entity/reserve.entity";
+    ReserveEntity, 
+} from "@reserve/entity/reserve.entity";
 
 export class GetReserveResponseDto
 implements Pick<ReserveEntity, "id" | "description"> {

@@ -1,15 +1,15 @@
 import {
-    PrismaService, 
-} from "../../config/prisma/prisma.service";
-import {
-    ReserveLogEntity, 
-} from "./entity/reserve-log.entity";
-import {
     Injectable, 
 } from "@nestjs/common";
 import {
+    PrismaService, 
+} from "@root/config/prisma/prisma.service";
+import {
+    ReserveLogEntity, 
+} from "@reserve/entity/reserve-log.entity";
+import {
     PaginateRequestDto, 
-} from "../../interface/request/paginate.request.dto";
+} from "@root/interface/request/paginate.request.dto";
 
 @Injectable()
 export class ReserveLogRepository {

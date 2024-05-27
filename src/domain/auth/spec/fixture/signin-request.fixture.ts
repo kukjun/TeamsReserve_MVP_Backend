@@ -3,7 +3,7 @@ import {
 } from "@faker-js/faker";
 import {
     SigninRequest, 
-} from "../../dto/req/signin.request";
+} from "@auth/dto/req/signin.request";
 
 export const signinRequestFixture = ():SigninRequest => {
     return {

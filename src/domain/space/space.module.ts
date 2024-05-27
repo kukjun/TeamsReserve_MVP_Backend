@@ -2,20 +2,20 @@ import {
     Module, 
 } from "@nestjs/common";
 import {
+    PrismaModule, 
+} from "@root/config/prisma/prisma.module";
+import {
     SpaceController, 
-} from "./space.controller";
+} from "@space/space.controller";
 import {
     SpaceService, 
-} from "./space.service";
+} from "@space/space.service";
 import {
     SpaceRepository, 
-} from "./space.repository";
+} from "@space/space.repository";
 import {
     PhotoRepository, 
-} from "./photo.repository";
-import {
-    PrismaModule, 
-} from "../../config/prisma/prisma.module";
+} from "@space/photo.repository";
 
 @Module({
     imports:[PrismaModule,],

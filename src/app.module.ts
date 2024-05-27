@@ -2,26 +2,26 @@ import {
     Module,
 } from "@nestjs/common";
 import {
-    AuthModule,
-} from "./domain/auth/auth.module";
-import {
     ConfigModule, ConfigService,
 } from "@nestjs/config";
 import {
     RedisModule,
 } from "@liaoliaots/nestjs-redis";
 import {
+    AuthModule, 
+} from "@auth/auth.module";
+import {
     PrismaModule, 
-} from "./config/prisma/prisma.module";
+} from "@root/config/prisma/prisma.module";
 import {
     MemberModule, 
-} from "./domain/member/member.module";
+} from "@member/member.module";
 import {
     SpaceModule, 
-} from "./domain/space/space.module";
+} from "@space/space.module";
 import {
     ReserveModule, 
-} from "./domain/reserve/reserve.module";
+} from "@reserve/reserve.module";
 
 @Module({
     imports: [

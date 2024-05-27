@@ -1,13 +1,13 @@
 import {
-    ReserveEntity, 
-} from "../../entity/reserve.entity";
-import {
     ApiProperty,
     PickType,
 } from "@nestjs/swagger";
 import {
     IsNotEmpty, IsOptional,
 } from "class-validator";
+import {
+    ReserveEntity, 
+} from "@reserve/entity/reserve.entity";
 
 export class CreateReserveValidateRequestDto extends PickType(ReserveEntity, [
     "startTime",

@@ -2,65 +2,65 @@ import {
     Injectable,
 } from "@nestjs/common";
 import {
-    MemberRepository,
-} from "./member.repository";
+    MemberRepository, 
+} from "@member/member.repository";
 import {
-    GetMemberResponseDto,
-} from "./dto/res/get-member.response.dto";
+    GetMemberResponseDto, 
+} from "@member/dto/res/get-member.response.dto";
 import {
-    MemberNotFoundException,
-} from "../../exception/member-not-found.exception";
+    MemberNotFoundException, 
+} from "@root/exception/member-not-found.exception";
 import {
-    PaginateRequestDto,
-} from "../../interface/request/paginate.request.dto";
+    PaginateRequestDto, 
+} from "@root/interface/request/paginate.request.dto";
 import {
-    PaginateData,
-} from "../../interface/response/paginate.data";
+    PaginateData, 
+} from "@root/interface/response/paginate.data";
 import {
-    GetMemberDetailResponseDto,
-} from "./dto/res/get-member-detail.response.dto";
+    MemberOptionDto, 
+} from "@root/interface/request/member-option.dto";
 import {
-    MemberOptionDto,
-} from "../../interface/request/member-option.dto";
+    GetMemberDetailResponseDto, 
+} from "@member/dto/res/get-member-detail.response.dto";
 import {
-    UpdateMemberRequestDto,
-} from "./dto/req/update-member.request.dto";
+    UpdateMemberRequestDto, 
+} from "@member/dto/req/update-member.request.dto";
 import {
-    UpdateMemberResponseDto,
-} from "./dto/res/update-member.response.dto";
+    MemberToken, 
+} from "@root/interface/member-token";
 import {
-    MemberToken,
-} from "../../interface/member-token";
+    UpdateMemberResponseDto, 
+} from "@member/dto/res/update-member.response.dto";
 import {
-    ResourceUnauthorizedException,
-} from "../../exception/resource-unauthorized.exception";
+    ResourceUnauthorizedException, 
+} from "@root/exception/resource-unauthorized.exception";
 import {
-    MemberEntity,
-} from "./entity/member.entity";
+    DuplicateException, 
+} from "@root/exception/duplicate.exception";
 import {
-    DuplicateException,
-} from "../../exception/duplicate.exception";
+    MemberEntity, 
+} from "@member/entity/member.entity";
 import {
-    UpdateMemberPasswordRequestDto,
-} from "./dto/req/update-member-password.request.dto";
+    UpdateMemberPasswordRequestDto, 
+} from "@member/dto/req/update-member-password.request.dto";
 import {
-    bcryptFunction,
-} from "../../util/function/bcrypt.function";
+    bcryptFunction, 
+} from "@root/util/function/bcrypt.function";
 import {
-    PasswordIncorrectException,
-} from "../../exception/password-incorrect.exception";
+    PasswordIncorrectException, 
+} from "@root/exception/password-incorrect.exception";
 import {
-    UpdateMemberJoinStatusRequestDto,
-} from "./dto/req/update-member-join-status-request.dto";
+    UpdateMemberJoinStatusRequestDto, 
+} from "@member/dto/req/update-member-join-status-request.dto";
 import {
-    BadRequestException,
-} from "../../exception/http/bad-request.exception";
+    UpdateMemberAuthorityRequestDto, 
+} from "@member/dto/req/update-member-authority.request.dto";
 import {
-    UpdateMemberAuthorityRequestDto,
-} from "./dto/req/update-member-authority.request.dto";
+    BadRequestException, 
+} from "@root/exception/http/bad-request.exception";
 import {
-    MemberAuthority,
-} from "../../types/enums/member.authority.enum";
+    MemberAuthority, 
+} from "@root/types/enums/member.authority.enum";
 
 @Injectable()
 export class MemberService {

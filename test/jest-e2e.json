@@ -6,5 +6,13 @@
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@root/(.*)$": "<rootDir>/../src/$1",
+    "^@auth/(.*)$": "<rootDir>/../src/domain/auth/$1",
+    "^@member/(.*)$": "<rootDir>/../src/domain/member/$1",
+    "^@reserve/(.*)$": "<rootDir>/../src/domain/reserve/$1",
+    "^@space/(.*)$": "<rootDir>/../src/domain/space/$1"
   }
+
 }

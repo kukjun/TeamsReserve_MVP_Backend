@@ -3,25 +3,25 @@ import {
 } from "@nestjs/common";
 import {
     PrismaModule, 
-} from "../../config/prisma/prisma.module";
-import {
-    ReserveController, 
-} from "./reserve.controller";
-import {
-    ReserveService, 
-} from "./reserve.service";
-import {
-    ReserveRepository, 
-} from "./reserve.repository";
-import {
-    ReserveLogRepository, 
-} from "./reserve-log.repository";
+} from "@root/config/prisma/prisma.module";
 import {
     MemberModule, 
-} from "../member/member.module";
+} from "@member/member.module";
 import {
     SpaceModule, 
-} from "../space/space.module";
+} from "@space/space.module";
+import {
+    ReserveController, 
+} from "@reserve/reserve.controller";
+import {
+    ReserveService, 
+} from "@reserve/reserve.service";
+import {
+    ReserveRepository, 
+} from "@reserve/reserve.repository";
+import {
+    ReserveLogRepository, 
+} from "@reserve/reserve-log.repository";
 
 @Module({
     imports:[PrismaModule,

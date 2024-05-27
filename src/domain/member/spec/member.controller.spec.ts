@@ -1,50 +1,49 @@
 import {
-    MemberController,
-} from "../member.controller";
-import {
     Test,
     TestingModule,
 } from "@nestjs/testing";
 import {
-    MemberService,
-} from "../member.service";
+    MemberController, 
+} from "@member/member.controller";
 import {
-    GetMemberResponseDto,
-} from "../dto/res/get-member.response.dto";
+    MemberService, 
+} from "@member/member.service";
 import {
-    MemberNotFoundException,
-} from "../../../exception/member-not-found.exception";
+    GetMemberResponseDto, 
+} from "@member/dto/res/get-member.response.dto";
 import {
-    PaginateData,
-} from "../../../interface/response/paginate.data";
+    MemberNotFoundException, 
+} from "@root/exception/member-not-found.exception";
 import {
-    getMemberListDetailFixture,
-    getMemberListFixture,
-} from "./fixture/paginate.response";
+    PaginateRequestDto, 
+} from "@root/interface/request/paginate.request.dto";
 import {
-    PaginateRequestDto,
-} from "../../../interface/request/paginate.request.dto";
+    PaginateData, 
+} from "@root/interface/response/paginate.data";
 import {
-    UpdateMemberRequestDto,
-} from "../dto/req/update-member.request.dto";
+    getMemberListDetailFixture, getMemberListFixture, 
+} from "@member/spec/fixture/paginate.response";
 import {
-    UpdateMemberResponseDto,
-} from "../dto/res/update-member.response.dto";
+    UpdateMemberRequestDto, 
+} from "@member/dto/req/update-member.request.dto";
 import {
-    uuidFunction,
-} from "../../../util/function/uuid.function";
+    uuidFunction, 
+} from "@root/util/function/uuid.function";
 import {
-    MemberAuthority,
-} from "../../../types/enums/member.authority.enum";
+    UpdateMemberResponseDto, 
+} from "@member/dto/res/update-member.response.dto";
 import {
     UpdateMemberPasswordRequestDto, 
-} from "../dto/req/update-member-password.request.dto";
+} from "@member/dto/req/update-member-password.request.dto";
 import {
-    UpdateMemberJoinStatusRequestDto,
-} from "../dto/req/update-member-join-status-request.dto";
+    UpdateMemberJoinStatusRequestDto, 
+} from "@member/dto/req/update-member-join-status-request.dto";
 import {
     UpdateMemberAuthorityRequestDto, 
-} from "../dto/req/update-member-authority.request.dto";
+} from "@member/dto/req/update-member-authority.request.dto";
+import {
+    MemberAuthority, 
+} from "@root/types/enums/member.authority.enum";
 
 const mockMemberService = {
     getMember: jest.fn(),

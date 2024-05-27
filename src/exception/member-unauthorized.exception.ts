@@ -1,6 +1,6 @@
 import {
     ForbiddenException, 
-} from "./http/forbidden.exception";
+} from "@root/exception/http/forbidden.exception";
 
 export class MemberUnauthorizedException extends ForbiddenException {
     constructor(message: string) {

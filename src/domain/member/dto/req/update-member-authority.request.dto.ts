@@ -6,7 +6,7 @@ import {
 } from "class-validator";
 import {
     MemberAuthority, 
-} from "../../../../types/enums/member.authority.enum";
+} from "@root/types/enums/member.authority.enum";
 
 export class UpdateMemberAuthorityRequestDto {
     @ApiProperty({

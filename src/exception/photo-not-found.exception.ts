@@ -1,6 +1,6 @@
 import {
     NotFoundException, 
-} from "./http/not-found.exception";
+} from "@root/exception/http/not-found.exception";
 
 export class PhotoNotFoundException extends NotFoundException {
     constructor(message: string) {
