@@ -3,13 +3,13 @@ import {
 } from "@nestjs/common";
 import {
     PrismaService, 
-} from "../../config/prisma/prisma.service";
+} from "@root/config/prisma/prisma.service";
 import {
     SpaceEntity, 
-} from "./entity/space.entity";
+} from "@space/entity/space.entity";
 import {
     PaginateRequestDto, 
-} from "../../interface/request/paginate.request.dto";
+} from "@root/interface/request/paginate.request.dto";
 
 @Injectable()
 export class SpaceRepository {

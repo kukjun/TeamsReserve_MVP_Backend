@@ -2,75 +2,75 @@ import {
     Injectable,
 } from "@nestjs/common";
 import {
-    ReserveRepository,
-} from "./reserve.repository";
-import {
-    CreateReserveValidateRequestDto,
-} from "./dto/req/create-reserve-validate.request.dto";
-import {
-    CreateReserveResponseDto,
-} from "./dto/res/create-reserve.response.dto";
-import {
-    MemberToken,
-} from "../../interface/member-token";
-import {
-    DuplicateException,
-} from "../../exception/duplicate.exception";
-import {
-    ResourceUnauthorizedException,
-} from "../../exception/resource-unauthorized.exception";
-import {
-    ReserveEntity,
-} from "./entity/reserve.entity";
-import {
-    ReserveLogRepository,
-} from "./reserve-log.repository";
-import {
-    ReserveLogEntity,
-} from "./entity/reserve-log.entity";
-import {
-    SpaceRepository,
-} from "../space/space.repository";
-import {
-    MemberRepository,
-} from "../member/member.repository";
-import {
-    SpaceNotFoundException,
-} from "../../exception/space-not-found.exception";
-import {
-    MemberNotFoundException,
-} from "../../exception/member-not-found.exception";
-import {
-    ReserveState,
-} from "../../types/enums/reserveState";
-import {
-    PrismaService,
-} from "../../config/prisma/prisma.service";
-import {
-    ReserveNotFoundException,
-} from "../../exception/reserve-not-found.exception";
-import {
-    GetReserveResponseDto,
-} from "./dto/res/get-reserve.response.dto";
-import {
-    PaginateRequestDto,
-} from "../../interface/request/paginate.request.dto";
-import {
-    PaginateData,
-} from "../../interface/response/paginate.data";
-import {
-    ReserveOptionDto,
-} from "../../interface/request/reserve-option.dto";
-import {
-    GetReserveLogResponseDto,
-} from "./dto/res/get-reserve-log.response.dto";
-import {
     InjectRedis,
 } from "@liaoliaots/nestjs-redis";
 import Redis from "ioredis";
 import {
-    ResourceLockException,
-} from "../../exception/resource-lock.exception";
+    ReserveRepository, 
+} from "@reserve/reserve.repository";
+import {
+    ReserveLogRepository, 
+} from "@reserve/reserve-log.repository";
+import {
+    SpaceRepository, 
+} from "@space/space.repository";
+import {
+    MemberRepository, 
+} from "@member/member.repository";
+import {
+    PrismaService, 
+} from "@root/config/prisma/prisma.service";
+import {
+    CreateReserveValidateRequestDto, 
+} from "@reserve/dto/req/create-reserve-validate.request.dto";
+import {
+    MemberToken, 
+} from "@root/interface/member-token";
+import {
+    CreateReserveResponseDto, 
+} from "@reserve/dto/res/create-reserve.response.dto";
+import {
+    ResourceUnauthorizedException, 
+} from "@root/exception/resource-unauthorized.exception";
+import {
+    ResourceLockException, 
+} from "@root/exception/resource-lock.exception";
+import {
+    MemberNotFoundException, 
+} from "@root/exception/member-not-found.exception";
+import {
+    SpaceNotFoundException, 
+} from "@root/exception/space-not-found.exception";
+import {
+    DuplicateException, 
+} from "@root/exception/duplicate.exception";
+import {
+    ReserveEntity, 
+} from "@reserve/entity/reserve.entity";
+import {
+    ReserveLogEntity, 
+} from "@reserve/entity/reserve-log.entity";
+import {
+    ReserveState, 
+} from "@root/types/enums/reserveState";
+import {
+    ReserveNotFoundException, 
+} from "@root/exception/reserve-not-found.exception";
+import {
+    GetReserveResponseDto, 
+} from "@reserve/dto/res/get-reserve.response.dto";
+import {
+    PaginateRequestDto, 
+} from "@root/interface/request/paginate.request.dto";
+import {
+    ReserveOptionDto, 
+} from "@root/interface/request/reserve-option.dto";
+import {
+    PaginateData, 
+} from "@root/interface/response/paginate.data";
+import {
+    GetReserveLogResponseDto, 
+} from "@reserve/dto/res/get-reserve-log.response.dto";
 
 @Injectable()
 export class ReserveService {

@@ -2,23 +2,23 @@ import {
     Injectable,
 } from "@nestjs/common";
 import {
-    PrismaService,
-} from "../../config/prisma/prisma.service";
+    PrismaService, 
+} from "@root/config/prisma/prisma.service";
 import {
-    ReserveEntity,
-} from "./entity/reserve.entity";
+    ReserveEntity, 
+} from "@reserve/entity/reserve.entity";
 import {
     SpaceEntity, 
-} from "../space/entity/space.entity";
+} from "@space/entity/space.entity";
 import {
     MemberEntity, 
-} from "../member/entity/member.entity";
+} from "@member/entity/member.entity";
 import {
     PaginateRequestDto, 
-} from "../../interface/request/paginate.request.dto";
+} from "@root/interface/request/paginate.request.dto";
 import {
     ReserveOptionDto, 
-} from "../../interface/request/reserve-option.dto";
+} from "@root/interface/request/reserve-option.dto";
 
 @Injectable()
 export class ReserveRepository {

@@ -2,7 +2,7 @@ import {
     ApiProperty,
 } from "@nestjs/swagger";
 
-export class DefaultResponse<T> {
+export class CustomResponse<T> {
     readonly data: T;
 
     @ApiProperty({

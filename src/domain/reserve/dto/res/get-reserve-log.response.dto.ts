@@ -1,6 +1,6 @@
 import {
-    ReserveLogEntity,
-} from "../../entity/reserve-log.entity";
+    ReserveLogEntity, 
+} from "@reserve/entity/reserve-log.entity";
 
 export class GetReserveLogResponseDto implements Pick<ReserveLogEntity,
     "id"

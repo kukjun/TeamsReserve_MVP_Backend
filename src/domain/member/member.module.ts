@@ -2,17 +2,17 @@ import {
     Module, 
 } from "@nestjs/common";
 import {
-    MemberRepository, 
-} from "./member.repository";
-import {
     PrismaModule, 
-} from "../../config/prisma/prisma.module";
-import {
-    MemberService, 
-} from "./member.service";
+} from "@root/config/prisma/prisma.module";
 import {
     MemberController, 
-} from "./member.controller";
+} from "@member/member.controller";
+import {
+    MemberRepository, 
+} from "@member/member.repository";
+import {
+    MemberService, 
+} from "@member/member.service";
 
 @Module({
     imports: [PrismaModule,],

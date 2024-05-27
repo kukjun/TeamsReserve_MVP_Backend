@@ -7,47 +7,47 @@ import {
 } from "@liaoliaots/nestjs-redis";
 import Redis from "ioredis";
 import {
-    SignupRequest,
-} from "./dto/req/signup.request";
-import {
-    SignupResponse,
-} from "./dto/res/signup.response";
-import {
-    MemberRepository,
-} from "../member/member.repository";
-import {
-    DuplicateException,
-} from "../../exception/duplicate.exception";
-import {
-    MemberEntity,
-} from "../member/entity/member.entity";
-import {
-    MemberAuthority, 
-} from "../../types/enums/member.authority.enum";
-import {
-    EmailUnauthenticatedException,
-} from "../../exception/email-unauthenticated.exception";
-import {
-    SigninFailException, 
-} from "../../exception/signin-fail.exception";
-import {
     JwtService, 
 } from "@nestjs/jwt";
 import {
     ConfigService, 
 } from "@nestjs/config";
 import {
-    SigninResponse, 
-} from "./dto/res/signin.response";
+    MemberRepository, 
+} from "@member/member.repository";
 import {
-    TeamUnauthenticatedException,
-} from "../../exception/team-unauthenticated.exception";
+    SignupRequest, 
+} from "@auth/dto/req/signup.request";
+import {
+    SignupResponse, 
+} from "@auth/dto/res/signup.response";
+import {
+    EmailUnauthenticatedException, 
+} from "@root/exception/email-unauthenticated.exception";
+import {
+    TeamUnauthenticatedException, 
+} from "@root/exception/team-unauthenticated.exception";
+import {
+    DuplicateException, 
+} from "@root/exception/duplicate.exception";
+import {
+    MemberEntity, 
+} from "@member/entity/member.entity";
+import {
+    MemberAuthority, 
+} from "@root/types/enums/member.authority.enum";
 import {
     SigninRequest, 
-} from "./dto/req/signin.request";
+} from "@auth/dto/req/signin.request";
 import {
-    MemberToken,
-} from "../../interface/member-token";
+    SigninFailException, 
+} from "@root/exception/signin-fail.exception";
+import {
+    SigninResponse, 
+} from "@auth/dto/res/signin.response";
+import {
+    MemberToken, 
+} from "@root/interface/member-token";
 
 @Injectable()
 export class AuthService {

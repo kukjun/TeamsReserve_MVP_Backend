@@ -2,17 +2,17 @@ import {
     Injectable,
 } from "@nestjs/common";
 import {
-    PrismaService,
-} from "../../config/prisma/prisma.service";
+    PrismaService, 
+} from "@root/config/prisma/prisma.service";
 import {
-    PaginateRequestDto,
-} from "../../interface/request/paginate.request.dto";
+    PaginateRequestDto, 
+} from "@root/interface/request/paginate.request.dto";
 import {
-    MemberOptionDto,
-} from "../../interface/request/member-option.dto";
+    MemberOptionDto, 
+} from "@root/interface/request/member-option.dto";
 import {
-    MemberEntity,
-} from "./entity/member.entity";
+    MemberEntity, 
+} from "@member/entity/member.entity";
 
 @Injectable()
 export class MemberRepository {

@@ -2,64 +2,64 @@ import {
     Injectable,
 } from "@nestjs/common";
 import {
-    SpaceRepository,
-} from "./space.repository";
-import {
-    PhotoRepository,
-} from "./photo.repository";
-import {
-    CreateSpaceRequestDto,
-} from "./dto/req/create-space.request.dto";
-import {
-    CreateSpaceResponseDto,
-} from "./dto/res/create-space.response.dto";
-import {
-    DuplicateException,
-} from "../../exception/duplicate.exception";
-import {
-    SpaceEntity,
-} from "./entity/space.entity";
-import {
-    CreatePhotoResponseDto,
-} from "./dto/res/create-photo.response.dto";
-import {
     ConfigService,
 } from "@nestjs/config";
-import {
-    uuidFunction,
-} from "../../util/function/uuid.function";
 import {
     DeleteObjectCommand,
     PutObjectCommand,
     S3Client,
 } from "@aws-sdk/client-s3";
 import {
-    SpaceNotFoundException,
-} from "../../exception/space-not-found.exception";
+    SpaceRepository, 
+} from "@space/space.repository";
 import {
-    PhotoEntity,
-} from "./entity/photo.entity";
+    PhotoRepository, 
+} from "@space/photo.repository";
 import {
-    GetPhotoResponseDto,
-} from "./dto/res/get-photo-response.dto";
+    CreateSpaceRequestDto, 
+} from "@space/dto/req/create-space.request.dto";
 import {
-    GetPhotoListResponseDto,
-} from "./dto/res/get-photo-list-response.dto";
+    CreateSpaceResponseDto, 
+} from "@space/dto/res/create-space.response.dto";
 import {
-    GetSpaceResponseDto, 
-} from "./dto/res/get-space.response.dto";
+    DuplicateException, 
+} from "@root/exception/duplicate.exception";
 import {
-    PaginateRequestDto, 
-} from "../../interface/request/paginate.request.dto";
+    SpaceEntity, 
+} from "@space/entity/space.entity";
 import {
-    PaginateData, 
-} from "../../interface/response/paginate.data";
+    CreatePhotoResponseDto, 
+} from "@space/dto/res/create-photo.response.dto";
 import {
-    UpdateSpaceRequestDto, 
-} from "./dto/req/update-space.request.dto";
+    SpaceNotFoundException, 
+} from "@root/exception/space-not-found.exception";
+import {
+    uuidFunction, 
+} from "@root/util/function/uuid.function";
+import {
+    PhotoEntity, 
+} from "@space/entity/photo.entity";
+import {
+    GetPhotoListResponseDto, 
+} from "@space/dto/res/get-photo-list-response.dto";
+import {
+    GetPhotoResponseDto, 
+} from "@space/dto/res/get-photo-response.dto";
 import {
     PhotoNotFoundException, 
-} from "../../exception/photo-not-found.exception";
+} from "@root/exception/photo-not-found.exception";
+import {
+    GetSpaceResponseDto, 
+} from "@space/dto/res/get-space.response.dto";
+import {
+    PaginateRequestDto, 
+} from "@root/interface/request/paginate.request.dto";
+import {
+    PaginateData, 
+} from "@root/interface/response/paginate.data";
+import {
+    UpdateSpaceRequestDto, 
+} from "@space/dto/req/update-space.request.dto";
 
 @Injectable()
 export class SpaceService {

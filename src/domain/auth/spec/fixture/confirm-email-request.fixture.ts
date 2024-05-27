@@ -1,6 +1,6 @@
 import {
     ConfirmEmailRequest, 
-} from "../../dto/req/confirm-email.request";
+} from "@auth/dto/req/confirm-email.request";
 
 export const confirmEmailRequestFixture = (): ConfirmEmailRequest => {
     return {

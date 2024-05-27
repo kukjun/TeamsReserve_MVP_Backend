@@ -3,9 +3,6 @@ import {
     INestApplication, ValidationPipe,
 } from "@nestjs/common";
 import {
-    PrismaService,
-} from "../../src/config/prisma/prisma.service";
-import {
     StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
 import {
@@ -15,68 +12,71 @@ import {
     ConfigService,
 } from "@nestjs/config";
 import {
-    psqlTestContainerStarter,
-} from "../../src/util/function/postgresql-contrainer.function";
-import {
     Test, TestingModule,
 } from "@nestjs/testing";
 import {
-    AppModule,
-} from "../../src/app.module";
-import {
-    HttpExceptionFilter,
-} from "../../src/filter/http-exception.filter";
-import {
-    CreateSpaceRequestDto,
-} from "../../src/domain/space/dto/req/create-space.request.dto";
-import {
-    supertestRequestFunction,
-} from "../../src/util/function/supertest-request.function";
-import {
-    DefaultResponse,
-} from "../../src/interface/response/default.response";
-import {
-    CreateSpaceResponseDto,
-} from "../../src/domain/space/dto/res/create-space.response.dto";
-import {
-    MemberAuthority,
-} from "../../src/types/enums/member.authority.enum";
-import {
-    spaceFixture, spaceRandomFixture,
-} from "../fixture/entity/space.fixture";
-import {
-    generateJwtToken,
-} from "../fixture/function/jwt-token";
-import {
-    photoFixture,
-} from "../fixture/entity/photo.fixture";
-import {
-    GetPhotoListResponseDto,
-} from "../../src/domain/space/dto/res/get-photo-list-response.dto";
-import {
-    uuidFunction,
-} from "../../src/util/function/uuid.function";
-import {
-    GetSpaceResponseDto,
-} from "../../src/domain/space/dto/res/get-space.response.dto";
-import {
-    SpaceEntity,
-} from "../../src/domain/space/entity/space.entity";
-import {
-    PaginateRequestDto,
-} from "../../src/interface/request/paginate.request.dto";
-import {
-    PaginateData,
-} from "../../src/interface/response/paginate.data";
-import {
-    UpdateSpaceRequestDto,
-} from "../../src/domain/space/dto/req/update-space.request.dto";
-import {
-    redisTestContainerStarter, 
-} from "../../src/util/function/redis-container.function";
+    CustomResponse,
+} from "@root/interface/response/custom-response";
 import {
     StartedRedisContainer, 
 } from "@testcontainers/redis";
+import {
+    PrismaService, 
+} from "@root/config/prisma/prisma.service";
+import {
+    psqlTestContainerStarter, 
+} from "@root/util/function/postgresql-contrainer.function";
+import {
+    redisTestContainerStarter, 
+} from "@root/util/function/redis-container.function";
+import {
+    AppModule, 
+} from "@root/app.module";
+import {
+    HttpExceptionFilter, 
+} from "@root/filter/http-exception.filter";
+import {
+    generateJwtToken, 
+} from "../fixture/function/jwt-token";
+import {
+    MemberAuthority, 
+} from "@root/types/enums/member.authority.enum";
+import {
+    CreateSpaceRequestDto, 
+} from "@space/dto/req/create-space.request.dto";
+import {
+    supertestRequestFunction, 
+} from "@root/util/function/supertest-request.function";
+import {
+    CreateSpaceResponseDto, 
+} from "@space/dto/res/create-space.response.dto";
+import {
+    spaceFixture, spaceRandomFixture, 
+} from "../fixture/entity/space.fixture";
+import {
+    GetPhotoListResponseDto, 
+} from "@space/dto/res/get-photo-list-response.dto";
+import {
+    uuidFunction, 
+} from "@root/util/function/uuid.function";
+import {
+    GetSpaceResponseDto, 
+} from "@space/dto/res/get-space.response.dto";
+import {
+    SpaceEntity, 
+} from "@space/entity/space.entity";
+import {
+    PaginateRequestDto, 
+} from "@root/interface/request/paginate.request.dto";
+import {
+    PaginateData, 
+} from "@root/interface/response/paginate.data";
+import {
+    UpdateSpaceRequestDto, 
+} from "@space/dto/req/update-space.request.dto";
+import {
+    photoFixture, 
+} from "../fixture/entity/photo.fixture";
 
 describe("Space e2e Test", () => {
     let app: INestApplication;
@@ -158,7 +158,7 @@ describe("Space e2e Test", () => {
                         .expect(HttpStatus.CREATED);
 
                     // then
-                    const actual = response.body as DefaultResponse<CreateSpaceResponseDto>;
+                    const actual = response.body as CustomResponse<CreateSpaceResponseDto>;
                     const actualSpace = await prismaService.space.findUnique({
                         where: {
                             id: actual.data.id,
@@ -236,7 +236,7 @@ describe("Space e2e Test", () => {
                     .expect(HttpStatus.OK);
 
                 // then
-                const actual = response.body as DefaultResponse<GetPhotoListResponseDto>;
+                const actual = response.body as CustomResponse<GetPhotoListResponseDto>;
                 const actualPhoto = await prismaService.photo.findUnique({
                     where: {
                         id: actual.data.data[0].id,
@@ -280,7 +280,7 @@ describe("Space e2e Test", () => {
                     .expect(HttpStatus.OK);
 
                 // then
-                const actual = response.body as DefaultResponse<GetSpaceResponseDto>;
+                const actual = response.body as CustomResponse<GetSpaceResponseDto>;
                 expect(actual.data.id).toBe(storedSpace.id);
                 expect(actual.data.name).toBe(storedSpace.name);
                 expect(actual.data.location).toBe(storedSpace.location);
@@ -329,7 +329,7 @@ describe("Space e2e Test", () => {
                 .expect(HttpStatus.OK);
 
             // then
-            const actual = response.body as DefaultResponse<PaginateData<GetSpaceResponseDto>>;
+            const actual = response.body as CustomResponse<PaginateData<GetSpaceResponseDto>>;
             expect(actual.data.meta.totalCount).toBe(randomNumber);
             expect(actual.data.meta.totalPage).toEqual(Math.ceil(randomNumber / request.limit));
             expect(actual.data.meta.page).toBe(request.page);
@@ -360,7 +360,7 @@ describe("Space e2e Test", () => {
                         .expect(HttpStatus.CREATED);
 
                     // then
-                    const actual = response.body as DefaultResponse<CreateSpaceResponseDto>;
+                    const actual = response.body as CustomResponse<CreateSpaceResponseDto>;
                     const actualSpace = await prismaService.space.findUnique({
                         where: {
                             id: actual.data.id,

@@ -1,39 +1,39 @@
 import {
-    SpaceController,
-} from "../space.controller";
-import {
-    SpaceService,
-} from "../space.service";
-import {
     Test,
 } from "@nestjs/testing";
 import {
-    CreateSpaceResponseDto,
-} from "../dto/res/create-space.response.dto";
+    SpaceController, 
+} from "@space/space.controller";
 import {
-    uuidFunction,
-} from "../../../util/function/uuid.function";
+    SpaceService, 
+} from "@space/space.service";
 import {
-    CreateSpaceRequestDto,
-} from "../dto/req/create-space.request.dto";
+    CreateSpaceResponseDto, 
+} from "@space/dto/res/create-space.response.dto";
 import {
-    GetPhotoListResponseDto,
-} from "../dto/res/get-photo-list-response.dto";
+    uuidFunction, 
+} from "@root/util/function/uuid.function";
 import {
-    CreatePhotoResponseDto,
-} from "../dto/res/create-photo.response.dto";
+    CreateSpaceRequestDto, 
+} from "@space/dto/req/create-space.request.dto";
 import {
-    GetSpaceResponseDto,
-} from "../dto/res/get-space.response.dto";
+    CreatePhotoResponseDto, 
+} from "@space/dto/res/create-photo.response.dto";
 import {
-    getSpaceList,
-} from "./fixture/paginate.response";
+    GetPhotoListResponseDto, 
+} from "@space/dto/res/get-photo-list-response.dto";
 import {
-    PaginateRequestDto,
-} from "../../../interface/request/paginate.request.dto";
+    GetSpaceResponseDto, 
+} from "@space/dto/res/get-space.response.dto";
 import {
-    UpdateSpaceRequestDto,
-} from "../dto/req/update-space.request.dto";
+    getSpaceList, 
+} from "@space/spec/fixture/paginate.response";
+import {
+    PaginateRequestDto, 
+} from "@root/interface/request/paginate.request.dto";
+import {
+    UpdateSpaceRequestDto, 
+} from "@space/dto/req/update-space.request.dto";
 
 const mockSpaceService = {
     createSpace: jest.fn(),

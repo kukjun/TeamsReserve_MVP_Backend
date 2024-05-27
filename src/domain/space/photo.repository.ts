@@ -3,10 +3,10 @@ import {
 } from "@nestjs/common";
 import {
     PrismaService, 
-} from "../../config/prisma/prisma.service";
+} from "@root/config/prisma/prisma.service";
 import {
     PhotoEntity, 
-} from "./entity/photo.entity";
+} from "@space/entity/photo.entity";
 
 @Injectable()
 export class PhotoRepository {

@@ -1,6 +1,6 @@
 import {
     ReserveEntity, 
-} from "../../../src/domain/reserve/entity/reserve.entity";
+} from "@reserve/entity/reserve.entity";
 
 export const reserveFixture
 = (memberId: string, spaceId: string, startTime:Date, endTime:Date, description: string = null): ReserveEntity => {

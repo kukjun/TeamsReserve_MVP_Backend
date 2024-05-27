@@ -6,7 +6,7 @@ import {
 } from "class-validator";
 import {
     SpaceEntity, 
-} from "../../entity/space.entity";
+} from "@space/entity/space.entity";
 
 export class CreateSpaceRequestDto implements Pick<SpaceEntity, "name" | "location"> {
     @ApiProperty({

@@ -1,9 +1,9 @@
 import {
-    MemberEntity,
-} from "../../../src/domain/member/entity/member.entity";
+    MemberAuthority, 
+} from "@root/types/enums/member.authority.enum";
 import {
-    MemberAuthority,
-} from "../../../src/types/enums/member.authority.enum";
+    MemberEntity, 
+} from "@member/entity/member.entity";
 
 export const memberFixture
     = (encryptedPassword: string, joinStatus: boolean = true, authority: string = MemberAuthority.USER): MemberEntity =>

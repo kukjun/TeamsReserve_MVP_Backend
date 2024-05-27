@@ -5,44 +5,44 @@ import {
 import {
     ConfigService,
 } from "@nestjs/config";
-import {
-    ValidateEmailRequest,
-} from "./dto/req/validate-email.request";
-import {
-    ValidateEmailResponse,
-} from "./dto/res/validate-email.response";
 import Redis from "ioredis";
 import {
     InjectRedis,
 } from "@liaoliaots/nestjs-redis";
-import {
-    generateRandomCodeFunction,
-} from "../../util/function/random-code.function";
-import {
-    EmailOptions,
-} from "../../interface/email-options";
-import {
-    ConfirmEmailRequest,
-} from "./dto/req/confirm-email.request";
-import {
-    ConfirmEmailResponse,
-} from "./dto/res/confirm-email.response";
-import {
-    EmailConfirmFailException,
-} from "../../exception/email-confirm-fail.exception";
-import {
-    MemberRepository,
-} from "../member/member.repository";
-import {
-    generateRandomPasswordFunction,
-} from "../../util/function/random-password.function";
-import {
-    MemberEntity,
-} from "../member/entity/member.entity";
 import * as bcrypt from "bcrypt";
 import {
+    MemberRepository, 
+} from "@member/member.repository";
+import {
+    ValidateEmailRequest, 
+} from "@auth/dto/req/validate-email.request";
+import {
+    ValidateEmailResponse, 
+} from "@auth/dto/res/validate-email.response";
+import {
+    generateRandomCodeFunction, 
+} from "@root/util/function/random-code.function";
+import {
+    EmailOptions, 
+} from "@root/interface/email-options";
+import {
+    ConfirmEmailRequest, 
+} from "@auth/dto/req/confirm-email.request";
+import {
+    ConfirmEmailResponse, 
+} from "@auth/dto/res/confirm-email.response";
+import {
+    EmailConfirmFailException, 
+} from "@root/exception/email-confirm-fail.exception";
+import {
     MemberNotFoundException, 
-} from "../../exception/member-not-found.exception";
+} from "@root/exception/member-not-found.exception";
+import {
+    generateRandomPasswordFunction, 
+} from "@root/util/function/random-password.function";
+import {
+    MemberEntity, 
+} from "@member/entity/member.entity";
 
 @Injectable()
 export class EmailTransferService {

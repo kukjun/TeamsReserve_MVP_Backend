@@ -1,32 +1,11 @@
 import * as UUID from "uuid";
 import {
-    AuthController,
-} from "../auth.controller";
-import {
     Test,
     TestingModule,
 } from "@nestjs/testing";
 import {
-    AuthService,
-} from "../auth.service";
-import {
-    EmailTransferService,
-} from "../email-transfer.service";
-import {
-    validateEmailRequestFixture,
-} from "./fixture/validate-email-request.fixture";
-import {
-    confirmEmailRequestFixture,
-} from "./fixture/confirm-email-request.fixture";
-import {
     faker,
 } from "@faker-js/faker";
-import {
-    signupRequestFixture,
-} from "./fixture/signup-request.fixture";
-import {
-    signinRequestFixture,
-} from "./fixture/signin-request.fixture";
 import {
     MemberAuthority, 
 } from "@root/types/enums/member.authority.enum";
@@ -48,6 +27,27 @@ import {
 import {
     MemberNotFoundException, 
 } from "@root/exception/member-not-found.exception";
+import {
+    confirmEmailRequestFixture, 
+} from "@auth/spec/fixture/confirm-email-request.fixture";
+import {
+    AuthController, 
+} from "@auth/auth.controller";
+import {
+    AuthService, 
+} from "@auth/auth.service";
+import {
+    EmailTransferService, 
+} from "@auth/email-transfer.service";
+import {
+    validateEmailRequestFixture, 
+} from "@auth/spec/fixture/validate-email-request.fixture";
+import {
+    signupRequestFixture, 
+} from "@auth/spec/fixture/signup-request.fixture";
+import {
+    signinRequestFixture, 
+} from "@auth/spec/fixture/signin-request.fixture";
 
 const authServiceMock = {
     signup: jest.fn(),

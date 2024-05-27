@@ -6,9 +6,6 @@ import {
     AuthGuard,
 } from "@nestjs/passport";
 import {
-    JWT_STRATEGY,
-} from "../strategies/jwt.strategy";
-import {
     Reflector,
 } from "@nestjs/core";
 import {
@@ -16,16 +13,19 @@ import {
 } from "rxjs";
 import {
     MemberAuthority, 
-} from "../../../types/enums/member.authority.enum";
+} from "@root/types/enums/member.authority.enum";
 import {
     ROLES_KEY, 
-} from "../../../util/decorators/permission";
+} from "@root/util/decorators/permission.decorator";
 import {
     MemberUnauthorizedException, 
-} from "../../../exception/member-unauthorized.exception";
+} from "@root/exception/member-unauthorized.exception";
 import {
     JwtAuthFailException, 
-} from "../../../exception/jwt-auth-fail.exception";
+} from "@root/exception/jwt-auth-fail.exception";
+import {
+    JWT_STRATEGY, 
+} from "@auth/strategies/jwt.strategy";
 
 @Injectable()
 export class JwtGuard extends AuthGuard(JWT_STRATEGY) {

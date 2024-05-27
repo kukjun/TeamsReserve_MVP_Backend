@@ -1,9 +1,9 @@
 import {
-    MemberEntity,
-} from "../../entity/member.entity";
-import {
     ApiProperty, 
 } from "@nestjs/swagger";
+import {
+    MemberEntity, 
+} from "@member/entity/member.entity";
 
 export class GetMemberResponseDto implements Pick<MemberEntity, "id"
     | "email"

@@ -6,17 +6,17 @@ import {
     ApiExtraModels, ApiResponse, getSchemaPath,
 } from "@nestjs/swagger";
 import {
-    DefaultResponse, 
-} from "../../interface/response/default.response";
+    CustomResponse, 
+} from "@root/interface/response/custom-response";
 
-export const ApiDefaultResponseDecorator = <TModel extends Type<any>>(model: TModel) => {
+export const ApiCustomResponseDecorator = <TModel extends Type<any>>(model: TModel) => {
     return applyDecorators(
-        ApiExtraModels(DefaultResponse, model),
+        ApiExtraModels(CustomResponse, model),
         ApiResponse({
             schema: {
                 allOf: [
                     {
-                        $ref: getSchemaPath(DefaultResponse),
+                        $ref: getSchemaPath(CustomResponse),
                     },
                     {
                         properties: {
