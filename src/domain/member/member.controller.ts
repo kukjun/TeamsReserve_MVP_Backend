@@ -20,8 +20,8 @@ import {
     ApiExtraModels, ApiOperation, ApiTags,
 } from "@nestjs/swagger";
 import {
-    ApiDefaultResponse,
-} from "../../util/decorators/api-default.response";
+    ApiDefaultResponseDecorator,
+} from "../../util/decorators/api-default-response.decorator";
 import {
     GetMemberResponseDto,
 } from "./dto/res/get-member.response.dto";
@@ -79,7 +79,7 @@ export class MemberController {
         summary: "멤버 Paginate 조회",
         description: "멤버의 정보를 Paginate 해서, 조회할 수 있다.",
     })
-    @ApiDefaultResponse(PaginateData<GetMemberResponseDto>)
+    @ApiDefaultResponseDecorator(PaginateData<GetMemberResponseDto>)
     @HttpCode(HttpStatus.OK)
     @Get()
     async getMemberList(@Query() paginateDto: PaginateRequestDto)
@@ -94,7 +94,7 @@ export class MemberController {
         summary: "멤버 Detail Paginate 조회",
         description: "멤버의 세부 정보(가입 여부, 권한)를 포함한 정보를 Paginate 해서, 조회할 수 있다.",
     })
-    @ApiDefaultResponse(PaginateData<GetMemberDetailResponseDto>)
+    @ApiDefaultResponseDecorator(PaginateData<GetMemberDetailResponseDto>)
     @HttpCode(HttpStatus.OK)
     @Get("/detail")
     async getMemberDetailList(
@@ -112,7 +112,7 @@ export class MemberController {
         summary: "멤버 조회",
         description: "멤버의 정보를 조회할 수 있다.",
     })
-    @ApiDefaultResponse(GetMemberResponseDto)
+    @ApiDefaultResponseDecorator(GetMemberResponseDto)
     @HttpCode(HttpStatus.OK)
     @Get("/:id")
     async getMember(@Param("id") id: string): Promise<DefaultResponse<GetMemberResponseDto>> {
@@ -126,7 +126,7 @@ export class MemberController {
         summary: "정보 수정",
         description: "자신의 정보를 수정할 수 있다.",
     })
-    @ApiDefaultResponse(GetMemberResponseDto)
+    @ApiDefaultResponseDecorator(GetMemberResponseDto)
     @HttpCode(HttpStatus.CREATED)
     @Put("/:id")
     async updateMember(@Param("id") id: string,
@@ -144,7 +144,7 @@ export class MemberController {
         summary: "비밀번호 변경",
         description: "자신의 비밀번호를 변경할 수 있다.",
     })
-    @ApiDefaultResponse(GetMemberResponseDto)
+    @ApiDefaultResponseDecorator(GetMemberResponseDto)
     @HttpCode(HttpStatus.CREATED)
     @Patch("/:id/password")
     async updateMemberPassword(@Param("id") id: string,
@@ -162,7 +162,7 @@ export class MemberController {
         summary: "회원가입 승인, 취소",
         description: "회원가입 요청이 있는 회원의 가입 승인, 취소할 수 있다.",
     })
-    @ApiDefaultResponse(GetMemberResponseDto)
+    @ApiDefaultResponseDecorator(GetMemberResponseDto)
     @HttpCode(HttpStatus.CREATED)
     @Patch("/:id/join")
     async updateMemberJoinStatus(@Param("id") id: string,
@@ -179,7 +179,7 @@ export class MemberController {
         summary: "회원 권한 부여",
         description: "회원가입 한 회원에게 권한을 부여할 수 있다.",
     })
-    @ApiDefaultResponse(GetMemberResponseDto)
+    @ApiDefaultResponseDecorator(GetMemberResponseDto)
     @HttpCode(HttpStatus.CREATED)
     @Patch("/:id/authority")
     async updateMemberAuthority(@Param("id") id: string,

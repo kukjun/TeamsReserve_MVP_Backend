@@ -19,35 +19,35 @@ import {
     confirmEmailRequestFixture,
 } from "./fixture/confirm-email-request.fixture";
 import {
-    EmailConfirmFailException,
-} from "../../../exception/email-confirm-fail.exception";
-import {
     faker,
 } from "@faker-js/faker";
 import {
     signupRequestFixture,
 } from "./fixture/signup-request.fixture";
 import {
-    TeamUnauthenticatedException,
-} from "../../../exception/team-unauthenticated.exception";
-import {
-    EmailUnauthenticatedException,
-} from "../../../exception/email-unauthenticated.exception";
-import {
-    DuplicateException,
-} from "../../../exception/duplicate.exception";
-import {
     signinRequestFixture,
 } from "./fixture/signin-request.fixture";
 import {
-    SigninFailException,
-} from "../../../exception/signin-fail.exception";
-import {
     MemberAuthority, 
-} from "../../../types/enums/member.authority.enum";
+} from "@root/types/enums/member.authority.enum";
+import {
+    TeamUnauthenticatedException, 
+} from "@root/exception/team-unauthenticated.exception";
+import {
+    EmailConfirmFailException, 
+} from "@root/exception/email-confirm-fail.exception";
+import {
+    EmailUnauthenticatedException, 
+} from "@root/exception/email-unauthenticated.exception";
+import {
+    DuplicateException, 
+} from "@root/exception/duplicate.exception";
+import {
+    SigninFailException, 
+} from "@root/exception/signin-fail.exception";
 import {
     MemberNotFoundException, 
-} from "../../../exception/member-not-found.exception";
+} from "@root/exception/member-not-found.exception";
 
 const authServiceMock = {
     signup: jest.fn(),

@@ -96,6 +96,13 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@root/(.*)$": "<rootDir>/$1",
+      "^@auth/(.*)$": "<rootDir>/domain/auth/$1",
+      "^@member/(.*)$": "<rootDir>/domain/member/$1",
+      "^@reserve/(.*)$": "<rootDir>/domain/reserve/$1",
+      "^@space/(.*)$": "<rootDir>/domain/space/$1"
+    }
   }
 }

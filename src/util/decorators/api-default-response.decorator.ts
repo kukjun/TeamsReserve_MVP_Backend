@@ -9,7 +9,7 @@ import {
     DefaultResponse, 
 } from "../../interface/response/default.response";
 
-export const ApiDefaultResponse = <TModel extends Type<any>>(model: TModel) => {
+export const ApiDefaultResponseDecorator = <TModel extends Type<any>>(model: TModel) => {
     return applyDecorators(
         ApiExtraModels(DefaultResponse, model),
         ApiResponse({

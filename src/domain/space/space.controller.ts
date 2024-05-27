@@ -29,8 +29,8 @@ import {
     ApiExtraModels, ApiOperation, ApiTags,
 } from "@nestjs/swagger";
 import {
-    ApiDefaultResponse,
-} from "../../util/decorators/api-default.response";
+    ApiDefaultResponseDecorator,
+} from "../../util/decorators/api-default-response.decorator";
 import {
     Roles,
 } from "../../util/decorators/permission";
@@ -79,7 +79,7 @@ export class SpaceController {
         summary: "공간 생성",
         description: "공간을 생성할 수 있다.",
     })
-    @ApiDefaultResponse(CreateSpaceResponseDto)
+    @ApiDefaultResponseDecorator(CreateSpaceResponseDto)
     @HttpCode(HttpStatus.CREATED)
     @Post()
     async createSpace(@Body() requestBody: CreateSpaceRequestDto): Promise<DefaultResponse<CreateSpaceResponseDto>> {
@@ -93,7 +93,7 @@ export class SpaceController {
         summary: "공간 사진 생성.",
         description: "공간에 사진을 저장할 수 있다.",
     })
-    @ApiDefaultResponse(CreatePhotoResponseDto)
+    @ApiDefaultResponseDecorator(CreatePhotoResponseDto)
     @HttpCode(HttpStatus.CREATED)
     @Post("/:id/photos")
     @UseInterceptors(FileInterceptor("file"))
@@ -117,7 +117,7 @@ export class SpaceController {
         summary: "공간 사진 조회.",
         description: "공간에 저장된 사진을 조회할 수 있다.",
     })
-    @ApiDefaultResponse(GetPhotoListResponseDto)
+    @ApiDefaultResponseDecorator(GetPhotoListResponseDto)
     @HttpCode(HttpStatus.OK)
     @Get("/:id/photos")
     async getPhotoList(@Param("id") id: string): Promise<DefaultResponse<GetPhotoListResponseDto>> {
@@ -144,7 +144,7 @@ export class SpaceController {
         summary: "공간 수정.",
         description: "공간의 내용을 수정할 수 있다.",
     })
-    @ApiDefaultResponse(PaginateData<CreateSpaceResponseDto>)
+    @ApiDefaultResponseDecorator(PaginateData<CreateSpaceResponseDto>)
     @HttpCode(HttpStatus.CREATED)
     @Put("/:id")
     async updateSpace(@Param("id") id: string, @Body() requestBody: UpdateSpaceRequestDto)
@@ -173,7 +173,7 @@ export class SpaceController {
         summary: "공간 조회.",
         description: "공간의 정보를 조회할 수 있다.",
     })
-    @ApiDefaultResponse(GetPhotoListResponseDto)
+    @ApiDefaultResponseDecorator(GetPhotoListResponseDto)
     @HttpCode(HttpStatus.OK)
     @Get("/:id")
     async getSpace(@Param("id") id: string): Promise<DefaultResponse<GetSpaceResponseDto>> {
@@ -187,7 +187,7 @@ export class SpaceController {
         summary: "공간 List 조회.",
         description: "공간의 정보를 Paginate해서 조회할 수 있다.",
     })
-    @ApiDefaultResponse(PaginateData<GetSpaceResponseDto>)
+    @ApiDefaultResponseDecorator(PaginateData<GetSpaceResponseDto>)
     @HttpCode(HttpStatus.OK)
     @Get()
     async getSpaceList(@Query() paginateDto: PaginateRequestDto)

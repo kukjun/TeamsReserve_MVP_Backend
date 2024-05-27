@@ -33,8 +33,8 @@ import {
     MemberAuthority,
 } from "../../types/enums/member.authority.enum";
 import {
-    ApiDefaultResponse, 
-} from "../../util/decorators/api-default.response";
+    ApiDefaultResponseDecorator,
+} from "../../util/decorators/api-default-response.decorator";
 import {
     PaginateRequestDto, 
 } from "../../interface/request/paginate.request.dto";
@@ -63,7 +63,7 @@ export class ReserveController {
         description: "예약을 할 수 있도록 하는 API",
     })
     @Roles(MemberAuthority.ADMIN, MemberAuthority.MANAGER, MemberAuthority.USER)
-    @ApiDefaultResponse(CreateReserveResponseDto)
+    @ApiDefaultResponseDecorator(CreateReserveResponseDto)
     @Post()
     async createReserve(@Body(new ReserveValidatePipe()) requestBody: CreateReserveValidateRequestDto, @Request() req)
         : Promise<DefaultResponse<CreateReserveResponseDto>> {
