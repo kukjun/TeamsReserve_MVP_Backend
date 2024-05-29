@@ -6,71 +6,77 @@ import {
 } from "@liaoliaots/nestjs-redis";
 import Redis from "ioredis";
 import {
-    ReserveRepository, 
+    ReserveRepository,
 } from "@reserve/reserve.repository";
 import {
-    ReserveLogRepository, 
+    ReserveLogRepository,
 } from "@reserve/reserve-log.repository";
 import {
-    SpaceRepository, 
+    SpaceRepository,
 } from "@space/space.repository";
 import {
-    MemberRepository, 
+    MemberRepository,
 } from "@member/member.repository";
 import {
-    PrismaService, 
+    PrismaService,
 } from "@root/config/prisma/prisma.service";
 import {
-    CreateReserveValidateRequestDto, 
+    CreateReserveValidateRequestDto,
 } from "@reserve/dto/req/create-reserve-validate.request.dto";
 import {
-    MemberToken, 
+    MemberToken,
 } from "@root/interface/member-token";
 import {
-    CreateReserveResponseDto, 
+    CreateReserveResponseDto,
 } from "@reserve/dto/res/create-reserve.response.dto";
 import {
-    ResourceUnauthorizedException, 
+    ResourceUnauthorizedException,
 } from "@root/exception/resource-unauthorized.exception";
 import {
-    ResourceLockException, 
+    ResourceLockException,
 } from "@root/exception/resource-lock.exception";
 import {
-    MemberNotFoundException, 
+    MemberNotFoundException,
 } from "@root/exception/member-not-found.exception";
 import {
-    SpaceNotFoundException, 
+    SpaceNotFoundException,
 } from "@root/exception/space-not-found.exception";
 import {
-    DuplicateException, 
+    DuplicateException,
 } from "@root/exception/duplicate.exception";
 import {
-    ReserveEntity, 
+    ReserveEntity,
 } from "@reserve/entity/reserve.entity";
 import {
-    ReserveLogEntity, 
+    ReserveLogEntity,
 } from "@reserve/entity/reserve-log.entity";
 import {
-    ReserveState, 
+    ReserveState,
 } from "@root/types/enums/reserveState";
 import {
-    ReserveNotFoundException, 
+    ReserveNotFoundException,
 } from "@root/exception/reserve-not-found.exception";
 import {
-    GetReserveResponseDto, 
+    GetReserveResponseDto,
 } from "@reserve/dto/res/get-reserve.response.dto";
 import {
-    PaginateRequestDto, 
+    PaginateRequestDto,
 } from "@root/interface/request/paginate.request.dto";
 import {
-    ReserveOptionDto, 
+    ReserveOptionDto,
 } from "@root/interface/request/reserve-option.dto";
 import {
-    PaginateData, 
+    PaginateData,
 } from "@root/interface/response/paginate.data";
 import {
-    GetReserveLogResponseDto, 
+    GetReserveLogResponseDto,
 } from "@reserve/dto/res/get-reserve-log.response.dto";
+import {
+    SpaceEntity,
+} from "@space/entity/space.entity";
+import {
+    MemberEntity,
+} from "@member/entity/member.entity";
 
 @Injectable()
 export class ReserveService {
@@ -107,13 +113,7 @@ export class ReserveService {
                 const reserve = new ReserveEntity(dto);
                 const resultId = await this.reserveRepository.saveReserve(reserve);
 
-                const reserveLog = new ReserveLogEntity({
-                    reservedUser: member.nickname,
-                    reservedSpaceName: space.name,
-                    reservedLocation: space.location,
-                    reservedTimes: `${reserve.startTime.toISOString()} - ${reserve.endTime.toISOString()}`,
-                    state: ReserveState.RESERVE,
-                });
+                const reserveLog = this.createReserveLog(member, space, reserve, ReserveState.RESERVE);
                 await this.reserveLogRepository.saveReserveLog(reserveLog);
 
                 return resultId;
@@ -125,7 +125,6 @@ export class ReserveService {
         } finally {
             await this.delLock(this.REDIS_LOCK_CREATE_RESERVE);
         }
-
     }
 
     async deleteReserve(id: string, token: MemberToken): Promise<null> {
@@ -139,13 +138,7 @@ export class ReserveService {
             if (reserve.memberId !== token.id) throw new ResourceUnauthorizedException();
 
             await this.reserveRepository.deleteReserve(id, tx.reserve);
-            const reserveLog: ReserveLogEntity = new ReserveLogEntity({
-                reservedUser: member.nickname,
-                reservedSpaceName: space.name,
-                reservedLocation: space.location,
-                reservedTimes: `${reserve.startTime.toISOString()} - ${reserve.endTime.toISOString()}`,
-                state: ReserveState.CANCEL,
-            });
+            const reserveLog = this.createReserveLog(member, space, reserve, ReserveState.CANCEL);
             await this.reserveLogRepository.saveReserveLog(reserveLog, tx.reserveLog);
         });
 
@@ -178,8 +171,9 @@ export class ReserveService {
         });
 
         const totalCount = await this.reserveRepository.findReserveCount(optionDto);
-        const totalPage = Math.ceil(totalCount / paginateDto.limit);
-        const hasNextPage = paginateDto.page < totalPage;
+        const {
+            totalPage, hasNextPage, 
+        } = this.getPaginateInfo(paginateDto, totalCount);
 
         return {
             data: data,
@@ -208,8 +202,9 @@ export class ReserveService {
         });
 
         const totalCount = await this.reserveRepository.findMyReserveCount(token.id);
-        const totalPage = Math.ceil(totalCount / paginateDto.limit);
-        const hasNextPage = paginateDto.page < totalPage;
+        const {
+            totalPage, hasNextPage,
+        } = this.getPaginateInfo(paginateDto, totalCount);
 
         return {
             data: data,
@@ -237,8 +232,9 @@ export class ReserveService {
             };
         });
         const totalCount = await this.reserveLogRepository.findReserveLogsCount();
-        const totalPage = Math.ceil(totalCount / paginateDto.limit);
-        const hasNextPage = paginateDto.page < totalPage;
+        const {
+            totalPage, hasNextPage,
+        } = this.getPaginateInfo(paginateDto, totalCount);
 
         return {
             data: data,
@@ -263,4 +259,30 @@ export class ReserveService {
 
         return;
     }
+
+    private createReserveLog(
+        member: MemberEntity, space: SpaceEntity, reserve: ReserveEntity, reserveState: ReserveState
+    ): ReserveLogEntity {
+        return new ReserveLogEntity({
+            reservedUser: member.nickname,
+            reservedSpaceName: space.name,
+            reservedLocation: space.location,
+            reservedTimes: `${reserve.startTime.toISOString()} - ${reserve.endTime.toISOString()}`,
+            state: reserveState,
+        });
+    }
+
+    private getPaginateInfo(paginateDto: PaginateRequestDto, totalCount: number): {
+        totalPage: number,
+        hasNextPage: boolean
+    } {
+        const totalPage = Math.ceil(totalCount / paginateDto.limit);
+        const hasNextPage = paginateDto.page < totalPage;
+
+        return {
+            totalPage,
+            hasNextPage,
+        };
+    }
+
 }

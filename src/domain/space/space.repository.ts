@@ -58,13 +58,15 @@ export class SpaceRepository {
     }
 
     async findSpaceByPaging(paginateDto: PaginateRequestDto): Promise<SpaceEntity[]> {
-        return await this.prismaSpace.findMany({
+        const result: SpaceEntity[] =  await this.prismaSpace.findMany({
             skip: (paginateDto.page - 1) * paginateDto.limit,
             take: paginateDto.limit,
             orderBy: {
                 createdAt: "desc",
             },
         });
+
+        return result;
     }
 
     async findSpaceCount(): Promise<number> {

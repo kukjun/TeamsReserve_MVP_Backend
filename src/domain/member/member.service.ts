@@ -2,64 +2,64 @@ import {
     Injectable,
 } from "@nestjs/common";
 import {
-    MemberRepository, 
+    MemberRepository,
 } from "@member/member.repository";
 import {
-    GetMemberResponseDto, 
+    GetMemberResponseDto,
 } from "@member/dto/res/get-member.response.dto";
 import {
-    MemberNotFoundException, 
+    MemberNotFoundException,
 } from "@root/exception/member-not-found.exception";
 import {
-    PaginateRequestDto, 
+    PaginateRequestDto,
 } from "@root/interface/request/paginate.request.dto";
 import {
-    PaginateData, 
+    PaginateData,
 } from "@root/interface/response/paginate.data";
 import {
-    MemberOptionDto, 
+    MemberOptionDto,
 } from "@root/interface/request/member-option.dto";
 import {
-    GetMemberDetailResponseDto, 
+    GetMemberDetailResponseDto,
 } from "@member/dto/res/get-member-detail.response.dto";
 import {
-    UpdateMemberRequestDto, 
+    UpdateMemberRequestDto,
 } from "@member/dto/req/update-member.request.dto";
 import {
-    MemberToken, 
+    MemberToken,
 } from "@root/interface/member-token";
 import {
-    UpdateMemberResponseDto, 
+    UpdateMemberResponseDto,
 } from "@member/dto/res/update-member.response.dto";
 import {
-    ResourceUnauthorizedException, 
+    ResourceUnauthorizedException,
 } from "@root/exception/resource-unauthorized.exception";
 import {
-    DuplicateException, 
+    DuplicateException,
 } from "@root/exception/duplicate.exception";
 import {
-    MemberEntity, 
+    MemberEntity,
 } from "@member/entity/member.entity";
 import {
-    UpdateMemberPasswordRequestDto, 
+    UpdateMemberPasswordRequestDto,
 } from "@member/dto/req/update-member-password.request.dto";
 import {
-    bcryptFunction, 
+    bcryptFunction,
 } from "@root/util/function/bcrypt.function";
 import {
-    PasswordIncorrectException, 
+    PasswordIncorrectException,
 } from "@root/exception/password-incorrect.exception";
 import {
-    UpdateMemberJoinStatusRequestDto, 
+    UpdateMemberJoinStatusRequestDto,
 } from "@member/dto/req/update-member-join-status-request.dto";
 import {
-    UpdateMemberAuthorityRequestDto, 
+    UpdateMemberAuthorityRequestDto,
 } from "@member/dto/req/update-member-authority.request.dto";
 import {
-    BadRequestException, 
+    BadRequestException,
 } from "@root/exception/http/bad-request.exception";
 import {
-    MemberAuthority, 
+    MemberAuthority,
 } from "@root/types/enums/member.authority.enum";
 
 @Injectable()
@@ -151,7 +151,6 @@ export class MemberService {
             ...member,
             ...updateDto,
         };
-
         const resultId = await this.memberRepository.updateMember(updatedMember);
 
         return {
@@ -215,7 +214,6 @@ export class MemberService {
         return {
             id: resultId,
         };
-
     }
 
     async deleteMember(id: string, token: MemberToken): Promise<null> {

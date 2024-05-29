@@ -1,19 +1,20 @@
 import {
-    Injectable, 
+    Injectable,
 } from "@nestjs/common";
 import {
-    PrismaService, 
+    PrismaService,
 } from "@root/config/prisma/prisma.service";
 import {
-    ReserveLogEntity, 
+    ReserveLogEntity,
 } from "@reserve/entity/reserve-log.entity";
 import {
-    PaginateRequestDto, 
+    PaginateRequestDto,
 } from "@root/interface/request/paginate.request.dto";
 
 @Injectable()
 export class ReserveLogRepository {
     private readonly prismaReserveLog: PrismaService["reserveLog"];
+
     constructor(private readonly prismaService: PrismaService) {
         this.prismaReserveLog = prismaService.reserveLog;
     }
@@ -31,16 +32,20 @@ export class ReserveLogRepository {
     }
 
     async findReserveLogsByPaging(paginateDto: PaginateRequestDto): Promise<ReserveLogEntity[]> {
-        return await this.prismaReserveLog.findMany({
+        const result: ReserveLogEntity[] = await this.prismaReserveLog.findMany({
             skip: (paginateDto.page - 1) * paginateDto.limit,
             take: paginateDto.limit,
             orderBy: {
                 createdAt: "desc",
             },
         });
+
+        return result;
     }
 
-    async findReserveLogsCount():Promise<number> {
-        return await this.prismaReserveLog.count();
+    async findReserveLogsCount(): Promise<number> {
+        const count = await this.prismaReserveLog.count();
+
+        return count;
     }
 }
