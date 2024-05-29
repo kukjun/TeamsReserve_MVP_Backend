@@ -23,8 +23,8 @@ import {
     generateRandomCodeFunction,
 } from "@root/util/function/random-code.function";
 import {
-    EmailOptions,
-} from "@root/interface/email-options";
+    EmailOptionsDto,
+} from "@root/interface/request/email-options.dto";
 import {
     ConfirmEmailRequest,
 } from "@auth/dto/req/confirm-email.request";
@@ -118,7 +118,7 @@ export class EmailTransferService {
     }
 
     private transportEmail(to: string, subject: string, html: string) {
-        const emailOptions: EmailOptions = {
+        const emailOptions: EmailOptionsDto = {
             from: this.hostAccount,
             to,
             subject,
