@@ -373,7 +373,7 @@ describe("Member e2e Test", () => {
                         token,storedMember,
                     } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
                     const requestBody: UpdateMemberRequestDto = {
-                        nickname: "updatedName",
+                        nickname: "update",
                         introduce: "updatedIntroduce",
                     };
 
@@ -410,7 +410,7 @@ describe("Member e2e Test", () => {
                     data: anotherMember,
                 });
                 const requestBody: UpdateMemberRequestDto = {
-                    nickname: "updatedName",
+                    nickname: "updated",
                     introduce: "updatedIntroduce",
                 };
 

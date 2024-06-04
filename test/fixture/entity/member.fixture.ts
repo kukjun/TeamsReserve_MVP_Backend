@@ -11,7 +11,7 @@ export const memberFixture
             {
                 email: "fixtureEmail@naver.com",
                 password: encryptedPassword,
-                nickname: "fixtureName",
+                nickname: "fixture",
                 introduce: "fixtureTestIntroduce",
                 teamCode: "ABCDEF-001",
                 authority: authority,
@@ -25,7 +25,7 @@ export const memberRandomFixture
             {
                 email: `fixtureEmail${count}@naver.com`,
                 password: encryptedPassword,
-                nickname: `fixtureName${count}`,
+                nickname: `fixture${count}`,
                 introduce: "fixtureTestIntroduce",
                 teamCode: "ABCDEF-001",
                 authority: MemberAuthority.USER,
