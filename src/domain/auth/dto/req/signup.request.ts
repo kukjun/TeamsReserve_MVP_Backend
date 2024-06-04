@@ -26,7 +26,6 @@ export class SignupRequest implements Pick<MemberEntity, "email" | "password" | 
     @IsEmail()
     email!: string;
 
-    // TODO: Password Validate 작업 필요
     @PasswordSwaggerDecorator()
     @IsNotEmpty()
     password!: string;

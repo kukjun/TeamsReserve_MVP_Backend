@@ -1,20 +1,22 @@
 import {
-    IsEmail, IsNotEmpty,
-} from "class-validator";
-import {
     PasswordSwaggerDecorator, 
 } from "@root/util/decorators/swagger/member/password.swagger.decorator";
 import {
     EmailSwaggerDecorator, 
 } from "@root/util/decorators/swagger/member/email.swagger.decorator";
+import {
+    EmailValidateDecorator, 
+} from "@root/util/decorators/validate/member/email.validate.decorator";
+import {
+    PasswordValidateDecorator, 
+} from "@root/util/decorators/validate/member/password.validate.decorator";
 
 export class SigninRequest {
     @EmailSwaggerDecorator()
-    @IsEmail()
-    @IsNotEmpty()
+    @EmailValidateDecorator()
     email!: string;
 
     @PasswordSwaggerDecorator()
-    @IsNotEmpty()
+    @PasswordValidateDecorator()
     password!: string;
 }

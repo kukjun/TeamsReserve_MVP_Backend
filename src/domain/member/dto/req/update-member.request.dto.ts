@@ -1,21 +1,22 @@
 import {
-    IsOptional, MaxLength, MinLength,
-} from "class-validator";
-import {
     NicknameSwaggerDecorator, 
 } from "@root/util/decorators/swagger/member/nickname.swagger.decorator";
 import {
     IntroduceSwaggerDecorator, 
 } from "@root/util/decorators/swagger/member/introduce.swagger.decorator";
+import {
+    NicknameValidateDecorator, 
+} from "@root/util/decorators/validate/member/nickname.validate.decorator";
+import {
+    IntroduceValidateDecorator, 
+} from "@root/util/decorators/validate/member/Introduce.validate.decorator";
 
 export class UpdateMemberRequestDto {
     @NicknameSwaggerDecorator()
-    @MinLength(3)
-    @MaxLength(20)
-    @IsOptional()
+    @NicknameValidateDecorator()
     nickname?: string;
 
     @IntroduceSwaggerDecorator()
-    @IsOptional()
+    @IntroduceValidateDecorator()
     introduce?: string;
 }

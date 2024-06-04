@@ -1,17 +1,12 @@
 import {
-    IsIn, IsNotEmpty, 
-} from "class-validator";
-import {
-    MemberAuthority, 
-} from "@root/types/enums/member.authority.enum";
-import {
-    AuthoritySwaggerDecorator, 
+    AuthoritySwaggerDecorator,
 } from "@root/util/decorators/swagger/member/authority.swagger.decorator";
+import {
+    AuthorityValidateDecorator,
+} from "@root/util/decorators/validate/member/authority.validate.decorator";
 
 export class UpdateMemberAuthorityRequestDto {
     @AuthoritySwaggerDecorator()
-    @IsNotEmpty()
-    @IsIn([MemberAuthority.USER,
-        MemberAuthority.MANAGER,])
-    authority: string;
+    @AuthorityValidateDecorator()
+    authority!: string;
 }

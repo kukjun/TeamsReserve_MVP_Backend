@@ -1,21 +1,19 @@
 import {
-    IsNotEmpty, 
-} from "class-validator";
-import {
     CurrentPasswordSwaggerDecorator, 
 } from "@root/util/decorators/swagger/member/current-password.swagger.decorator";
 import {
     NewPasswordSwaggerDecorator, 
 } from "@root/util/decorators/swagger/member/new-password.swagger.decorator";
+import {
+    PasswordValidateDecorator, 
+} from "@root/util/decorators/validate/member/password.validate.decorator";
 
 export class UpdateMemberPasswordRequestDto {
-    // TODO: Password Validate 작업 필요
     @CurrentPasswordSwaggerDecorator()
-    @IsNotEmpty()
+    @PasswordValidateDecorator()
     currentPassword!: string;
 
-    // TODO: Password Validate 작업 필요
     @NewPasswordSwaggerDecorator()
-    @IsNotEmpty()
+    @PasswordValidateDecorator()
     newPassword!: string;
 }

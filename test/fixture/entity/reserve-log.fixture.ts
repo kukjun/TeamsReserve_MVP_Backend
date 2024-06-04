@@ -3,7 +3,7 @@ import {
 } from "@reserve/entity/reserve-log.entity";
 import {
     ReserveState, 
-} from "@root/types/enums/reserveState";
+} from "@root/types/enums/reserve-state";
 
 export const reserveLogFixture =
     (count: number) => {
