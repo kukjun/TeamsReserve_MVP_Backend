@@ -1,39 +1,29 @@
 import {
-    ApiProperty,
-} from "@nestjs/swagger";
-import {
     IsNotEmpty, IsOptional,
 } from "class-validator";
 import {
     SpaceEntity, 
 } from "@space/entity/space.entity";
+import {
+    SpaceNameSwaggerDecorator, 
+} from "@root/util/decorators/swagger/space/space-name-swagger.decorator";
+import {
+    SpaceLocationSwaggerDecorator, 
+} from "@root/util/decorators/swagger/space/space-location-swagger.decorator";
+import {
+    SpaceDescriptionSwaggerDecorator,
+} from "@root/util/decorators/swagger/space/space-description.swagger.decorator";
 
 export class CreateSpaceRequestDto implements Pick<SpaceEntity, "name" | "location"> {
-    @ApiProperty({
-        type: String,
-        description: "공간 이름",
-        required: true,
-        example: "미래 인재관",
-    })
+    @SpaceNameSwaggerDecorator()
     @IsNotEmpty()
     name!: string;
 
-    @ApiProperty({
-        type: String,
-        description: "공간 위치",
-        required: true,
-        example: "서울시 용산구 한강대로 41길 21 6층",
-    })
+    @SpaceLocationSwaggerDecorator()
     @IsNotEmpty()
     location: string;
 
-    @ApiProperty({
-        type: String,
-        description: "공간에 대한 설명",
-        required: false,
-        nullable: true,
-        example: "이 공간은 40여명을 수용할 수 있고, 화이트보드가 있습니다.",
-    })
+    @SpaceDescriptionSwaggerDecorator()
     @IsOptional()
     description?: string | null;
 }

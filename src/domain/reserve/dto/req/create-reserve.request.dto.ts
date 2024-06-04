@@ -1,41 +1,32 @@
 import {
-    ApiProperty, 
-} from "@nestjs/swagger";
+    MemberIdSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/member-id.swagger.decorator";
+import {
+    SpaceIdSwaggerDecorator, 
+} from "@root/util/decorators/swagger/space/space-id.swagger.decorator";
+import {
+    StartTimeSwaggerDecorator, 
+} from "@root/util/decorators/swagger/reserve/start-time.swagger.decorator";
+import {
+    EndTimeSwaggerDecorator, 
+} from "@root/util/decorators/swagger/reserve/end-time.swagger.decorator";
+import {
+    ReserveDescriptionSwaggerDecorator,
+} from "@root/util/decorators/swagger/reserve/reserve-description.swagger.decorator";
 
 export class CreateReserveRequestDto {
-    @ApiProperty({
-        type: String,
-        description: "Space Id",
-        required: true,
-        example: "UUID",
-    })
+    @SpaceIdSwaggerDecorator()
     spaceId!: string;
-    @ApiProperty({
-        type: String,
-        description: "Member Id",
-        required: true,
-        example: "UUID",
-    })
+
+    @MemberIdSwaggerDecorator()
     memberId!: string;
-    @ApiProperty({
-        type: String,
-        description: "Start Time",
-        required: true,
-        example: "2024-03-01T10:00",
-    })
+
+    @StartTimeSwaggerDecorator()
     startTime!: string;
-    @ApiProperty({
-        type: String,
-        description: "End Time",
-        required: true,
-        example: "2024-03-01T12:00",
-    })
+
+    @EndTimeSwaggerDecorator()
     endTime!: string;
-    @ApiProperty({
-        type: String,
-        description: "Description",
-        required: true,
-        example: "기획팀 정기 회의를 위한 예약입니다.",
-    })
+
+    @ReserveDescriptionSwaggerDecorator()
     description: string | null;
 }

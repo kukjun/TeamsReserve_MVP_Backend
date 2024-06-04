@@ -2,26 +2,19 @@ import {
     IsEmail, IsNotEmpty,
 } from "class-validator";
 import {
-    ApiProperty, 
-} from "@nestjs/swagger";
+    PasswordSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/password.swagger.decorator";
+import {
+    EmailSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/email.swagger.decorator";
 
 export class SigninRequest {
-    @ApiProperty({
-        type: String,
-        description: "이메일",
-        required: true,
-        example: "test123@naver.com",
-    })
+    @EmailSwaggerDecorator()
     @IsEmail()
     @IsNotEmpty()
     email!: string;
 
-    @ApiProperty({
-        type: String,
-        description: "비밀번호",
-        required: true,
-        example: "test123!@",
-    })
+    @PasswordSwaggerDecorator()
     @IsNotEmpty()
     password!: string;
 }
