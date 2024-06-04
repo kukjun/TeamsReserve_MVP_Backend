@@ -1,48 +1,39 @@
 import {
-    ApiProperty, 
-} from "@nestjs/swagger";
-import {
     MemberEntity, 
 } from "@member/entity/member.entity";
+import {
+    MemberIdSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/member-id.swagger.decorator";
+import {
+    EmailSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/email.swagger.decorator";
+import {
+    NicknameSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/nickname.swagger.decorator";
+import {
+    TeamCodeSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/team-code.swagger.decorator";
+import {
+    IntroduceSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/introduce.swagger.decorator";
 
 export class GetMemberResponseDto implements Pick<MemberEntity, "id"
     | "email"
     | "nickname"
     | "teamCode"
     | "introduce"> {
-    @ApiProperty({
-        type: String,
-        description: "아이디",
-        required: true,
-        example: "ebbadaa0-8361-448b-93bc-c6f3b6d0c142",
-    })
+    @MemberIdSwaggerDecorator()
     id: string;
-    @ApiProperty({
-        type: String,
-        description: "이메일",
-        required: true,
-        example: "test123@naver.com",
-    })
+
+    @EmailSwaggerDecorator()
     email: string;
-    @ApiProperty({
-        type: String,
-        description: "닉네임",
-        required: true,
-        example: "테스트 닉네임",
-    })
+
+    @NicknameSwaggerDecorator()
     nickname: string;
-    @ApiProperty({
-        type: String,
-        description: "팀 코드",
-        required: true,
-        example: "ABCDEF-001",
-    })
+
+    @TeamCodeSwaggerDecorator()
     teamCode: string;
-    @ApiProperty({
-        type: String,
-        description: "자기 소개",
-        required: false,
-        example: "안녕하세요. 지인 소개로 가입하게 되었습니다. 잘부탁드립니다.",
-    })
+
+    @IntroduceSwaggerDecorator()
     introduce: string;
 }

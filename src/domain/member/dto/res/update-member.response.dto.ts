@@ -1,13 +1,8 @@
 import {
-    ApiProperty, 
-} from "@nestjs/swagger";
+    MemberIdSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/member-id.swagger.decorator";
 
 export class UpdateMemberResponseDto {
-    @ApiProperty({
-        type: String,
-        description: "Member id",
-        required: true,
-        example: "ebbadaa0-8361-448b-93bc-c6f3b6d0c142",
-    })
+    @MemberIdSwaggerDecorator()
     id: string;
 }

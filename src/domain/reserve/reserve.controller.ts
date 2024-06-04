@@ -91,6 +91,7 @@ export class ReserveController {
         description: "본인이 예약한 정보를 Paginate된 예약List로 조회 할 수 있는 API",
     })
     @PermissionDecorator(MemberAuthority.ADMIN, MemberAuthority.MANAGER, MemberAuthority.USER)
+    @ApiCustomResponseDecorator(PaginateData<GetReserveResponseDto>)
     @HttpCode(HttpStatus.OK)
     @Get("/my-reserve")
     async getMyReserveList(@Query() paginateDto: PaginateRequestDto, @Request() req)
@@ -105,6 +106,7 @@ export class ReserveController {
         description: "모든 예약의 Paginate된 예약 Log 정보를 조회 할 수 있는 API",
     })
     @PermissionDecorator(MemberAuthority.ADMIN, MemberAuthority.MANAGER)
+    @ApiCustomResponseDecorator(PaginateData<GetReserveLogResponseDto>)
     @HttpCode(HttpStatus.OK)
     @Get("/logs")
     async getReserveLogList(@Query() paginateDto: PaginateRequestDto)
@@ -118,6 +120,7 @@ export class ReserveController {
         summary: "예약 조회 API",
         description: "예약 단일 조회를 할 수 있는 API",
     })
+    @ApiCustomResponseDecorator(GetReserveResponseDto)
     @PermissionDecorator(MemberAuthority.ADMIN, MemberAuthority.MANAGER, MemberAuthority.USER)
     @HttpCode(HttpStatus.OK)
     @Get(":id")
@@ -133,6 +136,7 @@ export class ReserveController {
         description: "SpaceId 별, Paginate된 예약List를 조회 할 수 있는 API",
     })
     @PermissionDecorator(MemberAuthority.ADMIN, MemberAuthority.MANAGER, MemberAuthority.USER)
+    @ApiCustomResponseDecorator(PaginateData<GetReserveResponseDto>)
     @HttpCode(HttpStatus.OK)
     @Get()
     async getReserveList(@Query() paginateDto: PaginateRequestDto, @Query() optionDto: ReserveOptionDto)

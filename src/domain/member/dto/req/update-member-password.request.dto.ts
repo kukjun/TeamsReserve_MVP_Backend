@@ -1,28 +1,19 @@
 import {
-    ApiProperty, 
-} from "@nestjs/swagger";
+    CurrentPasswordSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/current-password.swagger.decorator";
 import {
-    IsNotEmpty, 
-} from "class-validator";
+    NewPasswordSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/new-password.swagger.decorator";
+import {
+    PasswordValidateDecorator, 
+} from "@root/util/decorators/validate/member/password.validate.decorator";
 
 export class UpdateMemberPasswordRequestDto {
-    // TODO: Password Validate 작업 필요
-    @ApiProperty({
-        type: String,
-        description: "변경 이전의 비밀번호",
-        required: true,
-        example: "test123!@",
-    })
-    @IsNotEmpty()
+    @CurrentPasswordSwaggerDecorator()
+    @PasswordValidateDecorator()
     currentPassword!: string;
 
-    // TODO: Password Validate 작업 필요
-    @ApiProperty({
-        type: String,
-        description: "변경 이후의 비밀번호",
-        required: true,
-        example: "test123!@",
-    })
-    @IsNotEmpty()
+    @NewPasswordSwaggerDecorator()
+    @PasswordValidateDecorator()
     newPassword!: string;
 }

@@ -1,18 +1,12 @@
 import {
-    IsBoolean, IsNotEmpty, 
-} from "class-validator";
+    JoinStatusSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/join-status.swagger.decorator";
 import {
-    ApiProperty, 
-} from "@nestjs/swagger";
+    JoinStatusValidateDecorator, 
+} from "@root/util/decorators/validate/member/join-status.validate.decorator";
 
 export class UpdateMemberJoinStatusRequestDto {
-    @ApiProperty({
-        type: Boolean,
-        description: "가입여부",
-        required: false,
-        example: true,
-    })
-    @IsNotEmpty()
-    @IsBoolean()
+    @JoinStatusSwaggerDecorator()
+    @JoinStatusValidateDecorator()
     joinStatus: boolean;
 }

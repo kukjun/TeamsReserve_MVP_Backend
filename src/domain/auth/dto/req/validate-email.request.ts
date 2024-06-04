@@ -1,18 +1,12 @@
 import {
-    IsEmail, IsNotEmpty, 
-} from "class-validator";
+    EmailSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/email.swagger.decorator";
 import {
-    ApiProperty, 
-} from "@nestjs/swagger";
+    EmailValidateDecorator, 
+} from "@root/util/decorators/validate/member/email.validate.decorator";
 
 export class ValidateEmailRequest {
-    @IsNotEmpty()
-    @IsEmail()
-    @ApiProperty({
-        type: String,
-        description: "이메일",
-        required: true,
-        example: "test123@naver.com", 
-    })
+    @EmailSwaggerDecorator()
+    @EmailValidateDecorator()
     email!: string;
 }

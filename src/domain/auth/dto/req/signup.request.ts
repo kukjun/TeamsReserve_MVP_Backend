@@ -5,56 +5,42 @@ import {
     IsEmail, IsNotEmpty, IsOptional, MaxLength, MinLength,
 } from "class-validator";
 import {
-    ApiProperty, 
-} from "@nestjs/swagger";
+    IntroduceSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/introduce.swagger.decorator";
+import {
+    EmailSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/email.swagger.decorator";
+import {
+    PasswordSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/password.swagger.decorator";
+import {
+    NicknameSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/nickname.swagger.decorator";
+import {
+    TeamCodeSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/team-code.swagger.decorator";
 
 export class SignupRequest implements Pick<MemberEntity, "email" | "password" | "nickname" | "teamCode"> {
 
-    @ApiProperty({
-        type: String,
-        description: "이메일",
-        required: true,
-        example: "test123@naver.com",
-    })
+    @EmailSwaggerDecorator()
     @IsEmail()
     email!: string;
 
-    // TODO: Password Validate 작업 필요
-    @ApiProperty({
-        type: String,
-        description: "비밀번호",
-        required: true,
-        example: "test123!@",
-    })
+    @PasswordSwaggerDecorator()
     @IsNotEmpty()
     password!: string;
 
-    @ApiProperty({
-        type: String,
-        description: "닉네임",
-        required: true,
-        example: "테스트 닉네임",
-    })
+    @NicknameSwaggerDecorator()
     @MinLength(3)
     @MaxLength(20)
     @IsNotEmpty()
     nickname!: string;
 
-    @ApiProperty({
-        type: String,
-        description: "팀 코드",
-        required: true,
-        example: "ABCDEF-001",
-    })
+    @TeamCodeSwaggerDecorator()
     @IsNotEmpty()
     teamCode!: string;
 
-    @ApiProperty({
-        type: String,
-        description: "자기 소개",
-        required: false,
-        example: "안녕하세요. 지인 소개로 가입하게 되었습니다. 잘부탁드립니다.",
-    })
+    @IntroduceSwaggerDecorator()
     @IsOptional()
     introduce?: string;
 }

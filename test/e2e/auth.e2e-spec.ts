@@ -70,6 +70,9 @@ import {
 import {
     SigninResponse, 
 } from "@auth/dto/res/signin.response";
+import {
+    generateRandomPasswordFunction, 
+} from "@root/util/function/random-password.function";
 
 describe("Auth e2e Test", () => {
     let app: INestApplication;
@@ -319,7 +322,7 @@ describe("Auth e2e Test", () => {
         describe("id, password가 일치하면,", () => {
             it("해당 member의 정보가 담긴 jwt token을 반환한다.", async () => {
                 // given
-                const password = "testPassword";
+                const password = generateRandomPasswordFunction();
                 const encryptedPassword = await bcryptFunction.hash(password, await bcryptFunction.genSalt());
                 const storedMember = await prismaService.member.create({
                     data: memberFixture(encryptedPassword),

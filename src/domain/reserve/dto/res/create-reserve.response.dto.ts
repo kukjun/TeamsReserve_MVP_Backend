@@ -1,13 +1,8 @@
 import {
-    ApiProperty, 
-} from "@nestjs/swagger";
+    ReserveIdSwaggerDecorator, 
+} from "@root/util/decorators/swagger/reserve/reserve-id.swagger.decorator";
 
 export class CreateReserveResponseDto {
-    @ApiProperty({
-        type: String,
-        description: "Response Reserve Id",
-        required: true,
-        example: "UUID",
-    })
+    @ReserveIdSwaggerDecorator()
     id: string;
 }
