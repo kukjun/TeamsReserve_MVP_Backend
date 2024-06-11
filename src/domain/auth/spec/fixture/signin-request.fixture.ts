@@ -1,13 +1,16 @@
 import {
-    faker, 
+    faker,
 } from "@faker-js/faker";
 import {
-    SigninRequest, 
+    SigninRequest,
 } from "@auth/dto/req/signin.request";
 
-export const signinRequestFixture = ():SigninRequest => {
+export const signinRequestFixture = (
+    email: string = faker.internet.email(),
+    password: string = faker.internet.password()
+): SigninRequest => {
     return {
-        email: faker.internet.email(),
-        password: faker.internet.password(),
+        email,
+        password,
     };
 };

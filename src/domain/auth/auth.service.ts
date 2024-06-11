@@ -1,4 +1,3 @@
-import * as bcrypt from "bcrypt";
 import {
     Injectable, 
 } from "@nestjs/common";
@@ -48,6 +47,12 @@ import {
 import {
     MemberToken, 
 } from "@root/interface/member-token";
+import {
+    bcryptFunction, 
+} from "@root/util/function/bcrypt.function";
+import {
+    MemberNotFoundException, 
+} from "@root/exception/member-not-found.exception";
 
 @Injectable()
 export class AuthService {
@@ -59,7 +64,7 @@ export class AuthService {
         private readonly jwtService: JwtService,
         configService: ConfigService,
     ) {
-        this.secret = configService.get<string>("JWT_SECRET_KEY");
+        this.secret = configService.get<string>("JWT_SECRET_KEY") ?? "SECRET";
         this.teamCode = configService.get<string>("TEAM_CODE") ?? "TEAM_CODE";
     }
 
@@ -77,13 +82,13 @@ export class AuthService {
         if(validate === null || validate !== "validate") throw new EmailUnauthenticatedException();
         if(dto.teamCode !== this.teamCode) throw new TeamUnauthenticatedException();
         const memberByEmail = await this.memberRepository.findMemberByEmail(dto.email);
-        if (memberByEmail !== null) throw new DuplicateException("email: " + dto.email + " duplicate");
+        if (memberByEmail !== null) throw new DuplicateException("email: " + dto.email);
         const memberByNickname = await this.memberRepository.findMemberByNickname(dto.nickname);
-        if (memberByNickname !== null) throw new DuplicateException("nickname: " + dto.nickname + " duplicate");
+        if (memberByNickname !== null) throw new DuplicateException("nickname: " + dto.nickname);
     }
 
     private async createUser(dto: SignupRequest): Promise<string> {
-        const hashedPassword = await bcrypt.hash(dto.password, await bcrypt.genSalt());
+        const hashedPassword = await bcryptFunction.hash(dto.password, await bcryptFunction.genSalt());
         const updatedRequest: SignupRequest = {
             email: dto.email,
             password: hashedPassword,
@@ -99,12 +104,13 @@ export class AuthService {
     async validateSignin(request: SigninRequest): Promise<string> {
         const member = await this.memberRepository.findMemberByEmail(request.email);
         if(!member || member.joinStatus === false) throw new SigninFailException();
-        if(!await bcrypt.compare(request.password, member.password)) throw new SigninFailException();
+        if(!await bcryptFunction.compare(request.password, member.password)) throw new SigninFailException();
 
         return member.id;
     }
     async signin(id: string): Promise<SigninResponse> {
         const member = await this.memberRepository.findMemberById(id);
+        if(member == null) throw new MemberNotFoundException(`id: ${id}`);
         const token = this.transferMemberToToken(member);
 
         return {
