@@ -2,38 +2,38 @@ import {
     Test,
 } from "@nestjs/testing";
 import {
-    ReserveController,
-} from "../reserve.controller";
+    ReserveController, 
+} from "@reserve/reserve.controller";
 import {
-    ReserveService,
-} from "../reserve.service";
+    ReserveService, 
+} from "@reserve/reserve.service";
 import {
-    CreateReserveResponseDto,
-} from "../dto/res/create-reserve.response.dto";
+    CreateReserveResponseDto, 
+} from "@reserve/dto/res/create-reserve.response.dto";
 import {
-    uuidFunction,
-} from "../../../util/function/uuid.function";
+    uuidFunction, 
+} from "@root/util/function/uuid.function";
 import {
-    CreateReserveValidateRequestDto,
-} from "../dto/req/create-reserve-validate.request.dto";
+    CreateReserveValidateRequestDto, 
+} from "@reserve/dto/req/create-reserve-validate.request.dto";
 import {
     GetReserveResponseDto, 
-} from "../dto/res/get-reserve.response.dto";
-import {
-    getReserveList, getReserveLogList,
-} from "./fixture/paginate-response";
-import {
-    PaginateData, 
-} from "../../../interface/response/paginate.data";
+} from "@reserve/dto/res/get-reserve.response.dto";
 import {
     PaginateRequestDto, 
-} from "../../../interface/request/paginate.request.dto";
+} from "@root/interface/request/paginate.request.dto";
 import {
     ReserveOptionDto, 
-} from "../../../interface/request/reserve-option.dto";
+} from "@root/interface/request/reserve-option.dto";
+import {
+    PaginateData, 
+} from "@root/interface/response/paginate.data";
+import {
+    getReserveList, getReserveLogList, 
+} from "@reserve/spec/fixture/paginate-response";
 import {
     GetReserveLogResponseDto, 
-} from "../dto/res/get-reserve-log.response.dto";
+} from "@reserve/dto/res/get-reserve-log.response.dto";
 
 const mockReserveService = {
     createReserve: jest.fn(),

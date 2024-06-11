@@ -3,13 +3,13 @@ import {
 } from "@nestjs/common";
 import {
     PrismaService, 
-} from "../../config/prisma/prisma.service";
+} from "@root/config/prisma/prisma.service";
 import {
     SpaceEntity, 
-} from "./entity/space.entity";
+} from "@space/entity/space.entity";
 import {
     PaginateRequestDto, 
-} from "../../interface/request/paginate.request.dto";
+} from "@root/interface/request/paginate.request.dto";
 
 @Injectable()
 export class SpaceRepository {
@@ -58,13 +58,15 @@ export class SpaceRepository {
     }
 
     async findSpaceByPaging(paginateDto: PaginateRequestDto): Promise<SpaceEntity[]> {
-        return await this.prismaSpace.findMany({
+        const result: SpaceEntity[] =  await this.prismaSpace.findMany({
             skip: (paginateDto.page - 1) * paginateDto.limit,
             take: paginateDto.limit,
             orderBy: {
                 createdAt: "desc",
             },
         });
+
+        return result;
     }
 
     async findSpaceCount(): Promise<number> {

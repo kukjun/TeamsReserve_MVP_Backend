@@ -2,35 +2,35 @@ import {
     Module, 
 } from "@nestjs/common";
 import {
-    AuthController, 
-} from "./auth.controller";
-import {
-    AuthService, 
-} from "./auth.service";
-import {
-    EmailTransferService, 
-} from "./email-transfer.service";
-import {
-    MemberModule, 
-} from "../member/member.module";
-import {
     ConfigModule, ConfigService, 
 } from "@nestjs/config";
 import {
     JwtModule, 
 } from "@nestjs/jwt";
 import {
-    LocalStrategy, 
-} from "./strategies/local.strategy";
-import {
-    JwtStrategy, 
-} from "./strategies/jwt.strategy";
-import {
     PassportModule, 
 } from "@nestjs/passport";
 import {
     PrismaModule, 
-} from "../../config/prisma/prisma.module";
+} from "@root/config/prisma/prisma.module";
+import {
+    MemberModule, 
+} from "@member/member.module";
+import {
+    AuthController, 
+} from "@auth/auth.controller";
+import {
+    AuthService, 
+} from "@auth/auth.service";
+import {
+    EmailTransferService, 
+} from "@auth/email-transfer.service";
+import {
+    LocalStrategy, 
+} from "@auth/strategies/local.strategy";
+import {
+    JwtStrategy, 
+} from "@auth/strategies/jwt.strategy";
 
 @Module({
     imports: [

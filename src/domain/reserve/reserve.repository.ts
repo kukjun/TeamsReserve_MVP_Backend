@@ -3,22 +3,22 @@ import {
 } from "@nestjs/common";
 import {
     PrismaService,
-} from "../../config/prisma/prisma.service";
+} from "@root/config/prisma/prisma.service";
 import {
     ReserveEntity,
-} from "./entity/reserve.entity";
+} from "@reserve/entity/reserve.entity";
 import {
-    SpaceEntity, 
-} from "../space/entity/space.entity";
+    SpaceEntity,
+} from "@space/entity/space.entity";
 import {
-    MemberEntity, 
-} from "../member/entity/member.entity";
+    MemberEntity,
+} from "@member/entity/member.entity";
 import {
-    PaginateRequestDto, 
-} from "../../interface/request/paginate.request.dto";
+    PaginateRequestDto,
+} from "@root/interface/request/paginate.request.dto";
 import {
-    ReserveOptionDto, 
-} from "../../interface/request/reserve-option.dto";
+    ReserveOptionDto,
+} from "@root/interface/request/reserve-option.dto";
 
 @Injectable()
 export class ReserveRepository {
@@ -102,7 +102,7 @@ export class ReserveRepository {
     }
 
     async deleteReserve(reserveId: string, txReserve?: PrismaService["reserve"])
-    : Promise<null> {
+        : Promise<null> {
         const prismaReserveClient = txReserve ?? this.prismaReserve;
         await prismaReserveClient.delete({
             where: {
@@ -125,7 +125,7 @@ export class ReserveRepository {
 
     async findReserveBySpaceIdAndPaging(paginateDto: PaginateRequestDto, optionDto: ReserveOptionDto)
         : Promise<ReserveEntity[]> {
-        return await this.prismaReserve.findMany({
+        const result: ReserveEntity[] = await this.prismaReserve.findMany({
             where: {
                 spaceId: optionDto.spaceId,
             },
@@ -135,11 +135,13 @@ export class ReserveRepository {
                 startTime: "desc",
             },
         });
+
+        return result;
     }
 
     async findReserveByMemberIdAndPaging(paginateDto: PaginateRequestDto, memberId: string)
         : Promise<ReserveEntity[]> {
-        return await this.prismaReserve.findMany({
+        const result: ReserveEntity[] = await this.prismaReserve.findMany({
             where: {
                 memberId: memberId,
             },
@@ -149,21 +151,27 @@ export class ReserveRepository {
                 startTime: "desc",
             },
         });
+
+        return result;
     }
 
     async findReserveCount(optionDto: ReserveOptionDto): Promise<number> {
-        return await this.prismaReserve.count({
+        const count = await this.prismaReserve.count({
             where: {
                 spaceId: optionDto.spaceId,
             },
         });
+
+        return count;
     }
 
     async findMyReserveCount(memberId: string): Promise<number> {
-        return await this.prismaReserve.count({
+        const count = await this.prismaReserve.count({
             where: {
                 memberId: memberId,
             },
         });
+
+        return count;
     }
 }

@@ -1,6 +1,6 @@
 import {
     GetPhotoResponseDto, 
-} from "./get-photo-response.dto";
+} from "@space/dto/res/get-photo-response.dto";
 
 export class GetPhotoListResponseDto {
     data: GetPhotoResponseDto[];

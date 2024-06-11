@@ -1,22 +1,12 @@
 import {
-    ApiProperty, 
-} from "@nestjs/swagger";
+    AuthoritySwaggerDecorator,
+} from "@root/util/decorators/swagger/member/authority.swagger.decorator";
 import {
-    IsIn, IsNotEmpty, 
-} from "class-validator";
-import {
-    MemberAuthority, 
-} from "../../../../types/enums/member.authority.enum";
+    AuthorityValidateDecorator,
+} from "@root/util/decorators/validate/member/authority.validate.decorator";
 
 export class UpdateMemberAuthorityRequestDto {
-    @ApiProperty({
-        type: String,
-        description: "권한",
-        required: true,
-        example: "USER",
-    })
-    @IsNotEmpty()
-    @IsIn([MemberAuthority.USER,
-        MemberAuthority.MANAGER,])
-    authority: string;
+    @AuthoritySwaggerDecorator()
+    @AuthorityValidateDecorator()
+    authority!: string;
 }

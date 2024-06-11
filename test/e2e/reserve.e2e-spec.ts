@@ -3,9 +3,6 @@ import {
     INestApplication, ValidationPipe,
 } from "@nestjs/common";
 import {
-    PrismaService,
-} from "../../src/config/prisma/prisma.service";
-import {
     StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
 import {
@@ -15,68 +12,71 @@ import {
     ConfigService,
 } from "@nestjs/config";
 import {
-    psqlTestContainerStarter,
-} from "../../src/util/function/postgresql-contrainer.function";
-import {
     Test, TestingModule,
 } from "@nestjs/testing";
 import {
-    AppModule,
-} from "../../src/app.module";
+    CustomResponse,
+} from "@root/interface/response/custom-response";
 import {
-    HttpExceptionFilter,
-} from "../../src/filter/http-exception.filter";
+    StartedRedisContainer, 
+} from "@testcontainers/redis";
 import {
-    generateJwtToken,
+    PrismaService, 
+} from "@root/config/prisma/prisma.service";
+import {
+    psqlTestContainerStarter, 
+} from "@root/util/function/postgresql-contrainer.function";
+import {
+    redisTestContainerStarter, 
+} from "@root/util/function/redis-container.function";
+import {
+    AppModule, 
+} from "@root/app.module";
+import {
+    HttpExceptionFilter, 
+} from "@root/filter/http-exception.filter";
+import {
+    generateJwtToken, 
 } from "../fixture/function/jwt-token";
 import {
-    MemberAuthority,
-} from "../../src/types/enums/member.authority.enum";
+    MemberAuthority, 
+} from "@root/types/enums/member.authority.enum";
 import {
-    spaceFixture,
+    spaceFixture, 
 } from "../fixture/entity/space.fixture";
 import {
-    CreateReserveRequestDto,
-} from "../../src/domain/reserve/dto/req/create-reserve.request.dto";
+    CreateReserveRequestDto, 
+} from "@reserve/dto/req/create-reserve.request.dto";
 import {
-    supertestRequestFunction,
-} from "../../src/util/function/supertest-request.function";
+    supertestRequestFunction, 
+} from "@root/util/function/supertest-request.function";
 import {
-    DefaultResponse,
-} from "../../src/interface/response/default.response";
+    CreateReserveResponseDto, 
+} from "@reserve/dto/res/create-reserve.response.dto";
 import {
-    CreateReserveResponseDto,
-} from "../../src/domain/reserve/dto/res/create-reserve.response.dto";
-import {
-    reserveFixture,
+    reserveFixture, 
 } from "../fixture/entity/reserve.fixture";
 import {
-    uuidFunction,
-} from "../../src/util/function/uuid.function";
+    uuidFunction, 
+} from "@root/util/function/uuid.function";
 import {
-    GetReserveResponseDto,
-} from "../../src/domain/reserve/dto/res/get-reserve.response.dto";
+    GetReserveResponseDto, 
+} from "@reserve/dto/res/get-reserve.response.dto";
 import {
     ReserveEntity, 
-} from "../../src/domain/reserve/entity/reserve.entity";
+} from "@reserve/entity/reserve.entity";
 import {
     PaginateData, 
-} from "../../src/interface/response/paginate.data";
-import {
-    GetReserveLogResponseDto, 
-} from "../../src/domain/reserve/dto/res/get-reserve-log.response.dto";
+} from "@root/interface/response/paginate.data";
 import {
     ReserveLogEntity, 
-} from "../../src/domain/reserve/entity/reserve-log.entity";
+} from "@reserve/entity/reserve-log.entity";
 import {
     reserveLogFixture, 
 } from "../fixture/entity/reserve-log.fixture";
 import {
-    redisTestContainerStarter, 
-} from "../../src/util/function/redis-container.function";
-import {
-    StartedRedisContainer, 
-} from "@testcontainers/redis";
+    GetReserveLogResponseDto, 
+} from "@reserve/dto/res/get-reserve-log.response.dto";
 
 describe("Reserve e2e Test ", () => {
     let app: INestApplication;
@@ -162,7 +162,7 @@ describe("Reserve e2e Test ", () => {
                         .set("Authorization", `Bearer ${token}`)
                         .expect(HttpStatus.CREATED);
                     // then
-                    const actual = response.body as DefaultResponse<CreateReserveResponseDto>;
+                    const actual = response.body as CustomResponse<CreateReserveResponseDto>;
                     const actualReserve = await prismaService.reserve.findUnique({
                         where: {
                             id: actual.data.id,
@@ -331,7 +331,7 @@ describe("Reserve e2e Test ", () => {
                     .set("Authorization", `Bearer ${token}`)
                     .expect(HttpStatus.OK);
                 // then
-                const actual = response.body as DefaultResponse<GetReserveResponseDto>;
+                const actual = response.body as CustomResponse<GetReserveResponseDto>;
                 expect(actual.data.id).toBe(storeReserve.id);
                 expect(actual.data.startTime).toBe(storeReserve.startTime.toISOString());
                 expect(actual.data.endTime).toBe(storeReserve.endTime.toISOString());
@@ -390,7 +390,7 @@ describe("Reserve e2e Test ", () => {
                 .set("Authorization", `Bearer ${token}`)
                 .expect(HttpStatus.OK);
             // then
-            const actual = response.body as DefaultResponse<PaginateData<GetReserveResponseDto>>;
+            const actual = response.body as CustomResponse<PaginateData<GetReserveResponseDto>>;
             expect(actual.data.meta.totalCount).toBe(randomNumber);
             expect(actual.data.meta.totalPage).toEqual(Math.ceil(randomNumber / request.limit));
             expect(actual.data.meta.page).toBe(request.page);
@@ -434,7 +434,7 @@ describe("Reserve e2e Test ", () => {
                 .set("Authorization", `Bearer ${token}`)
                 .expect(HttpStatus.OK);
             // then
-            const actual = response.body as DefaultResponse<PaginateData<GetReserveResponseDto>>;
+            const actual = response.body as CustomResponse<PaginateData<GetReserveResponseDto>>;
             expect(actual.data.meta.totalCount).toBe(randomNumber);
             expect(actual.data.meta.totalPage).toEqual(Math.ceil(randomNumber / request.limit));
             expect(actual.data.meta.page).toBe(request.page);
@@ -469,7 +469,7 @@ describe("Reserve e2e Test ", () => {
                 .set("Authorization", `Bearer ${token}`)
                 .expect(HttpStatus.OK);
             // then
-            const actual = response.body as DefaultResponse<PaginateData<GetReserveLogResponseDto>>;
+            const actual = response.body as CustomResponse<PaginateData<GetReserveLogResponseDto>>;
             expect(actual.data.meta.totalCount).toBe(randomNumber);
             expect(actual.data.meta.totalPage).toEqual(Math.ceil(randomNumber / request.limit));
             expect(actual.data.meta.page).toBe(request.page);

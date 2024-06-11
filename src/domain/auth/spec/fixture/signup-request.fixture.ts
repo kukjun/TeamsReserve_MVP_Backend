@@ -1,9 +1,9 @@
 import {
-    SignupRequest, 
-} from "../../dto/req/signup.request";
-import {
     faker, 
 } from "@faker-js/faker";
+import {
+    SignupRequest, 
+} from "@auth/dto/req/signup.request";
 
 export const signupRequestFixture = ():SignupRequest => {
     return {

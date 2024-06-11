@@ -1,6 +1,6 @@
 import {
     ConflictException, 
-} from "./http/conflict.exception";
+} from "@root/exception/http/conflict.exception";
 
 export class ResourceLockException extends ConflictException {
     constructor(message: string) {

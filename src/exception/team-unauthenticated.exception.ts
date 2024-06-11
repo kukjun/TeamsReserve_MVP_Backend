@@ -1,6 +1,6 @@
 import {
     UnauthorizedException, 
-} from "./http/unauthorized.exception";
+} from "@root/exception/http/unauthorized.exception";
 
 export class TeamUnauthenticatedException extends UnauthorizedException {
     constructor() {

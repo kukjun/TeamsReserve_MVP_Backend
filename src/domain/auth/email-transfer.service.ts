@@ -5,44 +5,44 @@ import {
 import {
     ConfigService,
 } from "@nestjs/config";
-import {
-    ValidateEmailRequest,
-} from "./dto/req/validate-email.request";
-import {
-    ValidateEmailResponse,
-} from "./dto/res/validate-email.response";
 import Redis from "ioredis";
 import {
     InjectRedis,
 } from "@liaoliaots/nestjs-redis";
-import {
-    generateRandomCodeFunction,
-} from "../../util/function/random-code.function";
-import {
-    EmailOptions,
-} from "../../interface/email-options";
-import {
-    ConfirmEmailRequest,
-} from "./dto/req/confirm-email.request";
-import {
-    ConfirmEmailResponse,
-} from "./dto/res/confirm-email.response";
-import {
-    EmailConfirmFailException,
-} from "../../exception/email-confirm-fail.exception";
-import {
-    MemberRepository,
-} from "../member/member.repository";
-import {
-    generateRandomPasswordFunction,
-} from "../../util/function/random-password.function";
-import {
-    MemberEntity,
-} from "../member/entity/member.entity";
 import * as bcrypt from "bcrypt";
 import {
-    MemberNotFoundException, 
-} from "../../exception/member-not-found.exception";
+    MemberRepository,
+} from "@member/member.repository";
+import {
+    ValidateEmailRequest,
+} from "@auth/dto/req/validate-email.request";
+import {
+    ValidateEmailResponse,
+} from "@auth/dto/res/validate-email.response";
+import {
+    generateRandomCodeFunction,
+} from "@root/util/function/random-code.function";
+import {
+    EmailOptionsDto,
+} from "@root/interface/request/email-options.dto";
+import {
+    ConfirmEmailRequest,
+} from "@auth/dto/req/confirm-email.request";
+import {
+    ConfirmEmailResponse,
+} from "@auth/dto/res/confirm-email.response";
+import {
+    EmailConfirmFailException,
+} from "@root/exception/email-confirm-fail.exception";
+import {
+    MemberNotFoundException,
+} from "@root/exception/member-not-found.exception";
+import {
+    generateRandomPasswordFunction,
+} from "@root/util/function/random-password.function";
+import {
+    MemberEntity,
+} from "@member/entity/member.entity";
 
 @Injectable()
 export class EmailTransferService {
@@ -71,14 +71,11 @@ export class EmailTransferService {
 
     async validateEmail(request: ValidateEmailRequest): Promise<ValidateEmailResponse> {
         const code = generateRandomCodeFunction().toString();
-        const emailOptions: EmailOptions = {
-            from: this.hostAccount,
-            to: request.email,
-            subject: "Validate Email - TeamsReserve",
-            html: `<h1> TeamsReserve 이메일 인증 </h1> <p>code: ${code}</p> </br> <p>제한 시간은 5분입니다.</p>`,
-        };
-
-        this.transporter.sendMail(emailOptions);
+        this.transportEmail(
+            request.email,
+            "Validate Email - TeamsReserve",
+            `<h1> TeamsReserve 이메일 인증 </h1> <p>code: ${code}</p> </br> <p>제한 시간은 5분입니다.</p>`
+        );
 
         const key = this.validateEmailPrefix + request.email;
         await this.client.set(key, code, "EX", this.validateLimitTime);
@@ -90,10 +87,8 @@ export class EmailTransferService {
 
     async confirmEmail(request: ConfirmEmailRequest): Promise<ConfirmEmailResponse> {
         const key = this.validateEmailPrefix + request.email;
-        const resCode: string | null = await this.client.get(key);
+        await this.validateCode(key, request.code);
 
-        if (resCode === null || resCode !== request.code) throw new EmailConfirmFailException();
-        await this.client.del(key);
         await this.client.set(request.email, "validate", "EX", this.signupLimitTime);
 
         return {
@@ -103,32 +98,47 @@ export class EmailTransferService {
 
     async updateTempPassword(request: ConfirmEmailRequest): Promise<ConfirmEmailResponse> {
         const key = this.validateEmailPrefix + request.email;
-        const resCode: string | null = await this.client.get(key);
-
-        if (resCode === null || resCode !== request.code) throw new EmailConfirmFailException();
-        await this.client.del(key);
+        await this.validateCode(key, request.code);
 
         const member = await this.memberRepository.findMemberByEmail(request.email);
-        if(!member) throw new MemberNotFoundException(`email: ${request.email}`);
+        if (!member) throw new MemberNotFoundException(`email: ${request.email}`);
+
         const tempPassword = generateRandomPasswordFunction();
-        const hashedPassword = await bcrypt.hash(tempPassword, await bcrypt.genSalt());
+        await this.updatePassword(member, tempPassword);
+
+        this.transportEmail(
+            request.email,
+            "Temp Password - TeamsReserve",
+            `<h1> TeamsReserve ${member.nickname}님 비밀번호 발급 </h1> <p>Temp Password: ${tempPassword}</p>`
+        );
+
+        return {
+            email: request.email,
+        };
+    }
+
+    private transportEmail(to: string, subject: string, html: string) {
+        const emailOptions: EmailOptionsDto = {
+            from: this.hostAccount,
+            to,
+            subject,
+            html,
+        };
+        this.transporter.sendMail(emailOptions);
+    }
+
+    private async validateCode(key: string, code: string) {
+        const resCode: string | null = await this.client.get(key);
+        if (resCode === null || resCode !== code) throw new EmailConfirmFailException();
+        await this.client.del(key);
+    }
+
+    private async updatePassword(member: MemberEntity, password: string) {
+        const hashedPassword = await bcrypt.hash(password, await bcrypt.genSalt());
         const updatedMember: MemberEntity = {
             ...member,
             password: hashedPassword,
         };
         await this.memberRepository.updateMember(updatedMember);
-
-        const emailOptions: EmailOptions = {
-            from: this.hostAccount,
-            to: request.email,
-            subject: "Temp Password - TeamsReserve",
-            html: `<h1> TeamsReserve ${updatedMember.nickname}님 비밀번호 발급 </h1> <p>Temp Password: ${tempPassword}</p>`,
-        };
-        this.transporter.sendMail(emailOptions);
-
-        return {
-            email: request.email,
-        };
-
     }
 }

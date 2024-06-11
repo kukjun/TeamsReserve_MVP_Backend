@@ -6,7 +6,7 @@ import {
 } from "@nestjs/passport";
 import {
     LOCAL_STRATEGY, 
-} from "../strategies/local.strategy";
+} from "@auth/strategies/local.strategy";
 
 @Injectable()
 export class LocalGuard extends AuthGuard(LOCAL_STRATEGY) {}

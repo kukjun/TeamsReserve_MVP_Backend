@@ -1,5 +1,5 @@
 export const generateRandomPasswordFunction = (length: number = 10): string => {
-    const specialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+    const specialChars = "!@#~$*";
     const numbers = "0123456789";
     const upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const lowerChars = "abcdefghijklmnopqrstuvwxyz";

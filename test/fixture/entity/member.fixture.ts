@@ -1,9 +1,9 @@
 import {
-    MemberEntity,
-} from "../../../src/domain/member/entity/member.entity";
+    MemberAuthority, 
+} from "@root/types/enums/member.authority.enum";
 import {
-    MemberAuthority,
-} from "../../../src/types/enums/member.authority.enum";
+    MemberEntity, 
+} from "@member/entity/member.entity";
 
 export const memberFixture
     = (encryptedPassword: string, joinStatus: boolean = true, authority: string = MemberAuthority.USER): MemberEntity =>
@@ -11,7 +11,7 @@ export const memberFixture
             {
                 email: "fixtureEmail@naver.com",
                 password: encryptedPassword,
-                nickname: "fixtureName",
+                nickname: "fixture",
                 introduce: "fixtureTestIntroduce",
                 teamCode: "ABCDEF-001",
                 authority: authority,
@@ -25,7 +25,7 @@ export const memberRandomFixture
             {
                 email: `fixtureEmail${count}@naver.com`,
                 password: encryptedPassword,
-                nickname: `fixtureName${count}`,
+                nickname: `fixture${count}`,
                 introduce: "fixtureTestIntroduce",
                 teamCode: "ABCDEF-001",
                 authority: MemberAuthority.USER,

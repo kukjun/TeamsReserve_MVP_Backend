@@ -1,9 +1,9 @@
 import {
     ReserveLogEntity, 
-} from "../../../src/domain/reserve/entity/reserve-log.entity";
+} from "@reserve/entity/reserve-log.entity";
 import {
     ReserveState, 
-} from "../../../src/types/enums/reserveState";
+} from "@root/types/enums/reserve-state";
 
 export const reserveLogFixture =
     (count: number) => {

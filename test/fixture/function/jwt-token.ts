@@ -1,30 +1,30 @@
 import {
-    generateRandomPasswordFunction,
-} from "../../../src/util/function/random-password.function";
-import {
-    bcryptFunction,
-} from "../../../src/util/function/bcrypt.function";
-import {
-    memberFixture,
-} from "../entity/member.fixture";
-import {
-    MemberToken,
-} from "../../../src/interface/member-token";
-import {
-    MemberAuthority,
-} from "../../../src/types/enums/member.authority.enum";
-import {
-    PrismaService,
-} from "../../../src/config/prisma/prisma.service";
-import {
     JwtService,
 } from "@nestjs/jwt";
 import {
     ConfigService,
 } from "@nestjs/config";
 import {
-    MemberEntity,
-} from "../../../src/domain/member/entity/member.entity";
+    PrismaService, 
+} from "@root/config/prisma/prisma.service";
+import {
+    MemberAuthority, 
+} from "@root/types/enums/member.authority.enum";
+import {
+    MemberEntity, 
+} from "@member/entity/member.entity";
+import {
+    generateRandomPasswordFunction, 
+} from "@root/util/function/random-password.function";
+import {
+    bcryptFunction, 
+} from "@root/util/function/bcrypt.function";
+import {
+    memberFixture, 
+} from "../entity/member.fixture";
+import {
+    MemberToken, 
+} from "@root/interface/member-token";
 
 export const generateJwtToken
     = async (

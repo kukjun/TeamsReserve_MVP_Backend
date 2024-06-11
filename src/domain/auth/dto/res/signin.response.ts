@@ -1,13 +1,8 @@
 import {
-    ApiProperty, 
-} from "@nestjs/swagger";
+    AccessTokenSwaggerDecorator, 
+} from "@root/util/decorators/swagger/member/access-token.swagger.decorator";
 
 export class SigninResponse {
-        @ApiProperty({
-            type: String,
-            description: "access token",
-            required: true,
-            example: "accessToken",
-        })
+        @AccessTokenSwaggerDecorator()
         accessToken: string;
 }

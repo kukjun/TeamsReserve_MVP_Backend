@@ -3,14 +3,14 @@ import {
     Catch, ExceptionFilter, HttpException, HttpStatus, Logger,
 } from "@nestjs/common";
 import {
-    ErrorData, 
-} from "../interface/response/error.data";
-import {
-    DefaultResponse, 
-} from "../interface/response/default.response";
-import {
     Request, Response, 
 } from "express";
+import {
+    ErrorData, 
+} from "@root/interface/response/error.data";
+import {
+    CustomResponse,
+} from "@root/interface/response/custom-response";
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -33,7 +33,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const data = new ErrorData(status, HttpStatus[status], request.url, errorMessage);
 
         response.status(status).json(
-            new DefaultResponse(data)
+            new CustomResponse(data)
         );
     }
 }

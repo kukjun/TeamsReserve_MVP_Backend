@@ -3,16 +3,16 @@ import {
 } from "@nestjs/common";
 import {
     PrismaService,
-} from "../../config/prisma/prisma.service";
+} from "@root/config/prisma/prisma.service";
 import {
     PaginateRequestDto,
-} from "../../interface/request/paginate.request.dto";
+} from "@root/interface/request/paginate.request.dto";
 import {
     MemberOptionDto,
-} from "../../interface/request/member-option.dto";
+} from "@root/interface/request/member-option.dto";
 import {
     MemberEntity,
-} from "./entity/member.entity";
+} from "@member/entity/member.entity";
 
 @Injectable()
 export class MemberRepository {
@@ -31,26 +31,37 @@ export class MemberRepository {
      */
     async findMemberByPaging(paginateDto: PaginateRequestDto, optionDto: MemberOptionDto = null)
         : Promise<MemberEntity[]> {
+        let result: MemberEntity[];
         if (!optionDto) {
-            return await this.prismaMember.findMany({
-                skip: (paginateDto.page - 1) * paginateDto.limit,
-                take: paginateDto.limit,
-                orderBy: {
-                    createdAt: "desc",
-                },
-            });
+            result = await this.findMemberWithoutOption(paginateDto);
         } else {
-            return await this.prismaMember.findMany({
-                skip: (paginateDto.page - 1) * paginateDto.limit,
-                take: paginateDto.limit,
-                where: {
-                    joinStatus: optionDto.joinStatus,
-                },
-                orderBy: {
-                    createdAt: "desc",
-                },
-            });
+            result = await this.findMemberWithOption(paginateDto, optionDto);
         }
+
+        return result;
+    }
+
+    private async findMemberWithoutOption(paginateDto: PaginateRequestDto): Promise<MemberEntity[]> {
+        return await this.prismaMember.findMany({
+            skip: (paginateDto.page - 1) * paginateDto.limit,
+            take: paginateDto.limit,
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
+    }
+
+    private async findMemberWithOption(paginateDto: PaginateRequestDto, optionDto: MemberOptionDto) {
+        return await this.prismaMember.findMany({
+            skip: (paginateDto.page - 1) * paginateDto.limit,
+            take: paginateDto.limit,
+            where: {
+                joinStatus: optionDto.joinStatus,
+            },
+            orderBy: {
+                createdAt: "desc",
+            },
+        });
     }
 
     /**
@@ -58,15 +69,19 @@ export class MemberRepository {
      * @param optionDto
      */
     async findMemberCount(optionDto: MemberOptionDto = null): Promise<number> {
+        let result: number;
+
         if (!optionDto) {
-            return await this.prismaMember.count();
+            result = await this.prismaMember.count();
         } else {
-            return await this.prismaMember.count({
+            result = await this.prismaMember.count({
                 where: {
                     joinStatus: optionDto.joinStatus,
                 },
             });
         }
+
+        return result;
     }
 
     /**
@@ -80,17 +95,6 @@ export class MemberRepository {
     ): Promise<MemberEntity | null> {
         const prismClientMember = txMember ?? this.prismaMember;
         const member = await prismClientMember.findUnique({
-            where: {
-                id,
-            },
-        });
-        if (!member) return null;
-
-        return member;
-    }
-
-    async findMemberByIdUseTx(id: string): Promise<MemberEntity | null> {
-        const member = await this.prismaMember.findUnique({
             where: {
                 id,
             },
@@ -138,9 +142,8 @@ export class MemberRepository {
         const savedMember = await this.prismaMember.create({
             data: member,
         });
-        if (savedMember === null) return null;
 
-        return savedMember.id;
+        return savedMember?.id;
     }
 
     /**

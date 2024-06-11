@@ -2,14 +2,8 @@ import {
     StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
 import {
-    PrismaService,
-} from "../../src/config/prisma/prisma.service";
-import {
     Test, TestingModule,
 } from "@nestjs/testing";
-import {
-    AppModule,
-} from "../../src/app.module";
 import {
     JwtService,
 } from "@nestjs/jwt";
@@ -21,55 +15,64 @@ import {
     StartedRedisContainer,
 } from "@testcontainers/redis";
 import {
-    HttpExceptionFilter,
-} from "../../src/filter/http-exception.filter";
-import {
     HttpStatus,
     INestApplication,
     ValidationPipe,
 } from "@nestjs/common";
 import {
-    ConfirmEmailRequest,
-} from "../../src/domain/auth/dto/req/confirm-email.request";
-import {
-    DefaultResponse,
-} from "../../src/interface/response/default.response";
-import {
-    ConfirmEmailResponse,
-} from "../../src/domain/auth/dto/res/confirm-email.response";
-import {
-    ErrorData,
-} from "../../src/interface/response/error.data";
-import {
-    SignupRequest,
-} from "../../src/domain/auth/dto/req/signup.request";
-import {
-    SignupResponse,
-} from "../../src/domain/auth/dto/res/signup.response";
-import {
-    memberFixture,
-} from "../fixture/entity/member.fixture";
-import {
-    SigninRequest,
-} from "../../src/domain/auth/dto/req/signin.request";
-import {
-    SigninResponse,
-} from "../../src/domain/auth/dto/res/signin.response";
-import {
-    supertestRequestFunction,
-} from "../../src/util/function/supertest-request.function";
-import {
-    bcryptFunction,
-} from "../../src/util/function/bcrypt.function";
-import {
-    psqlTestContainerStarter,
-} from "../../src/util/function/postgresql-contrainer.function";
-import {
-    redisTestContainerStarter,
-} from "../../src/util/function/redis-container.function";
+    CustomResponse,
+} from "@root/interface/response/custom-response";
 import {
     ConfigService,
 } from "@nestjs/config";
+import {
+    PrismaService, 
+} from "@root/config/prisma/prisma.service";
+import {
+    psqlTestContainerStarter, 
+} from "@root/util/function/postgresql-contrainer.function";
+import {
+    redisTestContainerStarter, 
+} from "@root/util/function/redis-container.function";
+import {
+    AppModule, 
+} from "@root/app.module";
+import {
+    HttpExceptionFilter, 
+} from "@root/filter/http-exception.filter";
+import {
+    ConfirmEmailRequest, 
+} from "@auth/dto/req/confirm-email.request";
+import {
+    supertestRequestFunction, 
+} from "@root/util/function/supertest-request.function";
+import {
+    ConfirmEmailResponse, 
+} from "@auth/dto/res/confirm-email.response";
+import {
+    SignupRequest, 
+} from "@auth/dto/req/signup.request";
+import {
+    ErrorData, 
+} from "@root/interface/response/error.data";
+import {
+    SignupResponse, 
+} from "@auth/dto/res/signup.response";
+import {
+    bcryptFunction, 
+} from "@root/util/function/bcrypt.function";
+import {
+    memberFixture, 
+} from "../fixture/entity/member.fixture";
+import {
+    SigninRequest, 
+} from "@auth/dto/req/signin.request";
+import {
+    SigninResponse, 
+} from "@auth/dto/res/signin.response";
+import {
+    generateRandomPasswordFunction, 
+} from "@root/util/function/random-password.function";
 
 describe("Auth e2e Test", () => {
     let app: INestApplication;
@@ -154,7 +157,7 @@ describe("Auth e2e Test", () => {
                 .expect(HttpStatus.CREATED);
 
             // then
-            const actual = response.body as DefaultResponse<ConfirmEmailResponse>;
+            const actual = response.body as CustomResponse<ConfirmEmailResponse>;
             expect(actual.data.email).toBe(requestBody.email);
             const isValid = await redisClient.get(actual.data.email);
             expect(isValid).toBe("validate");
@@ -178,7 +181,7 @@ describe("Auth e2e Test", () => {
                 .expect(HttpStatus.BAD_REQUEST);
 
             // then
-            const actual = response.body as DefaultResponse<ErrorData>;
+            const actual = response.body as CustomResponse<ErrorData>;
             expect(actual.data.path).toBe(expectedPath);
             expect(actual.data.status).toBe(expectedStatus);
             expect(actual.data.error).toBe(expectedError);
@@ -209,7 +212,7 @@ describe("Auth e2e Test", () => {
                         .expect(HttpStatus.CREATED);
 
                     // then
-                    const actual = response.body as DefaultResponse<SignupResponse>;
+                    const actual = response.body as CustomResponse<SignupResponse>;
                     const actualMember = await prismaService.member.findUnique({
                         where: {
                             id: actual.data.id,
@@ -243,7 +246,7 @@ describe("Auth e2e Test", () => {
                             .expect(HttpStatus.UNAUTHORIZED);
 
                         // then
-                        const actual = response.body as DefaultResponse<ErrorData>;
+                        const actual = response.body as CustomResponse<ErrorData>;
                         expect(actual.data.path).toBe(expectedPath);
                         expect(actual.data.status).toBe(expectedStatus);
                         expect(actual.data.error).toBe(expectedError);
@@ -277,7 +280,7 @@ describe("Auth e2e Test", () => {
                         .expect(HttpStatus.BAD_REQUEST);
 
                     // then
-                    const actual = response.body as DefaultResponse<ErrorData>;
+                    const actual = response.body as CustomResponse<ErrorData>;
                     expect(actual.data.path).toBe(expectedPath);
                     expect(actual.data.status).toBe(expectedStatus);
                     expect(actual.data.error).toBe(expectedError);
@@ -307,7 +310,7 @@ describe("Auth e2e Test", () => {
                     .expect(HttpStatus.UNAUTHORIZED);
 
                 // then
-                const actual = response.body as DefaultResponse<ErrorData>;
+                const actual = response.body as CustomResponse<ErrorData>;
                 expect(actual.data.path).toBe(expectedPath);
                 expect(actual.data.status).toBe(expectedStatus);
                 expect(actual.data.error).toBe(expectedError);
@@ -319,7 +322,7 @@ describe("Auth e2e Test", () => {
         describe("id, password가 일치하면,", () => {
             it("해당 member의 정보가 담긴 jwt token을 반환한다.", async () => {
                 // given
-                const password = "testPassword";
+                const password = generateRandomPasswordFunction();
                 const encryptedPassword = await bcryptFunction.hash(password, await bcryptFunction.genSalt());
                 const storedMember = await prismaService.member.create({
                     data: memberFixture(encryptedPassword),
@@ -336,7 +339,7 @@ describe("Auth e2e Test", () => {
                     .expect(HttpStatus.OK);
 
                 // then
-                const actual = response.body as DefaultResponse<SigninResponse>;
+                const actual = response.body as CustomResponse<SigninResponse>;
                 const {
                     id, nickname, authority,
                 } = jwtService.decode(actual.data.accessToken);
@@ -364,7 +367,7 @@ describe("Auth e2e Test", () => {
                     .expect(HttpStatus.BAD_REQUEST);
 
                 // then
-                const actual = response.body as DefaultResponse<ErrorData>;
+                const actual = response.body as CustomResponse<ErrorData>;
                 expect(actual.data.path).toBe(expectedPath);
                 expect(actual.data.status).toBe(expectedStatus);
                 expect(actual.data.error).toBe(expectedError);
@@ -394,7 +397,7 @@ describe("Auth e2e Test", () => {
                     .expect(HttpStatus.BAD_REQUEST);
 
                 // then
-                const actual = response.body as DefaultResponse<ErrorData>;
+                const actual = response.body as CustomResponse<ErrorData>;
                 expect(actual.data.path).toBe(expectedPath);
                 expect(actual.data.status).toBe(expectedStatus);
                 expect(actual.data.error).toBe(expectedError);

@@ -1,7 +1,4 @@
 import {
-    MemberEntity, 
-} from "../../domain/member/entity/member.entity";
-import {
     ApiProperty, 
 } from "@nestjs/swagger";
 import {
@@ -9,7 +6,10 @@ import {
 } from "class-validator";
 import {
     StringParseBoolean, 
-} from "../../util/decorators/query-converter";
+} from "../../util/decorators/query-converter.decorator";
+import {
+    MemberEntity, 
+} from "@member/entity/member.entity";
 
 export class MemberOptionDto implements Pick<MemberEntity, "joinStatus"> {
     @ApiProperty({

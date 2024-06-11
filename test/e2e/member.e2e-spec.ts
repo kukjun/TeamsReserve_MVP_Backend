@@ -3,9 +3,6 @@ import {
     INestApplication, ValidationPipe,
 } from "@nestjs/common";
 import {
-    PrismaService,
-} from "../../src/config/prisma/prisma.service";
-import {
     StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
 import {
@@ -15,83 +12,86 @@ import {
     Test, TestingModule,
 } from "@nestjs/testing";
 import {
-    AppModule,
-} from "../../src/app.module";
-import {
-    HttpExceptionFilter,
-} from "../../src/filter/http-exception.filter";
-import {
-    memberRandomFixture,
-} from "../fixture/entity/member.fixture";
-import {
-    generateRandomPasswordFunction,
-} from "../../src/util/function/random-password.function";
-import {
-    DefaultResponse,
-} from "../../src/interface/response/default.response";
-import {
-    GetMemberResponseDto,
-} from "../../src/domain/member/dto/res/get-member.response.dto";
+    CustomResponse,
+} from "@root/interface/response/custom-response";
 import {
     ConfigService,
 } from "@nestjs/config";
 import {
-    ErrorData,
-} from "../../src/interface/response/error.data";
+    StartedRedisContainer, 
+} from "@testcontainers/redis";
 import {
-    bcryptFunction,
-} from "../../src/util/function/bcrypt.function";
+    PrismaService, 
+} from "@root/config/prisma/prisma.service";
 import {
-    uuidFunction,
-} from "../../src/util/function/uuid.function";
+    psqlTestContainerStarter, 
+} from "@root/util/function/postgresql-contrainer.function";
 import {
-    supertestRequestFunction,
-} from "../../src/util/function/supertest-request.function";
+    redisTestContainerStarter, 
+} from "@root/util/function/redis-container.function";
 import {
-    psqlTestContainerStarter,
-} from "../../src/util/function/postgresql-contrainer.function";
+    AppModule, 
+} from "@root/app.module";
 import {
-    MemberEntity,
-} from "../../src/domain/member/entity/member.entity";
-import {
-    PaginateRequestDto,
-} from "../../src/interface/request/paginate.request.dto";
-import {
-    PaginateData,
-} from "../../src/interface/response/paginate.data";
-import {
-    MemberOptionDto,
-} from "../../src/interface/request/member-option.dto";
-import {
-    GetMemberDetailResponseDto,
-} from "../../src/domain/member/dto/res/get-member-detail.response.dto";
-import {
-    MemberAuthority,
-} from "../../src/types/enums/member.authority.enum";
-import {
-    UpdateMemberRequestDto,
-} from "../../src/domain/member/dto/req/update-member.request.dto";
-import {
-    UpdateMemberResponseDto,
-} from "../../src/domain/member/dto/res/update-member.response.dto";
-import {
-    UpdateMemberPasswordRequestDto,
-} from "../../src/domain/member/dto/req/update-member-password.request.dto";
-import {
-    UpdateMemberJoinStatusRequestDto,
-} from "../../src/domain/member/dto/req/update-member-join-status-request.dto";
-import {
-    UpdateMemberAuthorityRequestDto,
-} from "../../src/domain/member/dto/req/update-member-authority.request.dto";
+    HttpExceptionFilter, 
+} from "@root/filter/http-exception.filter";
 import {
     generateJwtToken, 
 } from "../fixture/function/jwt-token";
 import {
-    redisTestContainerStarter, 
-} from "../../src/util/function/redis-container.function";
+    supertestRequestFunction, 
+} from "@root/util/function/supertest-request.function";
 import {
-    StartedRedisContainer, 
-} from "@testcontainers/redis";
+    GetMemberResponseDto, 
+} from "@member/dto/res/get-member.response.dto";
+import {
+    uuidFunction, 
+} from "@root/util/function/uuid.function";
+import {
+    ErrorData, 
+} from "@root/interface/response/error.data";
+import {
+    MemberEntity, 
+} from "@member/entity/member.entity";
+import {
+    memberRandomFixture, 
+} from "../fixture/entity/member.fixture";
+import {
+    bcryptFunction, 
+} from "@root/util/function/bcrypt.function";
+import {
+    generateRandomPasswordFunction, 
+} from "@root/util/function/random-password.function";
+import {
+    PaginateRequestDto, 
+} from "@root/interface/request/paginate.request.dto";
+import {
+    PaginateData, 
+} from "@root/interface/response/paginate.data";
+import {
+    MemberAuthority, 
+} from "@root/types/enums/member.authority.enum";
+import {
+    MemberOptionDto, 
+} from "@root/interface/request/member-option.dto";
+import {
+    GetMemberDetailResponseDto, 
+} from "@member/dto/res/get-member-detail.response.dto";
+import {
+    UpdateMemberRequestDto, 
+} from "@member/dto/req/update-member.request.dto";
+import {
+    UpdateMemberResponseDto, 
+} from "@member/dto/res/update-member.response.dto";
+import {
+    UpdateMemberPasswordRequestDto, 
+} from "@member/dto/req/update-member-password.request.dto";
+import {
+    UpdateMemberJoinStatusRequestDto, 
+} from "@member/dto/req/update-member-join-status-request.dto";
+import {
+    UpdateMemberAuthorityRequestDto, 
+} from "@member/dto/req/update-member-authority.request.dto";
 
 describe("Member e2e Test", () => {
     let app: INestApplication;
@@ -166,7 +166,7 @@ describe("Member e2e Test", () => {
                         .set("Authorization", `Bearer ${token}`)
                         .expect(HttpStatus.OK);
                     // then
-                    const actual = response.body as DefaultResponse<GetMemberResponseDto>;
+                    const actual = response.body as CustomResponse<GetMemberResponseDto>;
                     expect(actual.data.id).toBe(storedMember.id);
                     expect(actual.data.nickname).toBe(storedMember.nickname);
                     expect(actual.data.email).toBe(storedMember.email);
@@ -191,7 +191,7 @@ describe("Member e2e Test", () => {
                         .set("Authorization", `Bearer ${token}`)
                         .expect(HttpStatus.NOT_FOUND);
                     // then
-                    const actual = response.body as DefaultResponse<ErrorData>;
+                    const actual = response.body as CustomResponse<ErrorData>;
                     expect(actual.data.path).toBe(expectedPath);
                     expect(actual.data.status).toBe(expectedStatus);
                     expect(actual.data.error).toBe(HttpStatus[expectedStatus]);
@@ -256,7 +256,7 @@ describe("Member e2e Test", () => {
                 .expect(HttpStatus.OK);
 
             // then
-            const actual = response.body as DefaultResponse<PaginateData<GetMemberResponseDto>>;
+            const actual = response.body as CustomResponse<PaginateData<GetMemberResponseDto>>;
             expect(actual.data.meta.totalCount).toBe(randomNumber + 1);
             expect(actual.data.meta.totalPage).toEqual(Math.ceil((randomNumber + 1) / request.limit));
             expect(actual.data.meta.page).toBe(request.page);
@@ -303,7 +303,7 @@ describe("Member e2e Test", () => {
                     .expect(HttpStatus.OK);
 
                 // then
-                const actual = response.body as DefaultResponse<PaginateData<GetMemberDetailResponseDto>>;
+                const actual = response.body as CustomResponse<PaginateData<GetMemberDetailResponseDto>>;
                 expect(actual.data.meta.totalCount).toBe(randomNumber + 1);
                 expect(actual.data.meta.totalPage).toEqual(Math.ceil((randomNumber + 1) / paginateDto.limit));
                 expect(actual.data.meta.page).toBe(paginateDto.page);
@@ -373,7 +373,7 @@ describe("Member e2e Test", () => {
                         token,storedMember,
                     } = await generateJwtToken(prismaService, jwtService, configService, MemberAuthority.MANAGER);
                     const requestBody: UpdateMemberRequestDto = {
-                        nickname: "updatedName",
+                        nickname: "update",
                         introduce: "updatedIntroduce",
                     };
 
@@ -385,7 +385,7 @@ describe("Member e2e Test", () => {
                         .expect(HttpStatus.CREATED);
 
                     // then
-                    const actual = response.body as DefaultResponse<UpdateMemberResponseDto>;
+                    const actual = response.body as CustomResponse<UpdateMemberResponseDto>;
                     const actualMember = await prismaService.member.findUnique({
                         where: {
                             id: actual.data.id,
@@ -410,7 +410,7 @@ describe("Member e2e Test", () => {
                     data: anotherMember,
                 });
                 const requestBody: UpdateMemberRequestDto = {
-                    nickname: "updatedName",
+                    nickname: "updated",
                     introduce: "updatedIntroduce",
                 };
 
@@ -446,7 +446,7 @@ describe("Member e2e Test", () => {
                     .expect(HttpStatus.CREATED);
 
                 // then
-                const actual = response.body as DefaultResponse<UpdateMemberResponseDto>;
+                const actual = response.body as CustomResponse<UpdateMemberResponseDto>;
                 const actualMember = await prismaService.member.findUnique({
                     where: {
                         id: actual.data.id,
@@ -507,7 +507,7 @@ describe("Member e2e Test", () => {
                         .expect(HttpStatus.CREATED);
 
                     // then
-                    const actual = response.body as DefaultResponse<UpdateMemberResponseDto>;
+                    const actual = response.body as CustomResponse<UpdateMemberResponseDto>;
                     const actualMember = await prismaService.member.findUnique({
                         where: {
                             id: actual.data.id,
@@ -598,7 +598,7 @@ describe("Member e2e Test", () => {
                             .set("Authorization", `Bearer ${token}`)
                             .expect(HttpStatus.CREATED);
 
-                        const actual = response.body as DefaultResponse<UpdateMemberResponseDto>;
+                        const actual = response.body as CustomResponse<UpdateMemberResponseDto>;
                         const actualMember = await prismaService.member.findUnique({
                             where: {
                                 id: actual.data.id,

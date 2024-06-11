@@ -1,6 +1,6 @@
 import {
     BadRequestException, 
-} from "./http/bad-request.exception";
+} from "@root/exception//http/bad-request.exception";
 
 export class PasswordIncorrectException extends BadRequestException {
     constructor() {

@@ -10,13 +10,13 @@ import {
 } from "@nestjs/config";
 import {
     MemberToken,
-} from "../../../interface/member-token";
+} from "@root/interface/member-token";
 import {
     MemberRepository,
-} from "../../member/member.repository";
+} from "@member/member.repository";
 import {
     MemberNotFoundException,
-} from "../../../exception/member-not-found.exception";
+} from "@root/exception/member-not-found.exception";
 import {
     Injectable, 
 } from "@nestjs/common";
