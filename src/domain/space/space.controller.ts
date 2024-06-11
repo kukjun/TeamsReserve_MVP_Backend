@@ -61,6 +61,9 @@ import {
 import {
     PaginateRequestDto, 
 } from "@root/interface/request/paginate.request.dto";
+import {
+    ApiCustomFilterResponseDecorator, 
+} from "@root/util/api-custom-filter-response.decotrator";
 
 @ApiTags("spaces")
 @ApiExtraModels(CustomResponse)
@@ -187,7 +190,7 @@ export class SpaceController {
         summary: "공간 List 조회.",
         description: "공간의 정보를 Paginate해서 조회할 수 있다.",
     })
-    @ApiCustomResponseDecorator(PaginateData<GetSpaceResponseDto>)
+    @ApiCustomFilterResponseDecorator(GetSpaceResponseDto)
     @HttpCode(HttpStatus.OK)
     @Get()
     async getSpaceList(@Query() paginateDto: PaginateRequestDto)
