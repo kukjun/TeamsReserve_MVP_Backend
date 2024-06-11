@@ -13,7 +13,7 @@ export const memberFixture
                 password: encryptedPassword,
                 nickname: "fixture",
                 introduce: "fixtureTestIntroduce",
-                teamCode: "ABCDEF-001",
+                teamCode: "TEAM_CODE",
                 authority: authority,
                 joinStatus: joinStatus,
             }
@@ -27,7 +27,7 @@ export const memberRandomFixture
                 password: encryptedPassword,
                 nickname: `fixture${count}`,
                 introduce: "fixtureTestIntroduce",
-                teamCode: "ABCDEF-001",
+                teamCode: "TEAM_CODE",
                 authority: MemberAuthority.USER,
                 joinStatus: joinStatus,
             }
