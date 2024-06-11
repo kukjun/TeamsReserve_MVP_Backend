@@ -64,6 +64,9 @@ import {
 import {
     UpdateMemberAuthorityRequestDto, 
 } from "@member/dto/req/update-member-authority.request.dto";
+import {
+    ApiCustomFilterResponseDecorator, 
+} from "@root/util/api-custom-filter-response.decotrator";
 
 @ApiTags("members")
 @ApiExtraModels(CustomResponse)
@@ -79,7 +82,7 @@ export class MemberController {
         summary: "멤버 Paginate 조회",
         description: "멤버의 정보를 Paginate 해서, 조회할 수 있다.",
     })
-    @ApiCustomResponseDecorator(PaginateData<GetMemberResponseDto>)
+    @ApiCustomFilterResponseDecorator(GetMemberResponseDto)
     @HttpCode(HttpStatus.OK)
     @Get()
     async getMemberList(@Query() paginateDto: PaginateRequestDto)
@@ -94,7 +97,7 @@ export class MemberController {
         summary: "멤버 Detail Paginate 조회",
         description: "멤버의 세부 정보(가입 여부, 권한)를 포함한 정보를 Paginate 해서, 조회할 수 있다.",
     })
-    @ApiCustomResponseDecorator(PaginateData<GetMemberDetailResponseDto>)
+    @ApiCustomFilterResponseDecorator(GetMemberDetailResponseDto)
     @HttpCode(HttpStatus.OK)
     @Get("/detail")
     async getMemberDetailList(

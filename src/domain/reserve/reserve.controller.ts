@@ -47,6 +47,9 @@ import {
 import {
     ReserveOptionDto, 
 } from "@root/interface/request/reserve-option.dto";
+import {
+    ApiCustomFilterResponseDecorator, 
+} from "@root/util/api-custom-filter-response.decotrator";
 
 @ApiTags("reserve")
 @ApiExtraModels(CustomResponse)
@@ -91,7 +94,7 @@ export class ReserveController {
         description: "본인이 예약한 정보를 Paginate된 예약List로 조회 할 수 있는 API",
     })
     @PermissionDecorator(MemberAuthority.ADMIN, MemberAuthority.MANAGER, MemberAuthority.USER)
-    @ApiCustomResponseDecorator(PaginateData<GetReserveResponseDto>)
+    @ApiCustomFilterResponseDecorator(GetReserveResponseDto)
     @HttpCode(HttpStatus.OK)
     @Get("/my-reserve")
     async getMyReserveList(@Query() paginateDto: PaginateRequestDto, @Request() req)
@@ -106,7 +109,7 @@ export class ReserveController {
         description: "모든 예약의 Paginate된 예약 Log 정보를 조회 할 수 있는 API",
     })
     @PermissionDecorator(MemberAuthority.ADMIN, MemberAuthority.MANAGER)
-    @ApiCustomResponseDecorator(PaginateData<GetReserveLogResponseDto>)
+    @ApiCustomFilterResponseDecorator(GetReserveLogResponseDto)
     @HttpCode(HttpStatus.OK)
     @Get("/logs")
     async getReserveLogList(@Query() paginateDto: PaginateRequestDto)
@@ -132,11 +135,11 @@ export class ReserveController {
     }
 
     @ApiOperation({
-        summary: "예약 조회List API",
+        summary: "예약 조회 List API",
         description: "SpaceId 별, Paginate된 예약List를 조회 할 수 있는 API",
     })
     @PermissionDecorator(MemberAuthority.ADMIN, MemberAuthority.MANAGER, MemberAuthority.USER)
-    @ApiCustomResponseDecorator(PaginateData<GetReserveResponseDto>)
+    @ApiCustomFilterResponseDecorator(GetReserveResponseDto)
     @HttpCode(HttpStatus.OK)
     @Get()
     async getReserveList(@Query() paginateDto: PaginateRequestDto, @Query() optionDto: ReserveOptionDto)
